@@ -37,7 +37,7 @@ def _load_readme_description(path_dir: str, homepage: str) -> str:
 
 
 HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
-VERSION = '0.5.5'
+VERSION = '0.5.6'
 DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 
 LONG_DESCRIPTION = _load_readme_description(
