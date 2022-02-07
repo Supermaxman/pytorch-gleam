@@ -30,10 +30,8 @@ def _load_readme_description(path_dir: str, homepage: str) -> str:
 	with open(path_readme, encoding="utf-8") as f:
 		text = f.read()
 
-	# https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_static/images/lightning_module/pt_to_pl.png
 	github_source_url = os.path.join(homepage, "blob/master")
 	# replace relative repository path to absolute link to the release
-	#  do not replace all "docs" as in the readme we reger some other sources with particular path to docs
 	text = text.replace("docs/images/", f"{os.path.join(github_source_url, 'docs/images/')}")
 
 	return text
