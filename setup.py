@@ -24,9 +24,9 @@ def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comme
 	return requirements
 
 
-VERSION = '0.4.0'
-DESCRIPTION = 'NLP package for pytorch and pytorch_lightning with pre-built models'
-LONG_DESCRIPTION = 'NLP package for pytorch and pytorch_lightning with pre-built models'
+VERSION = '0.5.0'
+DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
+LONG_DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 
 # Setting up
 setup(
@@ -37,10 +37,11 @@ setup(
 	description=DESCRIPTION,
 	long_description=LONG_DESCRIPTION,
 	install_requires=_load_requirements(_PATH_ROOT),
-	keywords=['pytorch', 'torch', 'pytorch_lightning', 'nlp', 'deep learning'],
+	keywords=['social media', 'twitter', 'pytorch', 'torch', 'pytorch_lightning', 'nlp', 'deep learning'],
 	python_requires=">=3.6",
 	license="Apache-2.0",
 	packages=find_packages(),
+	download_url='',
 	classifiers=[
 		"Environment :: Console",
 		"Natural Language :: English",
@@ -51,6 +52,9 @@ setup(
 		"License :: OSI Approved :: Apache Software License",
 		"Operating System :: OS Independent",
 		"Programming Language :: Python :: 3",
+		"Programming Language :: Python :: 3.6",
+		"Programming Language :: Python :: 3.7",
+		"Programming Language :: Python :: 3.8",
 		"Programming Language :: Python :: 3.9",
 	],
 	entry_points={

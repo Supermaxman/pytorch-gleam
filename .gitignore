@@ -11,7 +11,9 @@ __pycache__/
 *.ipynb
 # C extensions
 *.so
+.idea
 .idea/
+.idea/*
 
 # Distribution / packaging
 .Python
