@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/logo.png" width="400px">
+<img src="docs/images/banner.png" width="400px">
 
 **A Social Media Natural Language Processing package for PyTorch & PyTorch Lightning.**
 
