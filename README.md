@@ -25,14 +25,15 @@ ______________________________________________________________________
 
 PyTorch Gleam builds upon [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) 
 for the specific use-case of Natural Language Processing on Social Media, such as Twitter. 
-PyTorch Gleam strives to make Social Media NLP research
- * Easy to understand
- * Easy to use
- * Easy to extend
+PyTorch Gleam strives to make Social Media NLP research easier to understand, use, and extend. 
+Gleam contains models I use in my research, from fine-tuning a BERT-based model with Lexical, Emotion, and Semantic
+information in a Graph Attention Network for stance identification towards COVID-19 misinformation, to 
+using Information Retrieval systems to identify new types of misinformation on Twitter.
+
 
 ## About Me
 My name is [Maxwell Weinzierl](https://personal.utdallas.edu/~maxwell.weinzierl/), and I am a 
-Natural Language processing researcher at the Human Technology Research Institute (HLTRI) at the 
+Natural Language Processing researcher at the Human Technology Research Institute (HLTRI) at the 
 University of Texas at Dallas. I am currently working on my PhD, which focuses on COVID-19 and 
 HPV vaccine misinformation, trust, and more on Social Media platforms such as Twitter. I have built 
 PyTorch Gleam to enable easy reproducibility for my published research, and for my own quick 
