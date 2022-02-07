@@ -6,9 +6,7 @@ date-released: 2020-02-07
 authors:
   - family-names: "Weinzierl"
     given-names: "Maxwell"
-  - name: "The PyTorch Lightning team"
 version: 0.5
-doi: doi
 license: "Apache-2.0"
 repository-code: "https://github.com/Supermaxman/pytorch-gleam"
 keywords:
