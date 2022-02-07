@@ -1,6 +1,7 @@
 
 import os
 from typing import List
+import re
 
 from setuptools import setup, find_packages
 
@@ -24,9 +25,27 @@ def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comme
 	return requirements
 
 
+def _load_readme_description(path_dir: str, homepage: str) -> str:
+	path_readme = os.path.join(path_dir, "README.md")
+	with open(path_readme, encoding="utf-8") as f:
+		text = f.read()
+
+	# https://github.com/PyTorchLightning/pytorch-lightning/raw/master/docs/source/_static/images/lightning_module/pt_to_pl.png
+	github_source_url = os.path.join(homepage, "blob/master")
+	# replace relative repository path to absolute link to the release
+	#  do not replace all "docs" as in the readme we reger some other sources with particular path to docs
+	text = text.replace("docs/images/", f"{os.path.join(github_source_url, 'docs/images/')}")
+
+	return text
+
+
+HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
 VERSION = '0.5.1'
 DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
-LONG_DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
+
+LONG_DESCRIPTION = long_description = _load_readme_description(
+	_PATH_ROOT, homepage=HOMEPAGE
+)
 
 # Setting up
 setup(
@@ -35,7 +54,8 @@ setup(
 	author="Maxwell Weinzierl",
 	author_email="maxwellweinzierl@gmail.com",
 	description=DESCRIPTION,
-	long_description=LONG_DESCRIPTION,
+	long_description=long_description,
+	long_description_content_type="text/markdown",
 	install_requires=_load_requirements(_PATH_ROOT),
 	keywords=['social media', 'twitter', 'pytorch', 'torch', 'pytorch_lightning', 'nlp', 'deep learning'],
 	python_requires=">=3.6",

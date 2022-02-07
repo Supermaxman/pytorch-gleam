@@ -17,10 +17,6 @@ ______________________________________________________________________
 [![PyPI Status](https://badge.fury.io/py/pytorch-gleam.svg)](https://badge.fury.io/py/pytorch-gleam)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Supermaxman/pytorch-gleam/blob/master/LICENSE.txt)
 
-[comment]: <> ([![PyPI Status]&#40;https://pepy.tech/badge/pytorch-gleam&#41;]&#40;https://pepy.tech/project/pytorch-gleam&#41;)
-[comment]: <> ([![codecov]&#40;https://codecov.io/gh/supermaxman/pytorch-gleam/branch/master/graph/badge.svg&#41;]&#40;https://codecov.io/gh/supermaxman/pytorch-gleam&#41;)
-
-
 </div>
 
 ______________________________________________________________________
