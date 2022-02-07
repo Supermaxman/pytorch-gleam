@@ -24,7 +24,7 @@ def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comme
 	return requirements
 
 
-VERSION = '0.5.0'
+VERSION = '0.5.1'
 DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 LONG_DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 
@@ -40,7 +40,7 @@ setup(
 	keywords=['social media', 'twitter', 'pytorch', 'torch', 'pytorch_lightning', 'nlp', 'deep learning'],
 	python_requires=">=3.6",
 	license="Apache-2.0",
-	packages=find_packages(exclude=["tests*", "pg_examples*"]),
+	packages=find_packages(exclude=["tests*", "pg_examples*", "docs*"]),
 	download_url='https://github.com/Supermaxman/pytorch-gleam',
 	classifiers=[
 		"Environment :: Console",
@@ -75,6 +75,10 @@ setup(
 			"gleam-tweet-to-jsonl=pytorch_gleam.search.tweet_to_jsonl:main",
 			"gleam-parse-raw-tweet=pytorch_gleam.parse.parse_raw_tweet:main",
 			"gleam-search-candidates=pytorch_gleam.search.select_candidates:main",
+			"gleam-train=pytorch_gleam.ex.train:main",
+			"gleam-test=pytorch_gleam.ex.test:main",
+			"gleam-validate=pytorch_gleam.ex.validate:main",
+			"gleam-predict=pytorch_gleam.ex.predict:main",
 		],
 	},
 )
