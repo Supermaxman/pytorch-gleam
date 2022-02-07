@@ -38,10 +38,10 @@ def _load_readme_description(path_dir: str, homepage: str) -> str:
 
 
 HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
-VERSION = '0.5.2'
+VERSION = '0.5.4'
 DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 
-LONG_DESCRIPTION = long_description = _load_readme_description(
+LONG_DESCRIPTION = _load_readme_description(
 	_PATH_ROOT, homepage=HOMEPAGE
 )
 
@@ -52,13 +52,20 @@ setup(
 	author="Maxwell Weinzierl",
 	author_email="maxwellweinzierl@gmail.com",
 	description=DESCRIPTION,
-	long_description=long_description,
+	long_description=LONG_DESCRIPTION,
+	packages=find_packages(exclude=["tests*", "pg_examples*", "docs*"]),
 	long_description_content_type="text/markdown",
-	install_requires=_load_requirements(_PATH_ROOT),
+	zip_safe=False,
+	include_package_data=True,
 	keywords=['social media', 'twitter', 'pytorch', 'torch', 'pytorch_lightning', 'nlp', 'deep learning'],
 	python_requires=">=3.6",
+	setup_requires=[],
+	install_requires=_load_requirements(_PATH_ROOT),
+	project_urls={
+		"Bug Tracker": "https://github.com/Supermaxman/pytorch-gleam/issues",
+		"Source Code": "https://github.com/Supermaxman/pytorch-gleam",
+	},
 	license="Apache-2.0",
-	packages=find_packages(exclude=["tests*", "pg_examples*", "docs*"]),
 	download_url='https://github.com/Supermaxman/pytorch-gleam',
 	classifiers=[
 		"Environment :: Console",
