@@ -40,8 +40,8 @@ setup(
 	keywords=['social media', 'twitter', 'pytorch', 'torch', 'pytorch_lightning', 'nlp', 'deep learning'],
 	python_requires=">=3.6",
 	license="Apache-2.0",
-	packages=find_packages(),
-	download_url='https://github.com/Supermaxman/pytorch-gleam/archive/refs/tags/v0.5.0.tar.gz',
+	packages=find_packages(exclude=["tests*", "pg_examples*"]),
+	download_url='https://github.com/Supermaxman/pytorch-gleam',
 	classifiers=[
 		"Environment :: Console",
 		"Natural Language :: English",
