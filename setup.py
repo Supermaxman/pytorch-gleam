@@ -41,7 +41,7 @@ setup(
 	python_requires=">=3.6",
 	license="Apache-2.0",
 	packages=find_packages(),
-	download_url='',
+	download_url='https://github.com/Supermaxman/pytorch-gleam/archive/refs/tags/v0.5.0.tar.gz',
 	classifiers=[
 		"Environment :: Console",
 		"Natural Language :: English",
