@@ -29,18 +29,18 @@ ______________________________________________________________________
 
 PyTorch Gleam builds upon [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) 
 for the specific use-case of Natural Language Processing on Social Media, such as Twitter. 
-
+PyTorch Gleam strives to make Social Media NLP research
  * Easy to understand
  * Easy to use
  * Easy to extend
 
 ## About Me
-My name is Maxwell Weinzierl, and I am a Natural Language processing researcher at the 
-Human Technology Research Institute at the University of Texas at Dallas. I am currently 
-working on my PhD, which focuses on COVID-19 and HPV vaccine misinformation, trust, and more 
-on Social Media platforms such as Twitter. I have built PyTorch Gleam to enable easy reproducibility 
-for my published research, and for my own quick iterations on research ideas. My personal website is here: 
-[Link](https://personal.utdallas.edu/~maxwell.weinzierl/)
+My name is [Maxwell Weinzierl](https://personal.utdallas.edu/~maxwell.weinzierl/), and I am a 
+Natural Language processing researcher at the Human Technology Research Institute (HLTRI) at the 
+University of Texas at Dallas. I am currently working on my PhD, which focuses on COVID-19 and 
+HPV vaccine misinformation, trust, and more on Social Media platforms such as Twitter. I have built 
+PyTorch Gleam to enable easy reproducibility for my published research, and for my own quick 
+iterations on research ideas. 
 
 ## How To Use
 
@@ -53,7 +53,9 @@ pip install pytorch-gleam
 ```
 
 ### Step 1: Create Experiment
-Create a `configs` folder with your YAML experiment file. 
+Create a `configs` folder with a YAML experiment file. Gleam utilizes PyTorch Lightning's CLI tools 
+to configure experiments from YAML files, which enables researchers to clearly look back
+and identify both hyper-parameters and model code used in their experiments. 
 This example is from COVID-19 vaccine misinformation stance identification:
 
 [pg_examples/covid-stance.yaml](https://github.com/Supermaxman/pytorch-gleam/tree/master/pg_examples)
@@ -106,16 +108,20 @@ data:
     test_path:
       - covid19/stance-test.jsonl
 ```
+More details about how to set up YAML experiment files, please see 
+PyTorch Lightning's [documentation](https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_cli.html).
+
 
 Annotations for this example are provided in the *VaccineLies* repository under covid19 as the *CoVaxLies* collection:
-[CoVaxLies](https://github.com/Supermaxman/vaccine-lies/tree/master/covid19)
+[CoVaxLies](https://github.com/Supermaxman/vaccine-lies/tree/master/covid19).
+You will need to download the tweet texts from the tweet ids from the Twitter API.
 
 
 ### Step 3: Run Experiment
-Create a `models` folder for your saved tensorboard logs and model weights. 
+Create a `models` folder for your saved TensorBoard logs and model weights. 
 Determine the GPU ID for the GPU you would like to utilize (multi-gpu supported) and provide the ID in a list, with 
-a comma at the end if it is a single GPU ID. You can also just specify an integer, such as `1`, and PyTorch Lightning will try 
-to find a single free GPU automatically.
+a comma at the end if it is a single GPU ID. You can also just specify an integer, such as `1`, and PyTorch Lightning 
+will try to find a single free GPU automatically.
 Run the following command to start training:
 ```bash
 gleam-train \
@@ -123,9 +129,11 @@ gleam-train \
   --trainer.gpus 1 \
   --trainer.default_root_dir models/covid-stance
 ```
+Your model will train, with TensorBoard logging all metrics, and a checkpoint will be saved upon completion.
+
 
 ### Step 4: Evaluate Experiment
-You can easily evaluate your system as follows:
+You can easily evaluate your system on a test collection as follows:
 ```bash
 gleam-test \
   --config configs/covid-stance.yaml \
@@ -137,7 +145,7 @@ ______________________________________________________________________
 
 ## Examples
 
-TODO these are a work-in-progress, as my original research code is a bit messy, but they will be updated soon!
+These are a work-in-progress, as my original research code is a bit messy, but they will be updated soon!
 
 ###### COVID-19 Vaccine Misinformation Detection on Twitter
 
