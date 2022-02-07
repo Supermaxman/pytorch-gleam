@@ -6,7 +6,6 @@ import re
 from setuptools import setup, find_packages
 
 _PATH_ROOT = os.path.dirname(__file__)
-_PATH_REQUIRE = os.path.join(_PATH_ROOT, "requirements")
 
 
 def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#") -> List[str]:
