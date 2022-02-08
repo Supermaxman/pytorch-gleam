@@ -14,7 +14,7 @@ __pycache__/
 .idea
 .idea/
 .idea/*
-senticnet5.py
+senticnet5_raw.py
 
 # Distribution / packaging
 .Python

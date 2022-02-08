@@ -9,7 +9,7 @@ from typing import Optional
 import numpy as np
 from tqdm import tqdm
 from transformers import AutoTokenizer
-import senticnet5 as senticnet5
+import pytorch_gleam.data.datasets.senticnet5 as senticnet5
 import spacy
 
 tokenizer: Optional[Callable] = None

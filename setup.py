@@ -1,11 +1,16 @@
 
 import os
 from typing import List
-import re
 
 from setuptools import setup, find_packages
 
 _PATH_ROOT = os.path.dirname(__file__)
+
+VERSION = '0.5.9'
+# python setup.py sdist
+# twine upload .\dist\pytorch-gleam-VERSION.tar.gz
+HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
+DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 
 
 def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#") -> List[str]:
@@ -35,10 +40,6 @@ def _load_readme_description(path_dir: str, homepage: str) -> str:
 
 	return text
 
-
-HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
-VERSION = '0.5.8'
-DESCRIPTION = 'Social Media NLP package for pytorch and pytorch_lightning with pre-built models'
 
 LONG_DESCRIPTION = _load_readme_description(
 	_PATH_ROOT, homepage=HOMEPAGE
