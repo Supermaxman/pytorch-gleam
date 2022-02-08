@@ -49,6 +49,11 @@ Simple installation from PyPI
 pip install pytorch-gleam
 ```
 
+You may need to install CUDA drivers and other versions of PyTorch. 
+See [PyTorch](https://pytorch.org/get-started/locally/) and 
+[PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning#how-to-use) 
+for installation help. 
+
 ### Step 1: Create Experiment
 Create a `configs` folder with a YAML experiment file. Gleam utilizes PyTorch Lightning's CLI tools 
 to configure experiments from YAML files, which enables researchers to clearly look back
@@ -105,7 +110,11 @@ data:
     test_path:
       - covid19/stance-test.jsonl
 ```
-More details about how to set up YAML experiment files, please see 
+Documentation on available `models`, `datasets`, and `callbacks` 
+will be provided soon.
+
+
+Details about how to set up YAML experiment files are provided by 
 PyTorch Lightning's [documentation](https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_cli.html).
 
 
@@ -114,8 +123,8 @@ Annotations for this example are provided in the *VaccineLies* repository under 
 You will need to download the tweet texts from the tweet ids from the Twitter API.
 
 
-### Step 3: Run Experiment
-Create a `models` folder for your saved TensorBoard logs and model weights. 
+### Step 2: Run Experiment
+Create a `models` folder for your saved [TensorBoard](https://www.tensorflow.org/tensorboard) logs and model weights. 
 Determine the GPU ID for the GPU you would like to utilize (multi-gpu supported) and provide the ID in a list, with 
 a comma at the end if it is a single GPU ID. You can also just specify an integer, such as `1`, and PyTorch Lightning 
 will try to find a single free GPU automatically.
@@ -126,10 +135,10 @@ gleam-train \
   --trainer.gpus 1 \
   --trainer.default_root_dir models/covid-stance
 ```
-Your model will train, with TensorBoard logging all metrics, and a checkpoint will be saved upon completion.
+Your model will train, with [TensorBoard](https://www.tensorflow.org/tensorboard) logging all metrics, and a checkpoint will be saved upon completion.
 
 
-### Step 4: Evaluate Experiment
+### Step 3: Evaluate Experiment
 You can easily evaluate your system on a test collection as follows:
 ```bash
 gleam-test \
