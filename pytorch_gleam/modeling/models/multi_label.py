@@ -22,6 +22,55 @@ class MultiLabelLanguageModel(BaseLanguageModel):
 			*args,
 			**kwargs
 	):
+		r"""
+		Knowledge-Base Inference Language Model for Attitude Consistency Scoring.
+
+		Args:
+
+			label_map: Dictionary mapping from name of class to class idx, used to determine
+				size of final sigmoid layer along with class-specific metrics.
+
+			threshold: Threshold module to use for system predictions.
+
+			metric: Metric to evaluate overall performance. Typically Macro or Micro F1.
+
+			m_metric: Metric to optimize for each Stance Knowledge Graph threshold, typically Micro F1.
+
+			num_classes: Number of different classes.
+				Default: ``2``.
+
+			num_threshold_steps: Number of different threshold values to evaluate when updating threshold on
+				validation dataset.
+				Default: ``100``.
+
+			update_threshold: If ``False``, validation thresholds are not updated. Use this in testing.
+				Default: ``True``.
+
+			pre_model_name: Name of pre-trained model from huggingface. See https://huggingface.co/
+
+			pre_model_type: Type of pre-trained model.
+				Default: [`AutoModel`].
+
+			learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
+				``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+				``1.0-lr_warm_up`` training steps.
+
+			weight_decay: How much weight decay to apply in the AdamW optimizer.
+				Default: ``0.0``.
+
+			lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
+				Default: ``0.1``.
+
+			load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
+				Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+				initialize your model twice.
+				Default: ``True``.
+
+			torch_cache_dir: If provided, cache directory for loading models. Defaults to huggingface default.
+				Default: ``None``.
+
+		"""
+
 		super().__init__(*args, **kwargs)
 		self.label_map = label_map
 		self.num_classes = num_classes

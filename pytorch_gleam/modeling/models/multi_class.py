@@ -16,6 +16,45 @@ class MultiClassLanguageModel(BaseLanguageModel):
 			*args,
 			**kwargs
 	):
+		r"""
+		Multi-Class Language Model for baseline n-way classification tasks.
+			.. deprecated:: v0.5.0
+				Please use :class:`~pytorch_gleam.modeling.models.MultiClassFrameLanguageModel`
+		Args:
+
+			num_classes: Number of different classes, such as "Accept", "Reject", and "No Stance".
+				Default: ``3``.
+
+			metric_mode: "macro" or "micro" f1 score to use for evaluation.
+				Default: ``macro``.
+
+			metric: Metric to use for evaluation. TODO currently only ``f1`` is available.
+				Default: ``f1``.
+
+			pre_model_name: Name of pre-trained model from huggingface. See https://huggingface.co/
+
+			pre_model_type: Type of pre-trained model.
+				Default: [`AutoModel`].
+
+			learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
+				``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+				``1.0-lr_warm_up`` training steps.
+
+			weight_decay: How much weight decay to apply in the AdamW optimizer.
+				Default: ``0.0``.
+
+			lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
+				Default: ``0.1``.
+
+			load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
+				Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+				initialize your model twice.
+				Default: ``True``.
+
+			torch_cache_dir: If provided, cache directory for loading models. Defaults to huggingface default.
+				Default: ``None``.
+
+		"""
 		super().__init__(*args, **kwargs)
 		self.num_classes = num_classes
 		self.cls_layer = torch.nn.Linear(

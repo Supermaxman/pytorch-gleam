@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from typing import Optional, Union, Callable, Type
 
 import pytorch_lightning as pl
-from transformers import AutoModel, AutoConfig, AutoModelForSequenceClassification
+from transformers import AutoModel, AutoConfig, AutoModelForSequenceClassification, AutoModelForSeq2SeqLM
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 
@@ -13,13 +13,43 @@ class BasePreModel(pl.LightningModule, ABC):
 	def __init__(
 			self,
 			pre_model_name: str,
-			pre_model_type: Type[Union[AutoModel, AutoModelForSequenceClassification]] = AutoModel,
+			pre_model_type: Type[Union[AutoModel, AutoModelForSequenceClassification, AutoModelForSeq2SeqLM]] = AutoModel,
 			learning_rate: float = 5e-5,
 			weight_decay: float = 0.0,
 			lr_warm_up: float = 0.1,
 			load_pre_model: bool = True,
 			torch_cache_dir: str = None
 	):
+		r"""
+		Base class for Pre-Trained Models.
+
+		Args:
+
+			pre_model_name: Name of pre-trained model from huggingface. See https://huggingface.co/
+
+			pre_model_type: Type of pre-trained model.
+				Default: [`AutoModel`].
+
+			learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
+				``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+				``1.0-lr_warm_up`` training steps.
+
+			weight_decay: How much weight decay to apply in the AdamW optimizer.
+				Default: ``0.0``.
+
+			lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
+				Default: ``0.1``.
+
+			load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
+				Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+				initialize your model twice.
+				Default: ``True``.
+
+			torch_cache_dir: If provided, cache directory for loading models. Defaults to huggingface default.
+				Default: ``None``.
+
+		"""
+
 		super().__init__()
 		self.pre_model_name = pre_model_name
 		self.pre_model_type = pre_model_type
@@ -105,6 +135,36 @@ class BaseLanguageModel(BasePreModel, ABC):
 			*args,
 			**kwargs
 	):
+		r"""
+		Base class for Pre-Trained Language Models.
+
+		Args:
+
+			pre_model_name: Name of pre-trained model from huggingface. See https://huggingface.co/
+
+			pre_model_type: Type of pre-trained model.
+				Default: [`AutoModel`].
+
+			learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
+				``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+				``1.0-lr_warm_up`` training steps.
+
+			weight_decay: How much weight decay to apply in the AdamW optimizer.
+				Default: ``0.0``.
+
+			lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
+				Default: ``0.1``.
+
+			load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
+				Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+				initialize your model twice.
+				Default: ``True``.
+
+			torch_cache_dir: If provided, cache directory for loading models. Defaults to huggingface default.
+				Default: ``None``.
+
+		"""
+
 		super().__init__(pre_model_name, pre_model_type, *args, **kwargs)
 
 		# TODO check for these, not all models may have them
@@ -137,6 +197,36 @@ class BaseLanguageModelForSequenceClassification(BasePreModel, ABC):
 			*args,
 			**kwargs
 	):
+		r"""
+		Base class for Pre-Trained Language Models for Sequence Classification.
+
+		Args:
+
+			pre_model_name: Name of pre-trained model from huggingface. See https://huggingface.co/
+
+			pre_model_type: Type of pre-trained model.
+				Default: [`AutoModel`].
+
+			learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
+				``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+				``1.0-lr_warm_up`` training steps.
+
+			weight_decay: How much weight decay to apply in the AdamW optimizer.
+				Default: ``0.0``.
+
+			lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
+				Default: ``0.1``.
+
+			load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
+				Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+				initialize your model twice.
+				Default: ``True``.
+
+			torch_cache_dir: If provided, cache directory for loading models. Defaults to huggingface default.
+				Default: ``None``.
+
+		"""
+
 		super().__init__(pre_model_name, pre_model_type, *args, **kwargs)
 		# TODO check for these, not all models may have them
 		# noinspection PyUnresolvedReferences
