@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 _PATH_ROOT = os.path.dirname(__file__)
 
-VERSION = '0.5.9'
+VERSION = '0.6.0'
 # python setup.py sdist
 # twine upload .\dist\pytorch-gleam-VERSION.tar.gz
 HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
