@@ -4,8 +4,11 @@
 from warnings import warn
 
 try:
-	import pytorch_gleam.data.datasets.senticnet5_raw as senticnet5
-	senticnet = senticnet5.senticnet
+    import pytorch_gleam.data.datasets.senticnet5_raw as senticnet5
+
+    senticnet = senticnet5.senticnet
 except ImportError:
-	warn('SenticNet 5 not properly installed, skipping. See `pytorch_gleam.data.datasets.senticnet5`')
-	senticnet = {}
+    warn(
+        "SenticNet 5 not properly installed, skipping. See `pytorch_gleam.data.datasets.senticnet5`"
+    )
+    senticnet = {}

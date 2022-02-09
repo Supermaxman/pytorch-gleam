@@ -2,9 +2,8 @@
 
 
 def main():
-	raise NotImplementedError('Not yet implemented')
+    raise NotImplementedError("Not yet implemented")
 
 
-if __name__ == '__main__':
-	main()
-
+if __name__ == "__main__":
+    main()

@@ -1,4 +1,3 @@
-
 from pytorch_gleam.inference.consistency import ConsistencyInference
 from pytorch_gleam.inference.consistency import CountConsistencyInference
 from pytorch_gleam.inference.consistency import ScoreConsistencyInference
