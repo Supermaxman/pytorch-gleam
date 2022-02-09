@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
 import torch
+from transformers import Adafactor
 
 from pytorch_gleam.qa import QAModule
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
@@ -156,3 +157,14 @@ class MultiTurnQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
     @staticmethod
     def flatten(multi_list):
         return [item for sub_list in multi_list for item in sub_list]
+
+    def configure_optimizers(self):
+        params = self.parameters()
+        optimizer = Adafactor(
+            params,
+            scale_parameter=True,
+            relative_step=True,
+            warmup_init=True,
+            # lr=self.learning_rate
+        )
+        return optimizer
