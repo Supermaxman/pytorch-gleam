@@ -1,21 +1,30 @@
 seed_everything: 0
 model:
-  # TODO build MultiTurnQAForConditionalGeneration
   class_path: pytorch_gleam.modeling.models.MultiTurnQAForConditionalGeneration
   init_args:
-    # TODO determine optimal learning rate for T5 model
     learning_rate: 5e-4
     pre_model_name: allenai/unifiedqa-t5-large
     label_map:
       No Stance: 0
       Accept: 1
       Reject: 2
-    # TODO include QA types here
-    # TODO threshold module replaced with QA module
-    # TODO qa module will transform raw predictions into either multiple-choice or multi-turn
-    # TODO then qa will pass proper predictions to metric
-    threshold:
-      class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
+    qa:
+      class_path: pytorch_gleam.qa.MultipleChoiceQAModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        prompt: "Does the author agree, disagree, or have no stance towards the following:"
+        label_map:
+          No Stance: 0
+          Accept: 1
+          Reject: 2
+        choices:
+          - "Agree"
+          - "Disagree"
+          - "Other"
+        choice_map:
+          Agree: 1
+          Disagree: 2
+          Other: 0
     metric:
       class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
       init_args:
@@ -35,30 +44,31 @@ data:
   # TODO build MultiTurnQAForConditionalGeneration
   class_path: pytorch_gleam.data.datasets.MultiTurnQAFrameDataModule
   init_args:
-    batch_size: 8
-    max_seq_len: 512
+    batch_size: 1
+    max_seq_len: 156
     max_label_seq_len: 8
     label_name: misinfo
     label_map:
       No Stance: 0
       Accept: 1
       Reject: 2
-    # TODO specify the format of QA questions:
-    # TODO Does the author agree, disagree, or have no stance towards the following:
-    # TODO qa_stance
-    # TODO need 3-way multiple choice of ['Agree', 'Disagree', 'Other']
-    # TODO map to ['Accept', 'Reject', 'No Stance']
-    # TODO then multi-turn QA:
-    # TODO Does the author accept the following:
-    # TODO ['Yes', 'No']
-    # TODO ['Accept', 'Not Accept']
-    # TODO second question:
-    # TODO Is it true that
-    # TODO ['Yes', 'No']
-    # TODO ['Accept', 'Not Accept']
-    # TODO reject_preds = ['Reject' if x != 'Accept' else 'No Stance' for x in tf_preds]
-    # TODO all need labels[labels == tokenizer.pad_token_id] = -100
-    tokenizer_name: allenai/unifiedqa-t5-large
+    qa:
+      class_path: pytorch_gleam.qa.MultipleChoiceQAModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        prompt: "Does the author agree, disagree, or have no stance towards the following:"
+        label_map:
+          No Stance: 0
+          Accept: 1
+          Reject: 2
+        choices:
+          - "Agree"
+          - "Disagree"
+          - "Other"
+        choice_map:
+          Agree: 1
+          Disagree: 2
+          Other: 0
     num_workers: 8
     frame_path:
       - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/misinfo.json

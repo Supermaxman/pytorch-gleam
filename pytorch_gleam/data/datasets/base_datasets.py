@@ -8,7 +8,7 @@ from transformers import AutoTokenizer
 class BaseDataModule(pl.LightningDataModule, ABC):
     def __init__(
         self,
-        tokenizer_name: str,
+        tokenizer_name: str = None,
         train_path: str = None,
         val_path: str = None,
         test_path: str = None,
@@ -25,7 +25,9 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         self.max_seq_len = max_seq_len
         self.num_workers = num_workers
         self.use_tpus = use_tpus
-        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
+        self.tokenizer = None
+        if self.tokenizer_name is not None:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
 
         self.train_path = train_path
         self.val_path = val_path

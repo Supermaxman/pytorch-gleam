@@ -1,11 +1,12 @@
 import json
-import re
 from typing import List, Dict, Any, Union
 
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.collators import SequenceToSequenceBatchCollator
+from pytorch_gleam.qa import QAModule
 
 
 def read_jsonl(path):
@@ -25,12 +26,12 @@ class MultiTurnQAFrameDataset(Dataset):
         data_path: Union[str, List[str]],
         frame_path: Union[str, List[str]],
         label_name: str,
-        tokenizer,
+        qa: QAModule,
         label_map: Dict[str, int],
     ):
         super().__init__()
         self.frame_path = frame_path
-        self.tokenizer = tokenizer
+        self.qa = qa
         self.label_name = label_name
         self.label_map = label_map
 
@@ -57,28 +58,34 @@ class MultiTurnQAFrameDataset(Dataset):
         for ex in read_jsonl(data_path):
             ex_id = ex["id"]
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
-            # for UnifiedQA
-            ex_text = ex_text.lower()
-            ex_text = re.sub(r"https:\/\/t.co\/[a-zA-Z0-9]{10}", "", ex_text)
-            ex_text = ex_text.replace("\t", " ").replace("\n", " ").strip()
-
             for f_id, f_label in ex[self.label_name].items():
                 frame = self.frames[f_id]
                 frame_text = frame["text"]
-                ex_label = 0
-                if f_label in self.label_map:
-                    ex_label = self.label_map[f_label]
-                token_data = self.tokenizer(frame_text, ex_text)
-                example = {
-                    "ids": f"{ex_id}|{f_id}",
-                    "label": ex_label,
-                    "input_ids": token_data["input_ids"],
-                    "attention_mask": token_data["attention_mask"],
-                }
-                if "token_type_ids" in token_data:
-                    example["token_type_ids"] = token_data["token_type_ids"]
+                if f_label not in self.label_map:
+                    continue
 
-                self.examples.append(example)
+                ex_label = self.label_map[f_label]
+
+                for q_id, input_ids, attention_mask, label_ids in self.qa.generate(
+                    body=ex_text, label=f_label, context=frame_text
+                ):
+                    example = {
+                        "ids": f"{ex_id}|{f_id}||{q_id}",
+                        "label": ex_label,
+                        "input_ids": input_ids,
+                        "attention_mask": attention_mask,
+                        "label_ids": label_ids,
+                    }
+
+                    self.examples.append(example)
+
+    def display_length_percentiles(self, key='input_ids'):
+        lengths = [len(x[key]) for x in self.examples]
+        print(f'mean={np.mean(lengths):.0f}')
+        print(f'90%={np.percentile(lengths, 90):.0f}')
+        print(f'95%={np.percentile(lengths, 95):.0f}')
+        print(f'min={np.min(lengths):.0f}')
+        print(f'max={np.max(lengths):.0f}')
 
     def __len__(self):
         return len(self.examples)
@@ -100,6 +107,7 @@ class MultiTurnQAFrameDataModule(BaseDataModule):
         self,
         label_name: str,
         label_map: Dict[str, int],
+        qa: QAModule,
         frame_path: Union[str, List[str]],
         train_path: Union[str, List[str]] = None,
         val_path: Union[str, List[str]] = None,
@@ -110,6 +118,7 @@ class MultiTurnQAFrameDataModule(BaseDataModule):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        self.qa = qa
         self.label_map = label_map
         self.max_label_seq_len = max_label_seq_len
 
@@ -122,7 +131,7 @@ class MultiTurnQAFrameDataModule(BaseDataModule):
 
         if self.train_path is not None:
             self.train_dataset = MultiTurnQAFrameDataset(
-                tokenizer=self.tokenizer,
+                qa=self.qa,
                 data_path=self.train_path,
                 frame_path=self.frame_path,
                 label_name=self.label_name,
@@ -130,7 +139,7 @@ class MultiTurnQAFrameDataModule(BaseDataModule):
             )
         if self.val_path is not None:
             self.val_dataset = MultiTurnQAFrameDataset(
-                tokenizer=self.tokenizer,
+                qa=self.qa,
                 data_path=self.val_path,
                 frame_path=self.frame_path,
                 label_name=self.label_name,
@@ -138,7 +147,7 @@ class MultiTurnQAFrameDataModule(BaseDataModule):
             )
         if self.test_path is not None:
             self.test_dataset = MultiTurnQAFrameDataset(
-                tokenizer=self.tokenizer,
+                qa=self.qa,
                 data_path=self.test_path,
                 frame_path=self.frame_path,
                 label_name=self.label_name,
@@ -146,7 +155,7 @@ class MultiTurnQAFrameDataModule(BaseDataModule):
             )
         if self.predict_path is not None:
             self.predict_dataset = MultiTurnQAFrameDataset(
-                tokenizer=self.tokenizer,
+                qa=self.qa,
                 data_path=self.predict_path,
                 frame_path=self.frame_path,
                 label_name=self.label_name,

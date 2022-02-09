@@ -11,7 +11,7 @@ class SequenceToSequenceBatchCollator(BatchCollator):
     def __call__(self, examples: list) -> dict:
         pad_seq_len = self._calculate_seq_padding(examples)
         label_pad_seq_len = self._calculate_seq_padding(
-            examples, key="label", max_seq_len=self.max_label_seq_len
+            examples, key="label_ids", max_seq_len=self.max_label_seq_len
         )
 
         batch_size = len(examples)
@@ -21,7 +21,8 @@ class SequenceToSequenceBatchCollator(BatchCollator):
         # [batch_size, labels_pad_seq_len]
         # -100 is ignored (treated as a mask) by loss and sequence generation
         has_labels = False
-        labels = torch.ones([batch_size, label_pad_seq_len], dtype=torch.long) * -100
+        labels = torch.zeros([batch_size], dtype=torch.long)
+        label_ids = torch.ones([batch_size, label_pad_seq_len], dtype=torch.long) * -100
         ids = []
         for ex_idx, ex in enumerate(examples):
             ids.append(ex["ids"])
@@ -29,7 +30,8 @@ class SequenceToSequenceBatchCollator(BatchCollator):
             self.pad_and_apply(ex["attention_mask"], attention_mask, ex_idx)
             if "label" in ex:
                 has_labels = True
-                self.pad_and_apply(ex["label"], labels, ex_idx)
+                labels[ex_idx] = ex["label"]
+                self.pad_and_apply(ex["label_ids"], label_ids, ex_idx)
 
         batch = {
             "ids": ids,
@@ -37,5 +39,6 @@ class SequenceToSequenceBatchCollator(BatchCollator):
             "attention_mask": attention_mask,
         }
         if has_labels:
+            batch["label_ids"] = label_ids
             batch["labels"] = labels
         return batch

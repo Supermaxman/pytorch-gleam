@@ -16,3 +16,4 @@ from pytorch_gleam.modeling.models.multi_class_frame import (
     MultiClassFrameGraphMoralityLanguageModel,
 )
 from pytorch_gleam.modeling.models.rerank import ReRankLanguageModel
+from pytorch_gleam.modeling.models.qa_frame import MultiTurnQAForConditionalGeneration
