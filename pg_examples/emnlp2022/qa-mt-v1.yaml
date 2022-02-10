@@ -72,7 +72,6 @@ trainer:
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
 data:
-  # TODO build MultiTurnQAForConditionalGeneration
   class_path: pytorch_gleam.data.datasets.MultiTurnQAFrameDataModule
   init_args:
     batch_size: 16

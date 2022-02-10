@@ -2,9 +2,10 @@ seed_everything: 0
 model:
   class_path: pytorch_gleam.modeling.models.MultiTurnQAForConditionalGeneration
   init_args:
-    # lr is automatically found by Adafactor, not used
-    learning_rate: 5e-4
-    pre_model_name: allenai/unifiedqa-t5-base
+    # 5e-4 or 1e-4 or ~
+    # ~ sets to None and uses Adafactor auto-tuning
+    learning_rate: ~
+    pre_model_name: allenai/unifiedqa-t5-large
     label_map:
       No Stance: 0
       Accept: 1
@@ -12,7 +13,7 @@ model:
     qa:
       class_path: pytorch_gleam.qa.MultipleChoiceQAModule
       init_args:
-        tokenizer_name: allenai/unifiedqa-t5-base
+        tokenizer_name: allenai/unifiedqa-t5-large
         prompt: "Does the author agree, disagree, or have no stance towards the following:"
         label_map:
           No Stance: 0
@@ -44,9 +45,9 @@ trainer:
 data:
   class_path: pytorch_gleam.data.datasets.MultiTurnQAFrameDataModule
   init_args:
-    batch_size: 16
+    batch_size: 8
     max_seq_len: 156
-    max_label_seq_len: 8
+    max_label_seq_len: 4
     label_name: misinfo
     label_map:
       No Stance: 0
@@ -55,7 +56,7 @@ data:
     qa:
       class_path: pytorch_gleam.qa.MultipleChoiceQAModule
       init_args:
-        tokenizer_name: allenai/unifiedqa-t5-base
+        tokenizer_name: allenai/unifiedqa-t5-large
         prompt: "Does the author agree, disagree, or have no stance towards the following:"
         label_map:
           No Stance: 0

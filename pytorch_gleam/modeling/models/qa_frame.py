@@ -160,11 +160,20 @@ class MultiTurnQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
 
     def configure_optimizers(self):
         params = self.parameters()
-        optimizer = Adafactor(
-            params,
-            scale_parameter=True,
-            relative_step=True,
-            warmup_init=True,
-            # lr=self.learning_rate
-        )
+        if self.learning_rate is None:
+            optimizer = Adafactor(
+                params,
+                scale_parameter=True,
+                relative_step=True,
+                warmup_init=True,
+                # lr=self.learning_rate
+            )
+        else:
+            optimizer = Adafactor(
+                params,
+                scale_parameter=False,
+                relative_step=False,
+                warmup_init=False,
+                lr=self.learning_rate
+            )
         return optimizer
