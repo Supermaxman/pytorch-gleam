@@ -2,7 +2,7 @@ seed_everything: 0
 model:
   class_path: pytorch_gleam.modeling.models.MultiTurnQAForConditionalGeneration
   init_args:
-    # 5e-4 or 1e-4 or ~
+    # 5e-4 or 1e-4 or 0.0
     # ~ sets to None and uses Adafactor auto-tuning
     learning_rate: 1e-4
     pre_model_name: allenai/unifiedqa-t5-large
