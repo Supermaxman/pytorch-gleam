@@ -1,0 +1,81 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.MultiTurnQAForConditionalGeneration
+  init_args:
+    # 5e-4 or 1e-4 or 0.0
+    # ~ sets to None and uses Adafactor auto-tuning
+    learning_rate: 1e-4
+    pre_model_name: allenai/unifiedqa-t5-large
+    label_map:
+      No Stance: 0
+      Accept: 1
+      Reject: 2
+    qa:
+      class_path: pytorch_gleam.qa.MultipleChoiceQAModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        prompt: "Does the author agree, disagree, or have no stance towards the following:"
+        label_map:
+          No Stance: 0
+          Accept: 1
+          Reject: 2
+        choices:
+          - "Agree"
+          - "Disagree"
+          - "Other"
+        choice_map:
+          Agree: 1
+          Disagree: 2
+          Other: 0
+    metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: macro
+        num_classes: 3
+
+trainer:
+  max_epochs: 20
+  accumulate_grad_batches: 8
+  check_val_every_n_epoch: 1
+  deterministic: true
+  num_sanity_val_steps: 1
+  checkpoint_callback: false
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+data:
+  class_path: pytorch_gleam.data.datasets.MultiTurnQAFrameDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 156
+    max_label_seq_len: 4
+    label_name: misinfo
+    label_map:
+      No Stance: 0
+      Accept: 1
+      Reject: 2
+    qa:
+      class_path: pytorch_gleam.qa.MultipleChoiceQAModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        prompt: "Does the author agree, disagree, or have no stance towards the following:"
+        label_map:
+          No Stance: 0
+          Accept: 1
+          Reject: 2
+        choices:
+          - "Agree"
+          - "Disagree"
+          - "Other"
+        choice_map:
+          Agree: 1
+          Disagree: 2
+          Other: 0
+    num_workers: 8
+    frame_path:
+      - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/misinfo.json
+    train_path:
+      - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-train.jsonl
+    val_path:
+      - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-dev.jsonl
+    test_path:
+      - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-test.jsonl
