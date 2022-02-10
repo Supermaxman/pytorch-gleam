@@ -20,7 +20,7 @@ class BasePreModel(pl.LightningModule, ABC):
         pre_model_type: Type[
             Union[AutoModel, AutoModelForSequenceClassification, AutoModelForSeq2SeqLM]
         ] = AutoModel,
-        learning_rate: float = 5e-5,
+        learning_rate: float = None,
         weight_decay: float = 0.0,
         lr_warm_up: float = 0.1,
         load_pre_model: bool = True,
