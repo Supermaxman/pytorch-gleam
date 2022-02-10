@@ -1,7 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict
 
 import torch
-from transformers import Adafactor
+from transformers import Adafactor, get_constant_schedule_with_warmup
+from transformers.optimization import get_adafactor_schedule
 
 from pytorch_gleam.qa import QAModule
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
@@ -92,7 +93,8 @@ class MultiTurnQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
             [
                 F.pad(x["pred_ids"], (0, max_pred_length - x["pred_ids"].shape[1]))
                 for x in outputs
-            ], dim=0
+            ],
+            dim=0,
         ).cpu()
         ex_ids, preds = self.qa(qa_ids=tq_ids, qa_responses=pred_ids)
         labels = []
@@ -166,14 +168,19 @@ class MultiTurnQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
                 scale_parameter=True,
                 relative_step=True,
                 warmup_init=True,
-                # lr=self.learning_rate
+                lr=None,
             )
+            scheduler = get_adafactor_schedule(optimizer)
         else:
             optimizer = Adafactor(
                 params,
                 scale_parameter=False,
                 relative_step=False,
                 warmup_init=False,
-                lr=self.learning_rate
+                lr=self.learning_rate,
             )
-        return optimizer
+            scheduler = get_constant_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=self.lr_warm_up * self.train_steps,
+            )
+        return [optimizer], [scheduler]
