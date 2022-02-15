@@ -33,7 +33,7 @@ if __name__ == "__main__":
     output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v1"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
-        secrets = json.load(f)["twitter"]
+        secrets = json.load(f)["crowdtangle"]
     endpoint_url = "https://api.crowdtangle.com/posts/search"
 
     all_dates = list(date_range(start_date, end_date))
