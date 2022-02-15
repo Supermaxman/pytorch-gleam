@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     request_max_count = 100
     output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v1"
-    secrets_path = "../../private/secrets.json"
+    secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
     endpoint_url = "https://api.crowdtangle.com/posts/search"
