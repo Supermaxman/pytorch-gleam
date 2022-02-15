@@ -64,8 +64,8 @@ if __name__ == "__main__":
                     "sortBy": "date",
                     "searchTerm": "(covid OR coronavirus OR coronavirus "
                     "OR corona OR covid-19 OR covid19 OR SARS-CoV-2 OR SARS OR SARS-CoV) "
-                    "AND (vaccine OR vaccines OR vaccination OR vaccinations"
-                    " OR vax OR vaxx OR vaxxed OR jab OR jabbed "
+                    "AND (vaccine OR vaccines OR vaccination OR vaccinations "
+                    "OR vax OR vaxx OR vaxxed OR jab OR jabbed "
                     "OR vaccinate OR vaccinated OR vaccinates)",
                     "platforms": "facebook",
                     "language": "en",
