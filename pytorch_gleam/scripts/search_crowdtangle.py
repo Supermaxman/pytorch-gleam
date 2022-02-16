@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # 50 calls per minute * 1 minute / 60 seconds = 0.8333 calls per second
     q_delay = 50.0 / 60.0
     request_max_count = 100
-    output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v1"
+    output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v2"
     secrets_path = "private/secrets.json"
     secret_type = "crowdtange"
     endpoint_url = "https://api.crowdtangle.com/posts/search"
