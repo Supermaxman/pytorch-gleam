@@ -103,8 +103,8 @@ if __name__ == "__main__":
                 }
                 endpoint = format_parameters(endpoint_url, parameters)
                 try:
-                    request_time = time.time()
                     response = requests.get(endpoint).json()
+                    response_time = time.time()
                 except Exception as e:
                     print(e)
                     time.sleep(10 * q_delay)
@@ -122,9 +122,9 @@ if __name__ == "__main__":
                     json.dump(posts, f)
                 with open(completed_path, "w") as f:
                     json.dump({"num_results": num_results}, f)
-                response_time = time.time()
-                api_delay = response_time - request_time
-                sleep_delay = q_delay - api_delay
+                process_time = time.time()
+                process_delay = process_time - response_time
+                sleep_delay = q_delay - process_delay
                 if sleep_delay > 0.0:
                     time.sleep(sleep_delay)
 
