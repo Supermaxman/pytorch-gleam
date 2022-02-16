@@ -39,12 +39,15 @@ def parse_timedelta(ts_str: str):
 
 
 if __name__ == "__main__":
+    # v1
     # start_date = date(2020, 1, 1)
     # end_date = date(2022, 1, 1)
-    start_date_str = "2020-12-14T13:00:00"
+    # v2
+    # start_date_str = "2020-12-14T13:00:00"
+    start_date_str = "2020-12-15T21:00:00"
     end_date_str = "2022-01-01T00:00:00"
     # hours, minutes, and seconds
-    request_time_delta_str = "00:10:00"
+    request_time_delta_str = "01:00:00"
 
     query_time_format = "%Y-%m-%dT%H:%M:%S"
     file_time_format = "%Y%m%dT%H%M%S"
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     # 50 calls per minute * 1 minute / 60 seconds = 0.8333 calls per second
     q_delay = 50.0 / 60.0
     request_max_count = 100
-    output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v2"
+    output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v3"
     secrets_path = "private/secrets.json"
     secret_type = "crowdtangle"
     endpoint_url = "https://api.crowdtangle.com/posts/search"
