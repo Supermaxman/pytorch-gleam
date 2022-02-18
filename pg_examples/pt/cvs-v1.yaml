@@ -19,7 +19,7 @@ data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
     batch_size: 8
-    max_seq_len: 96
+    max_seq_len: 128
     tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
     num_workers: 8
     train_path:

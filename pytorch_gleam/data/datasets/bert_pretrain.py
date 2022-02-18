@@ -488,7 +488,7 @@ class BertPreDataset(Dataset):
         self.num_examples = len(self.examples)
 
     def create_examples(self):
-        with tqdm(total=self.dupe_factor * len(self.documents)) as pbar:
+        with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
             for _ in range(self.dupe_factor):
                 for document_index in range(len(self.documents)):
                     for instance in create_instances_from_document(
@@ -504,7 +504,7 @@ class BertPreDataset(Dataset):
                     ):
                         example = self.create_example(instance)
                         self.examples.append(example)
-                    pbar.update(1)
+                    progress.update(1)
 
     def create_example(self, instance):
         # tokens is a list of token strings, needs to be converted to ids
