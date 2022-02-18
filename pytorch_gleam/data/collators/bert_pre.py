@@ -42,18 +42,4 @@ class BertPreBatchCollator(BatchCollator):
             "next_sentence_labels": next_sentence_labels,
         }
 
-        from pprint import pprint
-
-        print("input_ids")
-        pprint(input_ids[0])
-        print("attention_mask")
-        pprint(attention_mask[0])
-        print("token_type_ids")
-        pprint(token_type_ids[0])
-        print("masked_lm_labels")
-        pprint(masked_lm_labels[0])
-        print("next_sentence_labels")
-        pprint(next_sentence_labels[0])
-        input()
-        exit()
         return batch
