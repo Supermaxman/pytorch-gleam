@@ -558,7 +558,6 @@ class BertPreDataset(Dataset):
 class BertPreDataModule(BaseDataModule):
     def __init__(
         self,
-        max_seq_length: int,
         bert_tokenizer_config: BertTokenizerConfig = None,
         masked_lm_prob: float = 0.15,
         short_seq_prob: float = 0.10,
@@ -576,7 +575,6 @@ class BertPreDataModule(BaseDataModule):
         if bert_tokenizer_config is None:
             bert_tokenizer_config = BertTokenizerConfig()
         self.short_seq_prob = short_seq_prob
-        self.max_seq_length = max_seq_length
         self.max_predictions_per_seq = max_predictions_per_seq
         self.dupe_factor = dupe_factor
         self.do_whole_word_mask = do_whole_word_mask
@@ -595,7 +593,7 @@ class BertPreDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.train_path,
                 short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_length,
+                max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
@@ -607,7 +605,7 @@ class BertPreDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.val_path,
                 short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_length,
+                max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
@@ -619,7 +617,7 @@ class BertPreDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.test_path,
                 short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_length,
+                max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
@@ -631,7 +629,7 @@ class BertPreDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.predict_path,
                 short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_length,
+                max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
