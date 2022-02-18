@@ -7,6 +7,7 @@ import unicodedata
 import html
 import emoji
 import unidecode
+from tqdm import tqdm
 
 from spacy.lang.en import English
 from spacy.language import Language
@@ -487,21 +488,23 @@ class BertPreDataset(Dataset):
         self.num_examples = len(self.examples)
 
     def create_examples(self):
-        for _ in range(self.dupe_factor):
-            for document_index in range(len(self.documents)):
-                for instance in create_instances_from_document(
-                    self.documents,
-                    document_index,
-                    self.max_seq_length,
-                    self.short_seq_prob,
-                    self.masked_lm_prob,
-                    self.max_predictions_per_seq,
-                    self.vocab_words,
-                    self.rng,
-                    self.do_whole_word_mask,
-                ):
-                    example = self.create_example(instance)
-                    self.examples.append(example)
+        with tqdm(total=self.dupe_factor * len(self.documents)) as pbar:
+            for _ in range(self.dupe_factor):
+                for document_index in range(len(self.documents)):
+                    for instance in create_instances_from_document(
+                        self.documents,
+                        document_index,
+                        self.max_seq_length,
+                        self.short_seq_prob,
+                        self.masked_lm_prob,
+                        self.max_predictions_per_seq,
+                        self.vocab_words,
+                        self.rng,
+                        self.do_whole_word_mask,
+                    ):
+                        example = self.create_example(instance)
+                        self.examples.append(example)
+                    pbar.update(1)
 
     def create_example(self, instance):
         # tokens is a list of token strings, needs to be converted to ids
