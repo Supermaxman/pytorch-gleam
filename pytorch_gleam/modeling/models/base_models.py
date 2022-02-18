@@ -7,6 +7,8 @@ from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
     AutoModelForSeq2SeqLM,
+    AutoModelForMaskedLM,
+    BertForPreTraining,
 )
 from transformers import AdamW, get_linear_schedule_with_warmup
 
@@ -18,7 +20,13 @@ class BasePreModel(pl.LightningModule, ABC):
         self,
         pre_model_name: str,
         pre_model_type: Type[
-            Union[AutoModel, AutoModelForSequenceClassification, AutoModelForSeq2SeqLM]
+            Union[
+                AutoModel,
+                AutoModelForSequenceClassification,
+                AutoModelForSeq2SeqLM,
+                AutoModelForMaskedLM,
+                BertForPreTraining,
+            ]
         ] = AutoModel,
         learning_rate: float = 5e-4,
         weight_decay: float = 0.0,
@@ -337,5 +345,61 @@ class BaseLanguageModelForSeq2SeqLM(BasePreModel, ABC):
                 input_ids=input_ids,
                 attention_mask=attention_mask,
             )
+        contextualized_embeddings = outputs[0]
+        return contextualized_embeddings
+
+
+class BaseLanguageModelForPreTraining(BasePreModel, ABC):
+    def __init__(
+        self,
+        pre_model_name: str,
+        pre_model_type: Type[BertForPreTraining] = BertForPreTraining,
+        *args,
+        **kwargs
+    ):
+        r"""
+        Base class for Masked Language Modeling.
+
+        Args:
+
+                pre_model_name: Name of pre-trained model from huggingface. See https://huggingface.co/
+
+                pre_model_type: Type of pre-trained model.
+                        Default: [`BertForPreTraining`].
+
+                learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``1.0-lr_warm_up`` training steps.
+
+                weight_decay: How much weight decay to apply in the AdamW optimizer.
+                        Default: ``0.0``.
+
+                lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
+                        Default: ``0.1``.
+
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                        initialize your model twice.
+                        Default: ``True``.
+
+                torch_cache_dir: If provided, cache directory for loading models. Defaults to huggingface default.
+                        Default: ``None``.
+
+        """
+
+        super().__init__(pre_model_name, pre_model_type, *args, **kwargs)
+
+    def lm_step(
+        self,
+        input_ids,
+        attention_mask,
+        token_type_ids=None,
+    ):
+        outputs = self.lm(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+        )
+
         contextualized_embeddings = outputs[0]
         return contextualized_embeddings

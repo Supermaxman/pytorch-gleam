@@ -16,3 +16,4 @@ from pytorch_gleam.data.datasets.multi_class_frame_edge_morality_iter import (
 )
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.datasets.multi_turn_qa_frame import MultiTurnQAFrameDataModule
+from pytorch_gleam.data.datasets.bert_pretrain import BertPreDataModule

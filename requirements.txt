@@ -9,3 +9,5 @@ numpy
 ujson
 jsonargparse
 pre-commit
+unidecode
+emoji

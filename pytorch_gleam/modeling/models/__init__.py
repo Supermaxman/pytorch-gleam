@@ -3,6 +3,9 @@ from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
 from pytorch_gleam.modeling.models.base_models import (
     BaseLanguageModelForSequenceClassification,
 )
+from pytorch_gleam.modeling.models.base_models import (
+    BaseLanguageModelForPreTraining,
+)
 from pytorch_gleam.modeling.models.multi_class import MultiClassLanguageModel
 from pytorch_gleam.modeling.models.kbi import KbiLanguageModel
 from pytorch_gleam.modeling.models.nli_misinfo import NliMisinfoLanguageModel
@@ -17,3 +20,4 @@ from pytorch_gleam.modeling.models.multi_class_frame import (
 )
 from pytorch_gleam.modeling.models.rerank import ReRankLanguageModel
 from pytorch_gleam.modeling.models.qa_frame import MultiTurnQAForConditionalGeneration
+from pytorch_gleam.modeling.models.bert_pretrain import BertPreTrainLanguageModel

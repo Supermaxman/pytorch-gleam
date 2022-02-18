@@ -13,3 +13,6 @@ from pytorch_gleam.data.collators.multi_class_frame_edge_morality import (
 from pytorch_gleam.data.collators.sequence_to_sequence import (
     SequenceToSequenceBatchCollator,
 )
+from pytorch_gleam.data.collators.bert_pre import (
+    BertPreBatchCollator,
+)
