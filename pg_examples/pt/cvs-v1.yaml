@@ -16,6 +16,7 @@ trainer:
   checkpoint_callback: false
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
