@@ -16,6 +16,7 @@ import torch
 from torch.utils.data import Dataset
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.collators import BertPreBatchCollator
+from pprint import pprint
 
 
 @Language.component("avoid_sentencizer_hashtags")
@@ -58,6 +59,214 @@ class BertTokenizerConfig:
     standardize_punctuation: bool = True
     remove_unicode_symbols: bool = True
     remove_accented_characters: bool = False
+
+
+class BertPreDataset(Dataset):
+    def __init__(
+        self,
+        tokenizer_config: BertTokenizerConfig,
+        masked_lm_prob: float,
+        data_path: Union[str, List[str]],
+        tokenizer,
+        short_seq_prob: float,
+        max_seq_length: int,
+        max_predictions_per_seq: int,
+        dupe_factor: int,
+        do_whole_word_mask: bool,
+    ):
+        super().__init__()
+        self.short_seq_prob = short_seq_prob
+        self.max_seq_length = max_seq_length
+        self.max_predictions_per_seq = max_predictions_per_seq
+        self.dupe_factor = dupe_factor
+        self.do_whole_word_mask = do_whole_word_mask
+
+        self.masked_lm_prob = masked_lm_prob
+        self.tokenizer_config = tokenizer_config
+        self.tokenizer = tokenizer
+        self.documents = []
+        self.examples = []
+        self.vocab_words = list(tokenizer.vocab.keys())
+
+        if isinstance(data_path, str):
+            self.read_path(data_path)
+        else:
+            for stage, stage_path in enumerate(data_path):
+                self.read_path(stage_path, stage)
+
+        self.rng = random.Random(torch.seed())
+        self.rng.shuffle(self.documents)
+        self.create_examples()
+        self.documents = None
+        self.rng.shuffle(self.examples)
+
+        self.num_examples = len(self.examples)
+
+    def create_examples(self):
+        with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
+            for _ in range(self.dupe_factor):
+                for document_index in range(len(self.documents)):
+                    print("Doc:")
+                    pprint(self.documents[document_index])
+                    for instance in create_instances_from_document(
+                        self.documents,
+                        document_index,
+                        self.max_seq_length,
+                        self.short_seq_prob,
+                        self.masked_lm_prob,
+                        self.max_predictions_per_seq,
+                        self.vocab_words,
+                        self.rng,
+                        self.do_whole_word_mask,
+                    ):
+                        print("Instance:")
+                        pprint(instance)
+                        example = self.create_example(instance)
+                        print("Example:")
+                        pprint(example)
+                        self.examples.append(example)
+                        print("    ")
+                    progress.update(1)
+                    print("==============")
+                    exit()
+
+    def create_example(self, instance):
+        # tokens is a list of token strings, needs to be converted to ids
+        # segment_ids is list of ints of token_type_ids
+        # is_random_next is bool label for seq pred task
+        # masked_lm_positions is indices of [mask]
+        # masked_lm_labels is token strings of [mask] indices
+        input_ids = self.tokenizer.convert_tokens_to_ids(instance["tokens"])
+        masked_lm_positions = list(instance["masked_lm_positions"])
+        masked_lm_ids = self.tokenizer.convert_tokens_to_ids(
+            instance["masked_lm_labels"]
+        )
+        masked_lm_weights = [1.0] * len(masked_lm_ids)
+        next_sentence_label = 1 if instance["is_random_next"] else 0
+        example = {
+            "input_ids": input_ids,
+            "attention_mask": [1] * len(input_ids),
+            "token_type_ids": list(instance["segment_ids"]),
+            "masked_lm_positions": masked_lm_positions,
+            "masked_lm_ids": masked_lm_ids,
+            "masked_lm_weights": masked_lm_weights,
+            "next_sentence_label": next_sentence_label,
+        }
+
+        return example
+
+    def read_path(self, data_path, stage=0):
+        for ex in read_jsonl(data_path):
+            ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
+            ex_text = preprocess_bert(ex_text, self.tokenizer_config)
+            doc = nlp(ex_text)
+            document = []
+            for s_idx, sent in enumerate(doc.sents):
+                tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
+                document.append(tokens)
+
+            self.documents.append(document)
+
+    def __len__(self):
+        return len(self.examples)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        example = self.examples[idx]
+
+        return example
+
+    def worker_init_fn(self, _):
+        pass
+
+
+class BertPreDataModule(BaseDataModule):
+    def __init__(
+        self,
+        bert_tokenizer_config: BertTokenizerConfig = None,
+        masked_lm_prob: float = 0.15,
+        short_seq_prob: float = 0.10,
+        max_predictions_per_seq: int = 14,
+        dupe_factor: int = 10,
+        do_whole_word_mask: bool = True,
+        train_path: Union[str, List[str]] = None,
+        val_path: Union[str, List[str]] = None,
+        test_path: Union[str, List[str]] = None,
+        predict_path: Union[str, List[str]] = None,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        if bert_tokenizer_config is None:
+            bert_tokenizer_config = BertTokenizerConfig()
+        self.short_seq_prob = short_seq_prob
+        self.max_predictions_per_seq = max_predictions_per_seq
+        self.dupe_factor = dupe_factor
+        self.do_whole_word_mask = do_whole_word_mask
+
+        self.bert_tokenizer_config = bert_tokenizer_config
+        self.masked_lm_prob = masked_lm_prob
+        self.train_path = train_path
+        self.val_path = val_path
+        self.test_path = test_path
+        self.predict_path = predict_path
+
+        if self.train_path is not None:
+            self.train_dataset = BertPreDataset(
+                tokenizer_config=self.bert_tokenizer_config,
+                masked_lm_prob=self.masked_lm_prob,
+                tokenizer=self.tokenizer,
+                data_path=self.train_path,
+                short_seq_prob=self.short_seq_prob,
+                max_seq_length=self.max_seq_len,
+                max_predictions_per_seq=self.max_predictions_per_seq,
+                dupe_factor=self.dupe_factor,
+                do_whole_word_mask=self.do_whole_word_mask,
+            )
+        if self.val_path is not None:
+            self.val_dataset = BertPreDataset(
+                tokenizer_config=self.bert_tokenizer_config,
+                masked_lm_prob=self.masked_lm_prob,
+                tokenizer=self.tokenizer,
+                data_path=self.val_path,
+                short_seq_prob=self.short_seq_prob,
+                max_seq_length=self.max_seq_len,
+                max_predictions_per_seq=self.max_predictions_per_seq,
+                dupe_factor=self.dupe_factor,
+                do_whole_word_mask=self.do_whole_word_mask,
+            )
+        if self.test_path is not None:
+            self.test_dataset = BertPreDataset(
+                tokenizer_config=self.bert_tokenizer_config,
+                masked_lm_prob=self.masked_lm_prob,
+                tokenizer=self.tokenizer,
+                data_path=self.test_path,
+                short_seq_prob=self.short_seq_prob,
+                max_seq_length=self.max_seq_len,
+                max_predictions_per_seq=self.max_predictions_per_seq,
+                dupe_factor=self.dupe_factor,
+                do_whole_word_mask=self.do_whole_word_mask,
+            )
+        if self.predict_path is not None:
+            self.predict_dataset = BertPreDataset(
+                tokenizer_config=self.bert_tokenizer_config,
+                masked_lm_prob=self.masked_lm_prob,
+                tokenizer=self.tokenizer,
+                data_path=self.predict_path,
+                short_seq_prob=self.short_seq_prob,
+                max_seq_length=self.max_seq_len,
+                max_predictions_per_seq=self.max_predictions_per_seq,
+                dupe_factor=self.dupe_factor,
+                do_whole_word_mask=self.do_whole_word_mask,
+            )
+
+    def create_collator(self):
+        return BertPreBatchCollator(
+            max_seq_len=self.max_seq_len,
+            use_tpus=self.use_tpus,
+        )
 
 
 def preprocess_bert(text: str, args: BertTokenizerConfig):
@@ -444,203 +653,3 @@ def read_jsonl(path):
             if line:
                 ex = json.loads(line)
                 yield ex
-
-
-class BertPreDataset(Dataset):
-    def __init__(
-        self,
-        tokenizer_config: BertTokenizerConfig,
-        masked_lm_prob: float,
-        data_path: Union[str, List[str]],
-        tokenizer,
-        short_seq_prob: float,
-        max_seq_length: int,
-        max_predictions_per_seq: int,
-        dupe_factor: int,
-        do_whole_word_mask: bool,
-    ):
-        super().__init__()
-        self.short_seq_prob = short_seq_prob
-        self.max_seq_length = max_seq_length
-        self.max_predictions_per_seq = max_predictions_per_seq
-        self.dupe_factor = dupe_factor
-        self.do_whole_word_mask = do_whole_word_mask
-
-        self.masked_lm_prob = masked_lm_prob
-        self.tokenizer_config = tokenizer_config
-        self.tokenizer = tokenizer
-        self.documents = []
-        self.examples = []
-        self.vocab_words = list(tokenizer.vocab.keys())
-
-        if isinstance(data_path, str):
-            self.read_path(data_path)
-        else:
-            for stage, stage_path in enumerate(data_path):
-                self.read_path(stage_path, stage)
-
-        self.rng = random.Random(torch.seed())
-        self.rng.shuffle(self.documents)
-        self.create_examples()
-        self.documents = None
-        self.rng.shuffle(self.examples)
-
-        self.num_examples = len(self.examples)
-
-    def create_examples(self):
-        with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
-            for _ in range(self.dupe_factor):
-                for document_index in range(len(self.documents)):
-                    for instance in create_instances_from_document(
-                        self.documents,
-                        document_index,
-                        self.max_seq_length,
-                        self.short_seq_prob,
-                        self.masked_lm_prob,
-                        self.max_predictions_per_seq,
-                        self.vocab_words,
-                        self.rng,
-                        self.do_whole_word_mask,
-                    ):
-                        example = self.create_example(instance)
-                        self.examples.append(example)
-                    progress.update(1)
-
-    def create_example(self, instance):
-        # tokens is a list of token strings, needs to be converted to ids
-        # segment_ids is list of ints of token_type_ids
-        # is_random_next is bool label for seq pred task
-        # masked_lm_positions is indices of [mask]
-        # masked_lm_labels is token strings of [mask] indices
-        input_ids = self.tokenizer.convert_tokens_to_ids(instance["tokens"])
-        masked_lm_positions = list(instance["masked_lm_positions"])
-        masked_lm_ids = self.tokenizer.convert_tokens_to_ids(
-            instance["masked_lm_labels"]
-        )
-        masked_lm_weights = [1.0] * len(masked_lm_ids)
-        next_sentence_label = 1 if instance["is_random_next"] else 0
-        example = {
-            "input_ids": input_ids,
-            "attention_mask": [1] * len(input_ids),
-            "token_type_ids": list(instance["segment_ids"]),
-            "masked_lm_positions": masked_lm_positions,
-            "masked_lm_ids": masked_lm_ids,
-            "masked_lm_weights": masked_lm_weights,
-            "next_sentence_label": next_sentence_label,
-        }
-
-        return example
-
-    def read_path(self, data_path, stage=0):
-        for ex in read_jsonl(data_path):
-            ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
-            ex_text = preprocess_bert(ex_text, self.tokenizer_config)
-            doc = nlp(ex_text)
-            document = []
-            for s_idx, sent in enumerate(doc.sents):
-                tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
-                document.append(tokens)
-
-            self.documents.append(document)
-
-    def __len__(self):
-        return len(self.examples)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        example = self.examples[idx]
-
-        return example
-
-    def worker_init_fn(self, _):
-        pass
-
-
-class BertPreDataModule(BaseDataModule):
-    def __init__(
-        self,
-        bert_tokenizer_config: BertTokenizerConfig = None,
-        masked_lm_prob: float = 0.15,
-        short_seq_prob: float = 0.10,
-        max_predictions_per_seq: int = 14,
-        dupe_factor: int = 10,
-        do_whole_word_mask: bool = True,
-        train_path: Union[str, List[str]] = None,
-        val_path: Union[str, List[str]] = None,
-        test_path: Union[str, List[str]] = None,
-        predict_path: Union[str, List[str]] = None,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-        if bert_tokenizer_config is None:
-            bert_tokenizer_config = BertTokenizerConfig()
-        self.short_seq_prob = short_seq_prob
-        self.max_predictions_per_seq = max_predictions_per_seq
-        self.dupe_factor = dupe_factor
-        self.do_whole_word_mask = do_whole_word_mask
-
-        self.bert_tokenizer_config = bert_tokenizer_config
-        self.masked_lm_prob = masked_lm_prob
-        self.train_path = train_path
-        self.val_path = val_path
-        self.test_path = test_path
-        self.predict_path = predict_path
-
-        if self.train_path is not None:
-            self.train_dataset = BertPreDataset(
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                data_path=self.train_path,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-            )
-        if self.val_path is not None:
-            self.val_dataset = BertPreDataset(
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                data_path=self.val_path,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-            )
-        if self.test_path is not None:
-            self.test_dataset = BertPreDataset(
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                data_path=self.test_path,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-            )
-        if self.predict_path is not None:
-            self.predict_dataset = BertPreDataset(
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                data_path=self.predict_path,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-            )
-
-    def create_collator(self):
-        return BertPreBatchCollator(
-            max_seq_len=self.max_seq_len,
-            max_predictions_per_seq=self.max_predictions_per_seq,
-            use_tpus=self.use_tpus,
-        )

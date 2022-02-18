@@ -4,15 +4,11 @@ from pytorch_gleam.data.collators.base_collators import BatchCollator
 
 
 class BertPreBatchCollator(BatchCollator):
-    def __init__(self, max_predictions_per_seq: int, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.max_predictions_per_seq = max_predictions_per_seq
 
     def __call__(self, examples: list) -> dict:
         pad_seq_len = self._calculate_seq_padding(examples)
-        pred_pad_seq_len = self._calculate_seq_padding(
-            examples, key="masked_lm_ids", max_seq_len=self.max_predictions_per_seq
-        )
 
         batch_size = len(examples)
         # "input_ids": input_ids,
