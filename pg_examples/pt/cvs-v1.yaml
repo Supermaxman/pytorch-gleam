@@ -2,7 +2,7 @@ seed_everything: 0
 model:
   class_path: pytorch_gleam.modeling.models.BertPreTrainLanguageModel
   init_args:
-    learning_rate: 5e-4
+    learning_rate: 2e-5
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
 
 trainer:
