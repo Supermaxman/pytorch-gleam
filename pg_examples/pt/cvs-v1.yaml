@@ -23,6 +23,6 @@ data:
     tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
     num_workers: 8
     train_path:
-      - covid-19/stance-train.jsonl
+      - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-train.jsonl
     val_path:
-      - covid-19/stance-dev.jsonl
+      - /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-dev.jsonl
