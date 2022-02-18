@@ -1,10 +1,10 @@
+import argparse
 import os
 import json
 import time
 
 import requests
-from pprint import pprint
-from datetime import timedelta, date, datetime
+from datetime import timedelta, datetime
 from tqdm import tqdm
 
 
@@ -38,27 +38,80 @@ def parse_timedelta(ts_str: str):
     return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser()
+    # output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v3"
     # v1
     # start_date = date(2020, 1, 1)
     # end_date = date(2022, 1, 1)
     # v2
     # start_date_str = "2020-12-14T13:00:00"
-    start_date_str = "2020-12-15T21:00:00"
-    end_date_str = "2022-01-01T00:00:00"
-    # hours, minutes, and seconds
-    request_time_delta_str = "01:00:00"
-
-    query_time_format = "%Y-%m-%dT%H:%M:%S"
-    file_time_format = "%Y%m%dT%H%M%S"
-    # time_delta_format = "%H:%M:%S"
+    # start_date_str = "2020-12-15T21:00:00"
+    # end_date_str = "2022-01-01T00:00:00"
+    # request_time_delta_str = "01:00:00"
     # 50 calls per minute * 1 minute / 60 seconds = 0.8333 calls per second
-    q_delay = 50.0 / 60.0
-    request_max_count = 100
-    output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v3"
-    secrets_path = "private/secrets.json"
-    secret_type = "crowdtangle"
-    endpoint_url = "https://api.crowdtangle.com/posts/search"
+    covid_terms = [
+        "covid",
+        "coronavirus",
+        "corona",
+        "covid-19",
+        "covid19",
+        "SARS-CoV-2",
+        "SARS",
+        "SARS-CoV",
+    ]
+    covid_query = " OR ".join(covid_terms)
+    vaccine_terms = [
+        "vaccine",
+        "vaccines",
+        "vaccination",
+        "vaccinations",
+        "vax",
+        "vaxx",
+        "vaxxed",
+        "jab",
+        "jabbed",
+        "vaccinate",
+        "vaccinated",
+        "vaccinates",
+    ]
+    vaccine_query = " OR ".join(vaccine_terms)
+    default_search_query = f"({covid_query}) AND ({vaccine_query})"
+
+    parser.add_argument("-o", "--output_path", required=True)
+    parser.add_argument("-s", "--start", required=True)
+    parser.add_argument("-e", "--end", required=True)
+    parser.add_argument("-q", "--query", default=default_search_query)
+    parser.add_argument(
+        "-u", "--endpoint_url", default="https://api.crowdtangle.com/posts/search"
+    )
+    parser.add_argument("-p", "--platform", default="facebook")
+    parser.add_argument("-ln", "--language", default="en")
+    parser.add_argument("-rd", "--request_delay", type=float, default=50.0 / 60.0)
+    parser.add_argument("-rc", "--request_max_count", type=int, default=100)
+    parser.add_argument("-sp", "--secrets_path", default="private/secrets.json")
+    parser.add_argument("-st", "--secrets_type", default="crowdtangle")
+    parser.add_argument(
+        "-td", "--request_time_delta", default="01:00:00", help="hours:minutes:seconds"
+    )
+    parser.add_argument("-qtf", "--query_time_format", default="%Y-%m-%dT%H:%M:%S")
+    parser.add_argument("-ftf", "--file_time_format", default="%Y%m%dT%H%M%S")
+    args = parser.parse_args()
+
+    start_date_str = args.start
+    end_date_str = args.end
+    output_path = args.output_path
+    search_query = args.query
+    language = args.language
+    request_time_delta_str = args.request_time_delta
+    query_time_format = args.query_time_format
+    file_time_format = args.file_time_format
+    q_delay = args.request_delay
+    request_max_count = args.request_max_count
+    secrets_path = args.secrets_path
+    secret_type = args.secrets_type
+    endpoint_url = args.endpoint_url
+    platform = args.platform
 
     with open(secrets_path, "r") as f:
         secrets = json.load(f)[secret_type]
@@ -76,9 +129,9 @@ if __name__ == "__main__":
         offset = 0
         while True:
             request_name = (
-                q_date_start.strftime("%Y%m%dT%H%M%S")
+                q_date_start.strftime(file_time_format)
                 + "-"
-                + q_date_end.strftime("%Y%m%dT%H%M%S")
+                + q_date_end.strftime(file_time_format)
                 + "-"
                 + f"{offset}"
             )
@@ -94,13 +147,9 @@ if __name__ == "__main__":
                     "startDate": start_time,
                     "endDate": end_time,
                     "sortBy": "date",
-                    "searchTerm": "(covid OR coronavirus OR coronavirus "
-                    "OR corona OR covid-19 OR covid19 OR SARS-CoV-2 OR SARS OR SARS-CoV) "
-                    "AND (vaccine OR vaccines OR vaccination OR vaccinations "
-                    "OR vax OR vaxx OR vaxxed OR jab OR jabbed "
-                    "OR vaccinate OR vaccinated OR vaccinates)",
-                    "platforms": "facebook",
-                    "language": "en",
+                    "searchTerm": search_query,
+                    "platforms": platform,
+                    "language": language,
                     "count": request_max_count,
                     "offset": offset,
                 }
@@ -136,3 +185,7 @@ if __name__ == "__main__":
             if num_results < request_max_count:
                 break
             offset += request_max_count
+
+
+if __name__ == "__main__":
+    main()
