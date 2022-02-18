@@ -128,7 +128,9 @@ class BertPreDataset(Dataset):
                         print("    ")
                     progress.update(1)
                     print("==============")
-                    exit()
+                    x = input()
+                    if x:
+                        exit()
 
     def create_example(self, instance):
         # tokens is a list of token strings, needs to be converted to ids
