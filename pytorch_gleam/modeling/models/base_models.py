@@ -403,3 +403,14 @@ class BaseLanguageModelForPreTraining(BasePreModel, ABC):
 
         contextualized_embeddings = outputs[0]
         return contextualized_embeddings
+
+    def configure_optimizers(self):
+        params = self._get_optimizer_params(self.weight_decay)
+        optimizer = AdamW(
+            params,
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+            correct_bias=False,
+        )
+
+        return optimizer
