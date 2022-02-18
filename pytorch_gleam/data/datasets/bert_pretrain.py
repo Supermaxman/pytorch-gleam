@@ -534,8 +534,8 @@ class BertPreDataset(Dataset):
             ex_text = preprocess_bert(ex_text, self.tokenizer_config)
             doc = nlp(ex_text)
             document = []
-            for s_idx, sent_text in enumerate(doc.sents):
-                tokens = self.tokenizer.tokenize(sent_text, add_special_tokens=False)
+            for s_idx, sent in enumerate(doc.sents):
+                tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
                 document.append(tokens)
 
             self.documents.append(document)
