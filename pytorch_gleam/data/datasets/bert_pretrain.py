@@ -100,6 +100,7 @@ class BertPreDataset(Dataset):
         self.rng.shuffle(self.examples)
 
         self.num_examples = len(self.examples)
+        print(f"self.num_examples={self.num_examples}")
 
     def create_examples(self):
         with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
