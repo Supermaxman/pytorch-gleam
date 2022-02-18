@@ -16,7 +16,6 @@ import torch
 from torch.utils.data import Dataset
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.collators import BertPreBatchCollator
-from pprint import pprint
 
 
 @Language.component("avoid_sentencizer_hashtags")
@@ -106,8 +105,6 @@ class BertPreDataset(Dataset):
         with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
             for _ in range(self.dupe_factor):
                 for document_index in range(len(self.documents)):
-                    print("Doc:")
-                    pprint(self.documents[document_index])
                     for instance in create_instances_from_document(
                         self.documents,
                         document_index,
@@ -119,18 +116,9 @@ class BertPreDataset(Dataset):
                         self.rng,
                         self.do_whole_word_mask,
                     ):
-                        print("Instance:")
-                        pprint(instance)
                         example = self.create_example(instance)
-                        print("Example:")
-                        pprint(example)
                         self.examples.append(example)
-                        print("    ")
                     progress.update(1)
-                    print("==============")
-                    x = input()
-                    if x:
-                        exit()
 
     def create_example(self, instance):
         # tokens is a list of token strings, needs to be converted to ids

@@ -42,4 +42,8 @@ class BertPreBatchCollator(BatchCollator):
             "next_sentence_labels": next_sentence_labels,
         }
 
+        from pprint import pprint
+
+        pprint(batch)
+        exit()
         return batch
