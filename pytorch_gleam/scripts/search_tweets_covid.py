@@ -18,7 +18,9 @@ def date_range(start_date, end_date):
 
 
 if __name__ == "__main__":
-    start_date = date(2021, 7, 1)
+    # 2021-07-23 2021-07-24
+    # start_date = date(2021, 7, 1)
+    start_date = date(2021, 7, 23)
     end_date = date(2022, 1, 1)
     # wait 5 seconds between queries
     q_delay = 5
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     vaccine_query = " OR ".join(vaccine_terms)
     default_search_query = f"({covid_query}) ({vaccine_query})"
 
-    query = "query=" f"{default_search_query} " "lang:en"
+    query = "query=" f"{default_search_query} " "lang:en -is:retweet"
     max_results = "max_results=500"
     tweet_fields = (
         "tweet.fields="
