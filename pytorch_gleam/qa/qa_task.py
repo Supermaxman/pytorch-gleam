@@ -118,7 +118,7 @@ class QATaskModule(nn.Module):
                 "label_ids": label_ids,
                 "label": ex_label,
             }
-            if len(examples) == 1000:
+            if len(examples) == 10000:
                 break
             examples.append(example)
 
