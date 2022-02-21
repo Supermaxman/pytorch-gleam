@@ -116,6 +116,9 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
     def flatten(multi_list):
         return [item for sub_list in multi_list for item in sub_list]
 
+    def setup(self, stage: Optional[str] = None):
+        pass
+
     def configure_optimizers(self):
         if self.trainer.stage == "fit":
             total_devices = self.trainer.num_nodes * self.trainer.num_gpus
