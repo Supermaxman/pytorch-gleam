@@ -3,6 +3,7 @@ import re
 from collections import defaultdict
 from string import ascii_lowercase
 from typing import Dict, List, Optional
+from tqdm import tqdm
 
 from datasets import load_dataset
 
@@ -84,7 +85,9 @@ class QATaskModule(nn.Module):
             cache_dir=data_path,
         )
         examples = []
-        for ds_idx, ex in enumerate(ds):
+        for ds_idx, ex in tqdm(
+            enumerate(ds), total=len(ds), desc=f"Loading {self.path}"
+        ):
             rep_dict = {
                 "{prompt}": self.config.prompt,
                 "{choices}": self.choices_text,
@@ -149,7 +152,9 @@ class MultiQATaskModule(nn.Module):
 
     def load(self, data_path: str, split: str):
         examples = []
-        for ds_name, ds in self.datasets.items():
+        for ds_name, ds in tqdm(
+            self.datasets.items(), total=len(self.datasets), desc=f"Loading datasets"
+        ):
             examples.extend(ds.load(data_path, split))
         return examples
 
