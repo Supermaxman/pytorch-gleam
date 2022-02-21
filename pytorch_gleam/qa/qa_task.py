@@ -76,17 +76,17 @@ class QATaskModule(nn.Module):
         self.path = ds_path
 
     def load(self, data_path: str, split: str):
+        examples = []
         if split not in self.config.split:
-            return
+            return examples
         ds = load_dataset(
             path=self.config.path,
             name=self.config.name,
             split=self.config.split[split],
             cache_dir=data_path,
         )
-        examples = []
         for ds_idx, ex in tqdm(
-            enumerate(ds), total=len(ds), desc=f"Loading {self.path}"
+            enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"
         ):
             rep_dict = {
                 "{prompt}": self.config.prompt,
@@ -153,7 +153,9 @@ class MultiQATaskModule(nn.Module):
     def load(self, data_path: str, split: str):
         examples = []
         for ds_name, ds in tqdm(
-            self.datasets.items(), total=len(self.datasets), desc=f"Loading datasets"
+            self.datasets.items(),
+            total=len(self.datasets),
+            desc=f"Loading {split} datasets",
         ):
             examples.extend(ds.load(data_path, split))
         return examples
