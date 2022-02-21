@@ -123,6 +123,7 @@ class QATaskModule(nn.Module):
                 print(ex_text)
                 print(choice_text)
                 print("=============")
+                input()
                 break
             examples.append(example)
 
