@@ -30,7 +30,7 @@ model:
                   split:
                     train: train
                     val: validation_matched
-                  type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -45,7 +45,7 @@ model:
                   split:
                     train: train
                     val: validation
-                  type: '{prompt} {sentence1} \n {choices} \n {sentence2}'
+                  template: '{prompt} {sentence1} \n {choices} \n {sentence2}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -63,7 +63,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -78,7 +78,7 @@ model:
                   split:
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {sentence}'
+                  template: '{prompt} \n {choices} \n {sentence}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -96,7 +96,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -114,7 +114,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -132,7 +132,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -150,7 +150,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -168,7 +168,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -186,7 +186,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
 
 trainer:
   max_epochs: 10
@@ -229,7 +229,7 @@ data:
                   split:
                     train: train
                     val: validation_matched
-                  type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -244,7 +244,7 @@ data:
                   split:
                     train: train
                     val: validation
-                  type: '{prompt} {sentence1} \n {choices} \n {sentence2}'
+                  template: '{prompt} {sentence1} \n {choices} \n {sentence2}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -262,7 +262,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -277,7 +277,7 @@ data:
                   split:
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {sentence}'
+                  template: '{prompt} \n {choices} \n {sentence}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -295,7 +295,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -313,7 +313,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -331,7 +331,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -349,7 +349,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -367,7 +367,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -385,4 +385,4 @@ data:
                     test: test
                     train: train
                     val: validation
-                  type: '{prompt} \n {choices} \n {text}'
+                  template: '{prompt} \n {choices} \n {text}'
