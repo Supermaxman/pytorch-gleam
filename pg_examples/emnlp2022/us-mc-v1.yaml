@@ -1,6 +1,6 @@
 seed_everything: 0
 model:
-  class_path: pytorch_gleam.modeling.models.MultiTurnQAForConditionalGeneration
+  class_path: pytorch_gleam.modeling.models.UnifiedQAForConditionalGeneration
   init_args:
     # 5e-4 or 1e-4 or 0.0
     # ~ sets to None and uses Adafactor auto-tuning
