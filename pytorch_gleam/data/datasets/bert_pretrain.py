@@ -18,6 +18,14 @@ from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.collators import BertPreBatchCollator
 
 
+# compile regexes
+username_regex = re.compile(r"(^|[^@\w])@(\w{1,15})\b")
+url_regex = re.compile(r"((www\.[^\s]+)|(https?://[^\s]+)|(http?://[^\s]+))")
+control_char_regex = re.compile(r"[\r\n\t]+")
+# translate table for punctuation
+transl_table = dict([(ord(x), ord(y)) for x, y in zip("‘’´“”–-", "'''\"\"--")])
+
+
 @Language.component("avoid_sentencizer_hashtags")
 def _avoid_sentence_boundary_on_hashtag(doc):
     for token in doc[:-1]:
@@ -34,15 +42,6 @@ def build_spacy_model():
     nlp.add_pipe("sentencizer")
     nlp.add_pipe("avoid_sentencizer_hashtags")
     return nlp
-
-
-nlp = build_spacy_model()
-# compile regexes
-username_regex = re.compile(r"(^|[^@\w])@(\w{1,15})\b")
-url_regex = re.compile(r"((www\.[^\s]+)|(https?://[^\s]+)|(http?://[^\s]+))")
-control_char_regex = re.compile(r"[\r\n\t]+")
-# translate table for punctuation
-transl_table = dict([(ord(x), ord(y)) for x, y in zip("‘’´“”–-", "'''\"\"--")])
 
 
 @dataclasses.dataclass
@@ -100,6 +99,7 @@ class BertPreDataset(Dataset):
         self.rng.shuffle(self.examples)
 
         self.num_examples = len(self.examples)
+        self.nlp = build_spacy_model()
 
     def create_examples(self):
         with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
@@ -149,7 +149,7 @@ class BertPreDataset(Dataset):
         for ex in read_jsonl(data_path):
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
             ex_text = preprocess_bert(ex_text, self.tokenizer_config)
-            doc = nlp(ex_text)
+            doc = self.nlp(ex_text)
             document = []
             for s_idx, sent in enumerate(doc.sents):
                 tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
