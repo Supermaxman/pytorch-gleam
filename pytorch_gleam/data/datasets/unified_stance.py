@@ -1,15 +1,12 @@
-import json
-import random
+import ujson as json
 from typing import List, Dict, Any, Union
-
-from datasets import load_dataset
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.collators import SequenceToSequenceBatchCollator
-from pytorch_gleam.qa import QAModule, MultiQATaskModule
+from pytorch_gleam.qa import MultiQATaskModule
 
 
 def read_jsonl(path):
@@ -56,7 +53,7 @@ class UnifiedQADataset(Dataset):
         pass
 
 
-class MultiTurnQAFrameDataModule(BaseDataModule):
+class UnifiedQADataModule(BaseDataModule):
     def __init__(
         self,
         data_path: str,
