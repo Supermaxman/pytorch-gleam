@@ -56,7 +56,6 @@ model:
                     Contradict: 2
                     Entail: 0
                     Neutral: 1
-                  name: null
                   path: snli
                   prompt: 'Does the sentence entail or contradict the following:'
                   split:
@@ -255,7 +254,6 @@ data:
                     Contradict: 2
                     Entail: 0
                     Neutral: 1
-                  name: null
                   path: snli
                   prompt: 'Does the sentence entail or contradict the following:'
                   split:

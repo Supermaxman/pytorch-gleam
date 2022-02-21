@@ -16,12 +16,12 @@ class QATaskConfig:
         self,
         choices: Dict[str, int],
         label_map: Dict[str, int],
-        name: Optional[str],
         path: str,
         prompt: str,
         split: Dict[str, str],
         template: str,
         max_size: int = -1,
+        name: Optional[str] = None,
     ):
         self.choices = choices
         self.label_map = label_map
