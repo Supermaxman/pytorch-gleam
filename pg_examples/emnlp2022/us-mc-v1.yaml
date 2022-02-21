@@ -193,13 +193,12 @@ trainer:
   check_val_every_n_epoch: 1
   deterministic: true
   num_sanity_val_steps: 1
-  checkpoint_callback: false
+  checkpoint_callback: true
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
         every_n_train_steps: 10000
-
 
 data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
