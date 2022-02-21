@@ -120,16 +120,17 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         pass
 
     def configure_optimizers(self):
-        total_devices = self.trainer.num_nodes * self.trainer.num_gpus
-        # https://github.com/PyTorchLightning/pytorch-lightning/discussions/10652
-        # https://github.com/PyTorchLightning/pytorch-lightning/issues/10430
-        train_dataloader = (
-            self.trainer._data_connector._train_dataloader_source.dataloader()
-        )
-        train_batches = len(train_dataloader) // total_devices
-        # need to figure out how many batches will actually have gradient updates
-        train_batches = train_batches // self.trainer.accumulate_grad_batches
-        self.train_steps = self.trainer.max_epochs * train_batches
+        # total_devices = self.trainer.num_nodes * self.trainer.num_gpus
+        # # https://github.com/PyTorchLightning/pytorch-lightning/discussions/10652
+        # # https://github.com/PyTorchLightning/pytorch-lightning/issues/10430
+        # train_dataloader = (
+        #     self.trainer._data_connector._train_dataloader_source.dataloader()
+        # )
+        # train_batches = len(train_dataloader) // total_devices
+        # # need to figure out how many batches will actually have gradient updates
+        # train_batches = train_batches // self.trainer.accumulate_grad_batches
+        # self.train_steps = self.trainer.max_epochs * train_batches
+        self.warm_up_steps = 10000
 
         params = self.parameters()
         if self.learning_rate == 0.0:
@@ -151,6 +152,6 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
             )
             scheduler = get_constant_schedule_with_warmup(
                 optimizer,
-                num_warmup_steps=self.lr_warm_up * self.train_steps,
+                num_warmup_steps=self.warm_up_steps,
             )
         return [optimizer], [scheduler]

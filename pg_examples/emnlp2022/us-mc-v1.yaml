@@ -190,6 +190,8 @@ model:
 trainer:
   max_epochs: 10
   gpus: 6
+  strategy: ddp
+  auto_select_gpus: true
   default_root_dir: /nas1-nfs1/data/maw150130/models/unified-qa
   accumulate_grad_batches: 2
   check_val_every_n_epoch: 1
