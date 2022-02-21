@@ -56,7 +56,6 @@ class UnifiedQADataset(Dataset):
 class UnifiedQADataModule(BaseDataModule):
     def __init__(
         self,
-        data_path: str,
         qa_task: MultiQATaskModule,
         max_label_seq_len: int = 6,
         *args,
@@ -64,20 +63,19 @@ class UnifiedQADataModule(BaseDataModule):
     ):
         super().__init__(*args, **kwargs)
         self.qa_task = qa_task
-        self.data_path = data_path
         self.max_label_seq_len = max_label_seq_len
 
         if self.train_path is not None:
             self.train_dataset = UnifiedQADataset(
-                qa_task=self.qa_task, split="train", cache_path=self.data_path
+                qa_task=self.qa_task, split="train", cache_path=self.train_path
             )
         if self.val_path is not None:
             self.val_dataset = UnifiedQADataset(
-                qa_task=self.qa_task, split="val", cache_path=self.data_path
+                qa_task=self.qa_task, split="val", cache_path=self.val_path
             )
         if self.test_path is not None:
             self.test_dataset = UnifiedQADataset(
-                qa_task=self.qa_task, split="test", cache_path=self.data_path
+                qa_task=self.qa_task, split="test", cache_path=self.test_path
             )
         if self.predict_path is not None:
             raise NotImplementedError()

@@ -203,7 +203,9 @@ data:
     max_seq_len: 156
     max_label_seq_len: 6
     num_workers: 8
-    data_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    val_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+#    test_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
     qa_task:
       class_path: pytorch_gleam.qa.MultiQATaskModule
       init_args:
