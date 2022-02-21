@@ -118,12 +118,7 @@ class QATaskModule(nn.Module):
                 "label_ids": label_ids,
                 "label": ex_label,
             }
-            if len(examples) == 0:
-                print(ex_id)
-                print(ex_text)
-                print(choice_text)
-                print("=============")
-                input()
+            if len(examples) == 1000:
                 break
             examples.append(example)
 
