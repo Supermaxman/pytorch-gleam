@@ -217,6 +217,23 @@ data:
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
+                    Contradict: 2
+                    Entail: 0
+                    Neither: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  name: mnli
+                  path: glue
+                  prompt: 'Does the sentence entail or contradict the following:'
+                  split:
+                    train: train
+                    val: validation_matched
+                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
                     Entail: 0
                     Not Entail: 1
                   label_map:
@@ -369,20 +386,3 @@ data:
                     train: train
                     val: validation
                   template: '{prompt} \n {choices} \n {text}'
-              - class_path: pytorch_gleam.qa.QATaskConfig
-                init_args:
-                  choices:
-                    Contradict: 2
-                    Entail: 0
-                    Neither: 1
-                  label_map:
-                    Contradict: 2
-                    Entail: 0
-                    Neutral: 1
-                  name: mnli
-                  path: glue
-                  prompt: 'Does the sentence entail or contradict the following:'
-                  split:
-                    train: train
-                    val: validation_matched
-                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
