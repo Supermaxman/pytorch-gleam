@@ -189,7 +189,9 @@ model:
 
 trainer:
   max_epochs: 10
-  accumulate_grad_batches: 4
+  gpus: 8
+  default_root_dir: /nas1-nfs1/data/maw150130/models/unified-qa
+  accumulate_grad_batches: 2
   check_val_every_n_epoch: 1
   deterministic: true
   num_sanity_val_steps: 1
@@ -197,7 +199,7 @@ trainer:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
-        every_n_train_steps: 10000
+        every_n_epochs: 1
 
 data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
@@ -206,8 +208,8 @@ data:
     max_seq_len: 128
     max_label_seq_len: 6
     num_workers: 8
-    train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
-    val_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    train_path: /nas1-nfs1/data/maw150130/data/huggingface
+    val_path: /nas1-nfs1/data/maw150130/data/huggingface
 #    test_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
     qa_task:
       class_path: pytorch_gleam.qa.MultiQATaskModule
