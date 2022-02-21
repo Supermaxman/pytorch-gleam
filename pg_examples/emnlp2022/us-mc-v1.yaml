@@ -28,7 +28,6 @@ model:
                   path: glue
                   prompt: 'Does the sentence entail or contradict the following:'
                   split:
-                    test: null
                     train: train
                     val: validation_matched
                   type: '{prompt} {premise} \n {choices} \n {hypothesis}'
@@ -44,7 +43,6 @@ model:
                   path: glue
                   prompt: 'Does the sentence entail the following:'
                   split:
-                    test: null
                     train: train
                     val: validation
                   type: '{prompt} {sentence1} \n {choices} \n {sentence2}'
@@ -78,7 +76,6 @@ model:
                   path: glue
                   prompt: Does the author express a positive or negative sentiment?
                   split:
-                    test: null
                     train: train
                     val: validation
                   type: '{prompt} \n {choices} \n {sentence}'
@@ -230,7 +227,6 @@ data:
                   path: glue
                   prompt: 'Does the sentence entail or contradict the following:'
                   split:
-                    test: null
                     train: train
                     val: validation_matched
                   type: '{prompt} {premise} \n {choices} \n {hypothesis}'
@@ -246,7 +242,6 @@ data:
                   path: glue
                   prompt: 'Does the sentence entail the following:'
                   split:
-                    test: null
                     train: train
                     val: validation
                   type: '{prompt} {sentence1} \n {choices} \n {sentence2}'
@@ -280,7 +275,6 @@ data:
                   path: glue
                   prompt: Does the author express a positive or negative sentiment?
                   split:
-                    test: null
                     train: train
                     val: validation
                   type: '{prompt} \n {choices} \n {sentence}'

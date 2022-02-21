@@ -2,7 +2,7 @@ import random
 import re
 from collections import defaultdict
 from string import ascii_lowercase
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from datasets import load_dataset
 
@@ -16,7 +16,7 @@ class QATaskConfig:
         self,
         choices: Dict[str, int],
         label_map: Dict[str, int],
-        name: str,
+        name: Optional[str],
         path: str,
         prompt: str,
         split: Dict[str, str],
@@ -70,7 +70,7 @@ class QATaskModule(nn.Module):
         self.path = ds_path
 
     def load(self, data_path: str, split: str):
-        if self.config.split[split] is None:
+        if split not in self.config.split:
             return
         ds = load_dataset(
             path=self.config.path,
