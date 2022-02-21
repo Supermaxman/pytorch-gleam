@@ -64,7 +64,6 @@ class MultipleChoiceQAModule(QAModule):
         tokenizer_name: str,
         prompt: str,
         label_map: Dict[str, int],
-        choices: List[str],
         choice_map: Dict[str, int],
         add_question: bool = False,
     ):
@@ -80,8 +79,6 @@ class MultipleChoiceQAModule(QAModule):
 
             label_map: Map from label name to label idx
 
-            choices: List of multiple choices, in order of appearance
-
             choice_map: Map from choice in choices to label idx from label map
 
             add_question: Add question mark at end of context and remove period.
@@ -92,8 +89,8 @@ class MultipleChoiceQAModule(QAModule):
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
         self.prompt = prompt
         self.label_map = label_map
-        self.choices = choices
         self.choice_map = choice_map
+        self.choices = [k for k, v in self.choice_map.items()]
         self.add_question = add_question
 
         self.inv_label_map = {v: k for k, v in self.label_map.items()}

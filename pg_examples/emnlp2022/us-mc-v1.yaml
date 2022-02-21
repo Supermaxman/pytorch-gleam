@@ -1,0 +1,368 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.MultiTurnQAForConditionalGeneration
+  init_args:
+    # 5e-4 or 1e-4 or 0.0
+    # ~ sets to None and uses Adafactor auto-tuning
+    learning_rate: 1e-3
+    pre_model_name: allenai/unifiedqa-t5-large
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          mnli:
+            choices:
+              Contradict: 2
+              Entail: 0
+              Neither: 1
+            label_map:
+              Contradict: 2
+              Entail: 0
+              Neutral: 1
+            name: mnli
+            path: glue
+            prompt: 'Does the sentence entail or contradict the following:'
+            split:
+              test: null
+              train: train
+              val: validation_matched
+            type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+          rte:
+            choices:
+              Entail: 0
+              Not Entail: 1
+            label_map:
+              Entailment: 0
+              Not Entailment: 1
+            name: rte
+            path: glue
+            prompt: 'Does the sentence entail the following:'
+            split:
+              test: null
+              train: train
+              val: validation
+            type: '{prompt} {sentence1} \n {choices} \n {sentence2}'
+          snli:
+            choices:
+              Contradict: 2
+              Entail: 0
+              Neither: 1
+            label_map:
+              Contradict: 2
+              Entail: 0
+              Neutral: 1
+            name: null
+            path: snli
+            prompt: 'Does the sentence entail or contradict the following:'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+          sst2:
+            choices:
+              Negative: 0
+              Positive: 1
+            label_map:
+              Negative: 0
+              Positive: 1
+            name: sst2
+            path: glue
+            prompt: Does the author express a positive or negative sentiment?
+            split:
+              test: null
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {sentence}'
+          tweet_eval_sentiment:
+            choices:
+              Negative: 0
+              Neutral: 1
+              Positive: 2
+            label_map:
+              Negative: 0
+              Neutral: 1
+              Positive: 2
+            name: sentiment
+            path: tweet_eval
+            prompt: Does the author express a positive, negative, or neutral sentiment?
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_abortion:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_abortion
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Abortion'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_atheism:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_atheism
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Atheism'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_climate:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_climate
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Climate Change'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_feminist:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_feminist
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Feminism'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_hillary:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_hillary
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Hillary Clinton'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+
+trainer:
+  max_epochs: 10
+  accumulate_grad_batches: 4
+  check_val_every_n_epoch: 1
+  deterministic: true
+  num_sanity_val_steps: 1
+  checkpoint_callback: false
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+data:
+  class_path: pytorch_gleam.data.datasets.MultiTurnQAFrameDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 156
+    max_label_seq_len: 4
+    num_workers: 8
+    data_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          mnli:
+            choices:
+              Contradict: 2
+              Entail: 0
+              Neither: 1
+            label_map:
+              Contradict: 2
+              Entail: 0
+              Neutral: 1
+            name: mnli
+            path: glue
+            prompt: 'Does the sentence entail or contradict the following:'
+            split:
+              test: null
+              train: train
+              val: validation_matched
+            type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+          rte:
+            choices:
+              Entail: 0
+              Not Entail: 1
+            label_map:
+              Entailment: 0
+              Not Entailment: 1
+            name: rte
+            path: glue
+            prompt: 'Does the sentence entail the following:'
+            split:
+              test: null
+              train: train
+              val: validation
+            type: '{prompt} {sentence1} \n {choices} \n {sentence2}'
+          snli:
+            choices:
+              Contradict: 2
+              Entail: 0
+              Neither: 1
+            label_map:
+              Contradict: 2
+              Entail: 0
+              Neutral: 1
+            name: null
+            path: snli
+            prompt: 'Does the sentence entail or contradict the following:'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} {premise} \n {choices} \n {hypothesis}'
+          sst2:
+            choices:
+              Negative: 0
+              Positive: 1
+            label_map:
+              Negative: 0
+              Positive: 1
+            name: sst2
+            path: glue
+            prompt: Does the author express a positive or negative sentiment?
+            split:
+              test: null
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {sentence}'
+          tweet_eval_sentiment:
+            choices:
+              Negative: 0
+              Neutral: 1
+              Positive: 2
+            label_map:
+              Negative: 0
+              Neutral: 1
+              Positive: 2
+            name: sentiment
+            path: tweet_eval
+            prompt: Does the author express a positive, negative, or neutral sentiment?
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_abortion:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_abortion
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Abortion'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_atheism:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_atheism
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Atheism'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_climate:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_climate
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Climate Change'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_feminist:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_feminist
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Feminism'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'
+          tweet_eval_stance_hillary:
+            choices:
+              Against: 1
+              In Favor: 2
+              None: 0
+            label_map:
+              Against: 1
+              In Favor: 2
+              None: 0
+            name: stance_hillary
+            path: tweet_eval
+            prompt: 'What stance does the author hold towards the following: Hillary Clinton'
+            split:
+              test: test
+              train: train
+              val: validation
+            type: '{prompt} \n {choices} \n {text}'

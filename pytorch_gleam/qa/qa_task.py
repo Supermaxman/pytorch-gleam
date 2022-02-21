@@ -1,0 +1,141 @@
+import random
+import re
+from collections import defaultdict
+from string import ascii_lowercase
+from datasets import load_dataset
+
+import torch
+from torch import nn
+from transformers import AutoTokenizer
+
+
+class QATaskModule(nn.Module):
+    def __init__(self, tokenizer, config: dict):
+        super().__init__()
+        self.tokenizer = tokenizer
+        self.config = config
+        self.template = self.config["type"]
+        self.choice_map = self.config["choices"]
+        self.choices = list(self.choice_map.keys())
+        self.label_map = self.config["label_map"]
+        self.inv_label_map = {v: k for k, v in self.label_map.items()}
+        self.inv_choice_map = {v: k for k, v in self.choice_map.items()}
+
+        self.choices_text = " ".join(
+            [
+                f"({o_letter}) {o_text}"
+                for o_letter, o_text in zip(ascii_lowercase, self.choices)
+            ]
+        )
+        self.pattern_keys = list(set(re.findall(r"\{\w*\}", self.template)))
+        self.pattern = re.compile(
+            "|".join(
+                [re.escape(k) for k in sorted(self.pattern_keys, key=len, reverse=True)]
+            ),
+            flags=re.DOTALL,
+        )
+        ds_name = self.config["name"]
+        ds_path = self.config["path"]
+        if ds_name is not None:
+            ds_path = f"{ds_path}|{ds_name}"
+        self.path = ds_path
+
+    def load(self, data_path: str, split: str):
+        if self.config["split"][split] is None:
+            return
+        ds = load_dataset(
+            path=self.config["path"],
+            name=self.config["name"],
+            split=self.config["split"][split],
+            cache_dir=data_path,
+        )
+        examples = []
+        for ds_idx, ex in enumerate(ds):
+            rep_dict = {
+                "{prompt}": self.config["prompt"],
+                "{choices}": self.choices_text,
+            }
+            idx = ex["idx"] if "idx" in ex else ds_idx
+            for key in self.pattern_keys:
+                if key != "label" and key != "idx":
+                    value = ex[key]
+                    rep_dict["{" + key + "}"] = value
+            ex_id = f"{self.path}||{idx}"
+            ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
+            ex_text = ex_text.lower()
+            ex_label = ex["label"]
+            token_data = self.tokenizer(ex_text, truncation=True)
+            input_ids = token_data["input_ids"]
+            attention_mask = token_data["attention_mask"]
+            choice_text = self.inv_choice_map[ex_label]
+            choice_text = choice_text.lower()
+            # TODO any more preprocessing, like urls
+            label_data = self.tokenizer(choice_text)
+            label_ids = label_data["input_ids"]
+            example = {
+                "ids": ex_id,
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "label_ids": label_ids,
+                "label": ex_label,
+            }
+            examples.append(example)
+
+        if "max_size" in self.config:
+            random.shuffle(examples)
+            examples = examples[: self.config["max_size"]]
+        return examples
+
+    def forward(self, qa_ids, qa_responses):
+        # List[str]
+        qa_response_texts = self.tokenizer.batch_decode(
+            qa_responses, skip_special_tokens=True
+        )
+        preds = []
+        for qa_response in qa_response_texts:
+            qa_response = qa_response.title()
+            if qa_response not in self.choice_map:
+                qa_response = self.choices[-1]
+            qa_pred = self.choice_map[qa_response]
+            preds.append(qa_pred)
+        preds = torch.tensor(preds, dtype=torch.long)
+        return qa_ids, preds
+
+
+class MultiQATaskModule(nn.Module):
+    def __init__(self, tokenizer_name: str, config: dict):
+        super().__init__()
+        self.tokenizer_name = tokenizer_name
+        self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
+        self.config = config
+        self.datasets = {}
+        for ds_name, ds_config in config.items():
+            ds = QATaskModule(self.tokenizer, ds_config)
+            self.datasets[ds.path] = ds
+
+    def load(self, data_path: str, split: str):
+        examples = []
+        for ds_name, ds in self.datasets.items():
+            examples.extend(ds.load(data_path, split))
+        return examples
+
+    def forward(self, qa_ids, qa_responses):
+        # ds_path||ex_id
+        ds_ids = defaultdict(list)
+        ds_indices = defaultdict(list)
+        for ex_idx, qa_id in enumerate(qa_ids):
+            ds_path, ex_id = qa_id.split("||")
+            ds_ids[ds_path].append(ex_id)
+            ds_indices[ds_path].append(ex_idx)
+
+        f_ids = []
+        f_preds = []
+        for ds_path, ds in self.datasets.items():
+            d_ids = ds_ids[ds_path]
+            d_indices = torch.tensor(ds_indices[ds_path], dtype=torch.long)
+            d_qa_responses = qa_responses[d_indices]
+            d_ids, d_preds = ds(d_ids, d_qa_responses)
+            f_ids.extend(d_ids)
+            f_preds.append(d_preds)
+        f_preds = torch.cat(f_preds, dim=0)
+        return f_ids, f_preds

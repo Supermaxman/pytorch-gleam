@@ -19,10 +19,6 @@ model:
           No Stance: 0
           Accept: 1
           Reject: 2
-        choices:
-          - "Agree"
-          - "Disagree"
-          - "Other"
         choice_map:
           Agree: 1
           Disagree: 2
@@ -62,10 +58,6 @@ data:
           No Stance: 0
           Accept: 1
           Reject: 2
-        choices:
-          - "Agree"
-          - "Disagree"
-          - "Other"
         choice_map:
           Agree: 1
           Disagree: 2
