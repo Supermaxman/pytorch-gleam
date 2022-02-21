@@ -81,9 +81,9 @@ model:
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
+                    Positive: 2
                     Negative: 0
                     Neutral: 1
-                    Positive: 2
                   label_map:
                     Negative: 0
                     Neutral: 1
@@ -281,9 +281,9 @@ data:
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
+                    Positive: 2
                     Negative: 0
                     Neutral: 1
-                    Positive: 2
                   label_map:
                     Negative: 0
                     Neutral: 1
