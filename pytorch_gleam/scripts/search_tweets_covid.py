@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # wait 5 seconds between queries
     q_delay = 5
 
-    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v6"
+    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
