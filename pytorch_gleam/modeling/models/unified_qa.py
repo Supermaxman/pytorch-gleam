@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 import torch
 from transformers import Adafactor, get_constant_schedule_with_warmup
@@ -117,6 +117,13 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         return [item for sub_list in multi_list for item in sub_list]
 
     def configure_optimizers(self):
+        if self.trainer.stage == "fit":
+            total_devices = self.trainer.num_nodes * self.trainer.num_gpus
+            train_batches = len(self.train_dataloader()) // total_devices
+            # need to figure out how many batches will actually have gradient updates
+            train_batches = train_batches // self.trainer.accumulate_grad_batches
+            self.train_steps = self.trainer.max_epochs * train_batches
+
         params = self.parameters()
         if self.learning_rate == 0.0:
             optimizer = Adafactor(
