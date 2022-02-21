@@ -120,17 +120,16 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         pass
 
     def configure_optimizers(self):
-        if self.trainer.stage == "fit":
-            total_devices = self.trainer.num_nodes * self.trainer.num_gpus
-            # https://github.com/PyTorchLightning/pytorch-lightning/discussions/10652
-            # https://github.com/PyTorchLightning/pytorch-lightning/issues/10430
-            train_dataloader = (
-                self.trainer._data_connector._train_dataloader_source.dataloader()
-            )
-            train_batches = len(train_dataloader) // total_devices
-            # need to figure out how many batches will actually have gradient updates
-            train_batches = train_batches // self.trainer.accumulate_grad_batches
-            self.train_steps = self.trainer.max_epochs * train_batches
+        total_devices = self.trainer.num_nodes * self.trainer.num_gpus
+        # https://github.com/PyTorchLightning/pytorch-lightning/discussions/10652
+        # https://github.com/PyTorchLightning/pytorch-lightning/issues/10430
+        train_dataloader = (
+            self.trainer._data_connector._train_dataloader_source.dataloader()
+        )
+        train_batches = len(train_dataloader) // total_devices
+        # need to figure out how many batches will actually have gradient updates
+        train_batches = train_batches // self.trainer.accumulate_grad_batches
+        self.train_steps = self.trainer.max_epochs * train_batches
 
         params = self.parameters()
         if self.learning_rate == 0.0:
