@@ -26,7 +26,7 @@ model:
                     Neutral: 1
                   name: mnli
                   path: glue
-                  prompt: "oes the sentence entail or contradict the following:"
+                  prompt: "Does the sentence entail or contradict the following:"
                   split:
                     train: train
                     val: validation_matched
@@ -73,7 +73,7 @@ model:
                     Positive: 1
                   name: sst2
                   path: glue
-                  prompt: Does the author express a positive or negative sentiment?
+                  prompt: "Does the author express a positive or negative sentiment?"
                   split:
                     train: train
                     val: validation
@@ -90,7 +90,7 @@ model:
                     Positive: 2
                   name: sentiment
                   path: tweet_eval
-                  prompt: Does the author express a positive, negative, or neutral sentiment?
+                  prompt: "Does the author express a positive, negative, or neutral sentiment?"
                   split:
                     test: test
                     train: train
@@ -278,7 +278,7 @@ data:
                     Positive: 1
                   name: sst2
                   path: glue
-                  prompt: Does the author express a positive or negative sentiment?
+                  prompt: "Does the author express a positive or negative sentiment?"
                   split:
                     train: train
                     val: validation
@@ -295,7 +295,7 @@ data:
                     Positive: 2
                   name: sentiment
                   path: tweet_eval
-                  prompt: Does the author express a positive, negative, or neutral sentiment?
+                  prompt: "Does the author express a positive, negative, or neutral sentiment?"
                   split:
                     test: test
                     train: train
