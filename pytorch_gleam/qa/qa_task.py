@@ -101,6 +101,8 @@ class QATaskModule(nn.Module):
             ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
             ex_text = ex_text.lower()
             ex_label = ex["label"]
+            if ex_label < 0:
+                continue
             token_data = self.tokenizer(ex_text, truncation=True)
             input_ids = token_data["input_ids"]
             attention_mask = token_data["attention_mask"]
