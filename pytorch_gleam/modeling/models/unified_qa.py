@@ -35,8 +35,8 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         # [count]
         tq_labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu()
         ex_label_map = {}
-        for t_id, t_label in zip(tq_ids, tq_labels.tolist()):
-            ex_id, q_id = t_id.split("||")
+        for ex_id, t_label in zip(tq_ids, tq_labels.tolist()):
+            # ds_path, ds_id = ex_id.split("||")
             ex_label_map[ex_id] = t_label
 
         # [count, max_seq_len]

@@ -168,8 +168,8 @@ class MultiQATaskModule(nn.Module):
         # ds_path||ex_id
         ds_ids = defaultdict(list)
         ds_indices = defaultdict(list)
-        for ex_idx, qa_id in enumerate(qa_ids):
-            ds_path, ex_id = qa_id.split("||")
+        for ex_idx, ex_id in enumerate(qa_ids):
+            ds_path, ds_idx = ex_id.split("||")
             ds_ids[ds_path].append(ex_id)
             ds_indices[ds_path].append(ex_idx)
 
