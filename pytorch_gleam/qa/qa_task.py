@@ -63,6 +63,11 @@ class QATaskModule(nn.Module):
             ),
             flags=re.DOTALL,
         )
+        self.data_keys = [
+            (x[1:-1], x)
+            for x in self.pattern_keys
+            if x not in {"{prompt}", "{choices}"}
+        ]
         ds_name = self.config.name
         ds_path = self.config.path
         if ds_name is not None:
@@ -85,8 +90,7 @@ class QATaskModule(nn.Module):
                 "{choices}": self.choices_text,
             }
             idx = ex["idx"] if "idx" in ex else ds_idx
-            for key in self.pattern_keys:
-                sub_key = key[1:-1]
+            for sub_key, key in self.data_keys:
                 if sub_key != "label" and sub_key != "idx" and sub_key in ex:
                     value = ex[sub_key]
                     rep_dict[key] = value
