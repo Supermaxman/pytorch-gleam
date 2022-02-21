@@ -27,8 +27,6 @@ class UnifiedQADataset(Dataset):
         self.split = split
         self.cache_path = cache_path
         self.examples = qa_task.load(self.cache_path, self.split)
-        self.display_length_percentiles()
-        exit()
 
     def display_length_percentiles(self, key="input_ids"):
         lengths = [len(x[key]) for x in self.examples]
