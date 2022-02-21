@@ -86,9 +86,10 @@ class QATaskModule(nn.Module):
             }
             idx = ex["idx"] if "idx" in ex else ds_idx
             for key in self.pattern_keys:
-                if key != "label" and key != "idx" and key in ex:
-                    value = ex[key]
-                    rep_dict["{" + key + "}"] = value
+                sub_key = key[1:-1]
+                if sub_key != "label" and sub_key != "idx" and sub_key in ex:
+                    value = ex[sub_key]
+                    rep_dict[key] = value
             ex_id = f"{self.path}||{idx}"
             ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
             ex_text = ex_text.lower()
