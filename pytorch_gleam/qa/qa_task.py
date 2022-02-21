@@ -86,7 +86,7 @@ class QATaskModule(nn.Module):
             }
             idx = ex["idx"] if "idx" in ex else ds_idx
             for key in self.pattern_keys:
-                if key != "label" and key != "idx":
+                if key != "label" and key != "idx" and key in ex:
                     value = ex[key]
                     rep_dict["{" + key + "}"] = value
             ex_id = f"{self.path}||{idx}"
