@@ -3,4 +3,9 @@ from pytorch_gleam.qa.qa import (
     MultipleChoiceQAModule,
     MultiTurnQAModule,
 )
-from pytorch_gleam.qa.qa_task import QATaskModule, MultiQATaskModule
+from pytorch_gleam.qa.qa_task import (
+    QATaskModule,
+    MultiQATaskModule,
+    QATaskConfig,
+    MultiQATaskConfig,
+)

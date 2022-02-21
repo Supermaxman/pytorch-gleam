@@ -2,6 +2,8 @@ import random
 import re
 from collections import defaultdict
 from string import ascii_lowercase
+from typing import Dict, List
+
 from datasets import load_dataset
 
 import torch
@@ -9,15 +11,42 @@ from torch import nn
 from transformers import AutoTokenizer
 
 
+class QATaskConfig:
+    def __init__(
+        self,
+        choices: Dict[str, int],
+        label_map: Dict[str, int],
+        name: str,
+        path: str,
+        prompt: str,
+        split: Dict[str, str],
+        template: str,
+        max_size: int = -1,
+    ):
+        self.choices = choices
+        self.label_map = label_map
+        self.name = name
+        self.path = path
+        self.prompt = prompt
+        self.split = split
+        self.template = template
+        self.max_size = max_size
+
+
+class MultiQATaskConfig:
+    def __init__(self, tasks: List[QATaskConfig]):
+        self.tasks = tasks
+
+
 class QATaskModule(nn.Module):
-    def __init__(self, tokenizer, config: dict):
+    def __init__(self, tokenizer, config: QATaskConfig):
         super().__init__()
         self.tokenizer = tokenizer
         self.config = config
-        self.template = self.config["type"]
-        self.choice_map = self.config["choices"]
+        self.template = self.config.template
+        self.choice_map = self.config.choices
         self.choices = list(self.choice_map.keys())
-        self.label_map = self.config["label_map"]
+        self.label_map = self.config.label_map
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
         self.inv_choice_map = {v: k for k, v in self.choice_map.items()}
 
@@ -34,25 +63,25 @@ class QATaskModule(nn.Module):
             ),
             flags=re.DOTALL,
         )
-        ds_name = self.config["name"]
-        ds_path = self.config["path"]
+        ds_name = self.config.name
+        ds_path = self.config.path
         if ds_name is not None:
             ds_path = f"{ds_path}|{ds_name}"
         self.path = ds_path
 
     def load(self, data_path: str, split: str):
-        if self.config["split"][split] is None:
+        if self.config.split[split] is None:
             return
         ds = load_dataset(
-            path=self.config["path"],
-            name=self.config["name"],
-            split=self.config["split"][split],
+            path=self.config.path,
+            name=self.config.name,
+            split=self.config.split[split],
             cache_dir=data_path,
         )
         examples = []
         for ds_idx, ex in enumerate(ds):
             rep_dict = {
-                "{prompt}": self.config["prompt"],
+                "{prompt}": self.config.prompt,
                 "{choices}": self.choices_text,
             }
             idx = ex["idx"] if "idx" in ex else ds_idx
@@ -81,9 +110,9 @@ class QATaskModule(nn.Module):
             }
             examples.append(example)
 
-        if "max_size" in self.config:
+        if self.config.max_size > 0:
             random.shuffle(examples)
-            examples = examples[: self.config["max_size"]]
+            examples = examples[: self.config.max_size]
         return examples
 
     def forward(self, qa_ids, qa_responses):
@@ -103,13 +132,13 @@ class QATaskModule(nn.Module):
 
 
 class MultiQATaskModule(nn.Module):
-    def __init__(self, tokenizer_name: str, config: dict):
+    def __init__(self, tokenizer_name: str, config: MultiQATaskConfig):
         super().__init__()
         self.tokenizer_name = tokenizer_name
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
         self.config = config
         self.datasets = {}
-        for ds_name, ds_config in config.items():
+        for ds_config in self.config.tasks:
             ds = QATaskModule(self.tokenizer, ds_config)
             self.datasets[ds.path] = ds
 
