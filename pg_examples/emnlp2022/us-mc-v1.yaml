@@ -26,11 +26,11 @@ model:
                     Neutral: 1
                   name: mnli
                   path: glue
-                  prompt: 'Does the sentence entail or contradict the following:'
+                  prompt: "oes the sentence entail or contradict the following:"
                   split:
                     train: train
                     val: validation_matched
-                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -41,11 +41,11 @@ model:
                     Not Entailment: 1
                   name: rte
                   path: glue
-                  prompt: 'Does the sentence entail the following:'
+                  prompt: "Does the sentence entail the following:"
                   split:
                     train: train
                     val: validation
-                  template: '{prompt} {sentence1} \n {choices} \n {sentence2}'
+                  template: "{prompt} {sentence1} \n {choices} \n {sentence2}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -57,12 +57,12 @@ model:
                     Entail: 0
                     Neutral: 1
                   path: snli
-                  prompt: 'Does the sentence entail or contradict the following:'
+                  prompt: "Does the sentence entail or contradict the following:"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -77,7 +77,7 @@ model:
                   split:
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {sentence}'
+                  template: "{prompt} \n {choices} \n {sentence}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -95,7 +95,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -108,12 +108,12 @@ model:
                     None: 0
                   name: stance_abortion
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Abortion'
+                  prompt: "What stance does the author hold towards the following: Abortion"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -126,12 +126,12 @@ model:
                     None: 0
                   name: stance_atheism
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Atheism'
+                  prompt: "What stance does the author hold towards the following: Atheism"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -144,12 +144,12 @@ model:
                     None: 0
                   name: stance_climate
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Climate Change'
+                  prompt: "What stance does the author hold towards the following: Climate Change"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -162,12 +162,12 @@ model:
                     None: 0
                   name: stance_feminist
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Feminism'
+                  prompt: "What stance does the author hold towards the following: Feminism"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -180,12 +180,12 @@ model:
                     None: 0
                   name: stance_hillary
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Hillary Clinton'
+                  prompt: "What stance does the author hold towards the following: Hillary Clinton"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
 
 trainer:
   max_epochs: 10
@@ -231,11 +231,11 @@ data:
                     Neutral: 1
                   name: mnli
                   path: glue
-                  prompt: 'Does the sentence entail or contradict the following:'
+                  prompt: "Does the sentence entail or contradict the following:"
                   split:
                     train: train
                     val: validation_matched
-                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -246,11 +246,11 @@ data:
                     Not Entailment: 1
                   name: rte
                   path: glue
-                  prompt: 'Does the sentence entail the following:'
+                  prompt: "Does the sentence entail the following:"
                   split:
                     train: train
                     val: validation
-                  template: '{prompt} {sentence1} \n {choices} \n {sentence2}'
+                  template: "{prompt} {sentence1} \n {choices} \n {sentence2}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -262,12 +262,12 @@ data:
                     Entail: 0
                     Neutral: 1
                   path: snli
-                  prompt: 'Does the sentence entail or contradict the following:'
+                  prompt: "Does the sentence entail or contradict the following:"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} {premise} \n {choices} \n {hypothesis}'
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -282,7 +282,7 @@ data:
                   split:
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {sentence}'
+                  template: "{prompt} \n {choices} \n {sentence}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -300,7 +300,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -313,12 +313,12 @@ data:
                     None: 0
                   name: stance_abortion
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Abortion'
+                  prompt: "What stance does the author hold towards the following: Abortion"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -331,12 +331,12 @@ data:
                     None: 0
                   name: stance_atheism
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Atheism'
+                  prompt: "What stance does the author hold towards the following: Atheism"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -349,12 +349,12 @@ data:
                     None: 0
                   name: stance_climate
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Climate Change'
+                  prompt: "What stance does the author hold towards the following: Climate Change"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -367,12 +367,12 @@ data:
                     None: 0
                   name: stance_feminist
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Feminism'
+                  prompt: "What stance does the author hold towards the following: Feminism"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   choices:
@@ -385,9 +385,9 @@ data:
                     None: 0
                   name: stance_hillary
                   path: tweet_eval
-                  prompt: 'What stance does the author hold towards the following: Hillary Clinton'
+                  prompt: "What stance does the author hold towards the following: Hillary Clinton"
                   split:
                     test: test
                     train: train
                     val: validation
-                  template: '{prompt} \n {choices} \n {text}'
+                  template: "{prompt} \n {choices} \n {text}"
