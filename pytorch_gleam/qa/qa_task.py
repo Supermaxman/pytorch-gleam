@@ -91,7 +91,7 @@ class QATaskModule(nn.Module):
             }
             idx = ex["idx"] if "idx" in ex else ds_idx
             for sub_key, key in self.data_keys:
-                if sub_key != "label" and sub_key != "idx" and sub_key in ex:
+                if sub_key != "label" and sub_key != "idx":
                     value = ex[sub_key]
                     rep_dict[key] = value
             ex_id = f"{self.path}||{idx}"
