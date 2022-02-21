@@ -2,7 +2,7 @@ import random
 import re
 from collections import defaultdict
 from string import ascii_lowercase
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from tqdm import tqdm
 
 from datasets import load_dataset
@@ -18,7 +18,7 @@ class QATaskConfig:
         choices: Dict[str, int],
         label_map: Dict[str, int],
         path: str,
-        prompt: str,
+        prompt: Union[str, dict],
         split: Dict[str, str],
         template: str,
         max_size: int = -1,
@@ -28,6 +28,8 @@ class QATaskConfig:
         self.label_map = label_map
         self.name = name
         self.path = path
+        if isinstance(prompt, dict):
+            prompt = list(prompt.keys())[0]
         self.prompt = prompt
         self.split = split
         self.template = template
