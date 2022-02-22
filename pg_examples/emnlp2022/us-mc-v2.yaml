@@ -217,10 +217,6 @@ data:
     pickle_path: /nas1-nfs1/data/maw150130/data/pickle/qa
     train_path: /nas1-nfs1/data/maw150130/data/huggingface
     val_path: /nas1-nfs1/data/maw150130/data/huggingface
-    #    pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/qa
-    #    train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
-    #    val_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
-#    test_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
     qa_task:
       class_path: pytorch_gleam.qa.MultiQATaskModule
       init_args:
