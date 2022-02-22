@@ -31,30 +31,11 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
     def eval_outputs(self, outputs, stage):
         results = {}
 
-        tq_ids = self.flatten([x["ids"] for x in outputs])
+        ex_ids = self.flatten([x["ids"] for x in outputs])
         # [count]
-        tq_labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu()
-        ex_label_map = {}
-        for ex_id, t_label in zip(tq_ids, tq_labels.tolist()):
-            # ds_path, ds_id = ex_id.split("||")
-            ex_label_map[ex_id] = t_label
+        labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu()
+        preds = torch.cat([x["preds"] for x in outputs], dim=0).cpu()
 
-        # [count, max_seq_len]
-        # need to pad to max length
-        max_pred_length = max([torch.max(x["pred_ids"]) for x in outputs]).item()
-        pred_ids = torch.cat(
-            [
-                F.pad(x["pred_ids"], (0, max_pred_length - x["pred_ids"].shape[1]))
-                for x in outputs
-            ],
-            dim=0,
-        ).cpu()
-        ex_ids, preds = self.qa_task(qa_ids=tq_ids, qa_responses=pred_ids)
-        labels = []
-        for ex_id in ex_ids:
-            ex_label = ex_label_map[ex_id]
-            labels.append(ex_label)
-        labels = torch.tensor(labels, dtype=torch.long)
         # TODO this metric needs to be task-specific
         accuracy = labels.eq(preds).float().mean()
         results[f"{stage}_accuracy"] = accuracy
@@ -101,13 +82,23 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
             attention_mask=batch["attention_mask"],
             # TODO add generator args to model
             # **generator_args,
-        )
-
+        ).cpu()
+        ex_ids, preds = self.qa_task(qa_ids=batch["ids"], qa_responses=batch_preds)
+        # TODO clean this up, must be better way
+        ex_label_map = {}
+        for ex_id, t_label in zip(batch["ids"], batch["labels"].tolist()):
+            # ds_path, ds_id = ex_id.split("||")
+            ex_label_map[ex_id] = t_label
+        labels = []
+        for ex_id in ex_ids:
+            ex_label = ex_label_map[ex_id]
+            labels.append(ex_label)
+        labels = torch.tensor(labels, dtype=torch.long)
         results = {
             # [bsize]
-            "ids": batch["ids"],
-            "labels": batch["labels"],
-            "pred_ids": batch_preds,
+            "ids": ex_ids,
+            "labels": labels,
+            "preds": preds,
             "loss": batch_loss,
         }
         return results
