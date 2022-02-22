@@ -1,0 +1,397 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.UnifiedQAForConditionalGeneration
+  init_args:
+    # 5e-4 or 1e-4 or 0.0
+    # ~ sets to None and uses Adafactor auto-tuning
+    learning_rate: 1e-3
+    pre_model_name: allenai/unifiedqa-t5-large
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          class_path: pytorch_gleam.qa.MultiQATaskConfig
+          init_args:
+            tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Contradict: 2
+                    Entail: 0
+                    Neither: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  name: mnli
+                  path: glue
+                  prompt: "Does the sentence entail or contradict the following:"
+                  split:
+                    train: train
+                    val: validation_matched
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Entail: 0
+                    Not Entail: 1
+                  label_map:
+                    Entailment: 0
+                    Not Entailment: 1
+                  name: rte
+                  path: glue
+                  prompt: "Does the sentence entail the following:"
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} {sentence1} \n {choices} \n {sentence2}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Contradict: 2
+                    Entail: 0
+                    Neither: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  path: snli
+                  prompt: "Does the sentence entail or contradict the following:"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Negative: 0
+                    Positive: 1
+                  label_map:
+                    Negative: 0
+                    Positive: 1
+                  name: sst2
+                  path: glue
+                  prompt: "Does the author express a positive or negative sentiment?"
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {sentence}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Positive: 2
+                    Negative: 0
+                    Neutral: 1
+                  label_map:
+                    Negative: 0
+                    Neutral: 1
+                    Positive: 2
+                  name: sentiment
+                  path: tweet_eval
+                  prompt: "Does the author express a positive, negative, or neutral sentiment?"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_abortion
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Abortion"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_atheism
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Atheism"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_climate
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Climate Change"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_feminist
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Feminism"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_hillary
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Hillary Clinton"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+
+trainer:
+  max_epochs: 10
+  tpu_cores: 8
+  default_root_dir: /home/supermaxman1/models/us-mc-v3
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 1
+  deterministic: true
+  num_sanity_val_steps: 1
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        every_n_epochs: 1
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+
+data:
+  class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
+  init_args:
+    use_tpus: true
+    batch_size: 8
+    max_seq_len: 128
+    max_label_seq_len: 6
+    num_workers: 8
+    pickle_path: /home/supermaxman1/data
+    train_path: /home/supermaxman1/data
+    val_path: /home/supermaxman1/data
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          class_path: pytorch_gleam.qa.MultiQATaskConfig
+          init_args:
+            tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Contradict: 2
+                    Entail: 0
+                    Neither: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  name: mnli
+                  path: glue
+                  prompt: "Does the sentence entail or contradict the following:"
+                  split:
+                    train: train
+                    val: validation_matched
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Entail: 0
+                    Not Entail: 1
+                  label_map:
+                    Entailment: 0
+                    Not Entailment: 1
+                  name: rte
+                  path: glue
+                  prompt: "Does the sentence entail the following:"
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} {sentence1} \n {choices} \n {sentence2}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Contradict: 2
+                    Entail: 0
+                    Neither: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  path: snli
+                  prompt: "Does the sentence entail or contradict the following:"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Negative: 0
+                    Positive: 1
+                  label_map:
+                    Negative: 0
+                    Positive: 1
+                  name: sst2
+                  path: glue
+                  prompt: "Does the author express a positive or negative sentiment?"
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {sentence}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Positive: 2
+                    Negative: 0
+                    Neutral: 1
+                  label_map:
+                    Negative: 0
+                    Neutral: 1
+                    Positive: 2
+                  name: sentiment
+                  path: tweet_eval
+                  prompt: "Does the author express a positive, negative, or neutral sentiment?"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_abortion
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Abortion"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_atheism
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Atheism"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_climate
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Climate Change"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_feminist
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Feminism"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  choices:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  name: stance_hillary
+                  path: tweet_eval
+                  prompt: "What stance does the author hold towards the following: Hillary Clinton"
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} \n {choices} \n {text}"
