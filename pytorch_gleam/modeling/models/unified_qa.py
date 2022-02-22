@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 import torch
 from transformers import Adafactor, get_constant_schedule_with_warmup
-from transformers.optimization import get_adafactor_schedule
+from transformers.optimization import get_adafactor_schedule, get_constant_schedule
 
 from pytorch_gleam.qa import MultiQATaskModule
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
@@ -121,7 +121,7 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         # # need to figure out how many batches will actually have gradient updates
         # train_batches = train_batches // self.trainer.accumulate_grad_batches
         # self.train_steps = self.trainer.max_epochs * train_batches
-        self.warm_up_steps = 10000
+        # self.warm_up_steps = 10000
 
         params = self.parameters()
         if self.learning_rate == 0.0:
@@ -141,8 +141,9 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
                 warmup_init=False,
                 lr=self.learning_rate,
             )
-            scheduler = get_constant_schedule_with_warmup(
-                optimizer,
-                num_warmup_steps=self.warm_up_steps,
-            )
+            # scheduler = get_constant_schedule_with_warmup(
+            #     optimizer,
+            #     num_warmup_steps=self.warm_up_steps,
+            # )
+            scheduler = get_constant_schedule(optimizer)
         return [optimizer], [scheduler]
