@@ -200,9 +200,9 @@ trainer:
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
         every_n_epochs: 1
-    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
-      init_args:
-        logging_interval: step
+#    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+#      init_args:
+#        logging_interval: step
 #    - class_path: pytorch_lightning.profiler.XLAProfile
 #      init_args:
 #        port: 9012
