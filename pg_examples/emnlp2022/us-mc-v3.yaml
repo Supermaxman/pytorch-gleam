@@ -205,10 +205,13 @@ data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
   init_args:
     use_tpus: true
-    batch_size: 64
-    max_seq_len: 128
+    batch_size: 128
+    # TPUs work well with [8 x 128] tensors, so we
+    # make sure batch size is divisable by 8 and max_seq_len + max_label_seq_len < 128
+    max_seq_len: 112
+#    max_seq_len: 128
     max_label_seq_len: 6
-    num_workers: 4
+    num_workers: 8
     pickle_path: /home/supermaxman1/data
     train_path: /home/supermaxman1/data
     val_path: /home/supermaxman1/data
