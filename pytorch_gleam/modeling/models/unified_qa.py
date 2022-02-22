@@ -146,4 +146,19 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
             #     num_warmup_steps=self.warm_up_steps,
             # )
             scheduler = get_constant_schedule(optimizer)
-        return [optimizer], [scheduler]
+        opt_dict = {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                # REQUIRED: The scheduler instance
+                "scheduler": scheduler,
+                # The unit of the scheduler's step size, could also be 'step'.
+                # 'epoch' updates the scheduler on epoch end whereas 'step'
+                # updates it after a optimizer update.
+                "interval": "step",
+                # How many epochs/steps should pass between calls to
+                # `scheduler.step()`. 1 corresponds to updating the learning
+                # rate after every epoch/step.
+                "frequency": 1,
+            },
+        }
+        return opt_dict

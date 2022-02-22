@@ -1,5 +1,10 @@
+import base64
+import hashlib
+import os
+import pickle
+
 import ujson as json
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Type
 
 import numpy as np
 import torch
@@ -55,6 +60,7 @@ class UnifiedQADataModule(BaseDataModule):
     def __init__(
         self,
         qa_task: MultiQATaskModule,
+        pickle_path: str = None,
         max_label_seq_len: int = 6,
         *args,
         **kwargs,
@@ -62,18 +68,31 @@ class UnifiedQADataModule(BaseDataModule):
         super().__init__(*args, **kwargs)
         self.qa_task = qa_task
         self.max_label_seq_len = max_label_seq_len
+        self.pickle_path = pickle_path
 
         if self.train_path is not None:
-            self.train_dataset = UnifiedQADataset(
-                qa_task=self.qa_task, split="train", cache_path=self.train_path
+            self.train_dataset = self.load_or_create(
+                UnifiedQADataset,
+                qa_task=self.qa_task,
+                split="train",
+                cache_path=self.train_path,
+                pickle_path=self.pickle_path,
             )
         if self.val_path is not None:
-            self.val_dataset = UnifiedQADataset(
-                qa_task=self.qa_task, split="val", cache_path=self.val_path
+            self.val_dataset = self.load_or_create(
+                UnifiedQADataset,
+                qa_task=self.qa_task,
+                split="val",
+                cache_path=self.val_path,
+                pickle_path=self.pickle_path,
             )
         if self.test_path is not None:
-            self.test_dataset = UnifiedQADataset(
-                qa_task=self.qa_task, split="test", cache_path=self.test_path
+            self.test_dataset = self.load_or_create(
+                UnifiedQADataset,
+                qa_task=self.qa_task,
+                split="test",
+                cache_path=self.test_path,
+                pickle_path=self.pickle_path,
             )
         if self.predict_path is not None:
             raise NotImplementedError()

@@ -1,4 +1,9 @@
+import base64
+import hashlib
+import os
+import pickle
 from abc import ABC, abstractmethod
+from typing import Type
 
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
@@ -38,6 +43,30 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         self.val_dataset = None
         self.test_dataset = None
         self.predict_dataset = None
+
+    @staticmethod
+    def load_or_create(cls: Type, **kwargs):
+        key_kwargs = {k: v for k, v in kwargs.items() if k != "pickle_path"}
+        if "pickle_path" not in kwargs or kwargs["pickle_path"] is None:
+            return cls(**key_kwargs)
+
+        pickle_path = kwargs["pickle_path"]
+        class_repr = f"{cls}" + "|".join(
+            [f"{k}-({str(v)})" for k, v in key_kwargs.items()]
+        )
+        ex_hasher = hashlib.sha1(class_repr.encode("utf-8"))
+        ex_hash = ex_hasher.digest()[:12]
+        file_name = base64.urlsafe_b64encode(ex_hash).decode("utf-8") + ".pickle"
+        file_path = os.path.join(pickle_path, file_name)
+        if os.path.exists(file_path):
+            with open(file_path, "rb") as f:
+                obj = pickle.load(f)
+            return obj
+        else:
+            obj = cls(**key_kwargs)
+            with open(file_path, "wb") as f:
+                pickle.dump(obj, f)
+            return obj
 
     @abstractmethod
     def create_collator(self):

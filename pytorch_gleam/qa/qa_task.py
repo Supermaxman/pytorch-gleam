@@ -35,10 +35,31 @@ class QATaskConfig:
         self.template = template
         self.max_size = max_size
 
+    def __str__(self):
+        choices_txt = "|".join([f"{k}-({str(v)})" for k, v in self.choices.items()])
+        label_map_txt = "|".join([f"{k}-({str(v)})" for k, v in self.label_map.items()])
+        split_txt = "|".join([f"{k}-({str(v)})" for k, v in self.split.items()])
+        config_text = "|".join(
+            [
+                f"choices-({choices_txt})",
+                f"label_map-({label_map_txt})",
+                f"path-({self.path})",
+                f"prompt-({self.prompt})",
+                f"split-({split_txt})",
+                f"template-({self.template})",
+                f"max_size-({self.max_size})",
+                f"name-({self.name})",
+            ]
+        )
+        return config_text
+
 
 class MultiQATaskConfig:
     def __init__(self, tasks: List[QATaskConfig]):
         self.tasks = tasks
+
+    def __str__(self):
+        return "|".join(f"({t})" for t in self.tasks)
 
 
 class QATaskModule(nn.Module):
@@ -153,6 +174,11 @@ class MultiQATaskModule(nn.Module):
         for ds_config in self.config.tasks:
             ds = QATaskModule(self.tokenizer, ds_config)
             self.datasets[ds.path] = ds
+
+    def __str__(self):
+        return (
+            f"{type(self)}tokenizer_name-({self.tokenizer_name})|config-({self.config})"
+        )
 
     def load(self, data_path: str, split: str):
         examples = []

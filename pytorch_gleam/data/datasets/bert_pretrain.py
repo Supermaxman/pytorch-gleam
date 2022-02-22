@@ -185,6 +185,7 @@ class BertPreDataModule(BaseDataModule):
         val_path: Union[str, List[str]] = None,
         test_path: Union[str, List[str]] = None,
         predict_path: Union[str, List[str]] = None,
+        pickle_path: str = None,
         *args,
         **kwargs,
     ):
@@ -202,9 +203,11 @@ class BertPreDataModule(BaseDataModule):
         self.val_path = val_path
         self.test_path = test_path
         self.predict_path = predict_path
+        self.pickle_path = pickle_path
 
         if self.train_path is not None:
-            self.train_dataset = BertPreDataset(
+            self.train_dataset = self.load_or_create(
+                BertPreDataset,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
@@ -214,9 +217,11 @@ class BertPreDataModule(BaseDataModule):
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
+                pickle_path=self.pickle_path,
             )
         if self.val_path is not None:
-            self.val_dataset = BertPreDataset(
+            self.val_dataset = self.load_or_create(
+                BertPreDataset,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
@@ -226,9 +231,11 @@ class BertPreDataModule(BaseDataModule):
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
+                pickle_path=self.pickle_path,
             )
         if self.test_path is not None:
-            self.test_dataset = BertPreDataset(
+            self.test_dataset = self.load_or_create(
+                BertPreDataset,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
@@ -238,9 +245,11 @@ class BertPreDataModule(BaseDataModule):
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
+                pickle_path=self.pickle_path,
             )
         if self.predict_path is not None:
-            self.predict_dataset = BertPreDataset(
+            self.predict_dataset = self.load_or_create(
+                BertPreDataset,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
@@ -250,6 +259,7 @@ class BertPreDataModule(BaseDataModule):
                 max_predictions_per_seq=self.max_predictions_per_seq,
                 dupe_factor=self.dupe_factor,
                 do_whole_word_mask=self.do_whole_word_mask,
+                pickle_path=self.pickle_path,
             )
 
     def create_collator(self):
