@@ -33,6 +33,7 @@ class UnifiedQADataset(Dataset):
 
     def load(self, data_path):
         self.examples = self.qa_task.load(data_path, self.split)
+        self.qa_task = None
 
     def display_length_percentiles(self, key="input_ids"):
         lengths = [len(x[key]) for x in self.examples]
