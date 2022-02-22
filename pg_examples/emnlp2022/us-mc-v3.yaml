@@ -208,7 +208,7 @@ data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
   init_args:
     use_tpus: true
-    batch_size: 32
+    batch_size: 16
     max_seq_len: 128
     max_label_seq_len: 6
     num_workers: 4
