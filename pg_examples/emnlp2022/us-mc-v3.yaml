@@ -189,7 +189,7 @@ model:
 
 trainer:
   max_epochs: 10
-  tpu_cores: 8
+  devices: ['TPU:0', 'TPU:1', 'TPU:2', 'TPU:3', 'TPU:4', 'TPU:5', 'TPU:6', 'TPU:7']
   default_root_dir: /home/supermaxman1/models/us-mc-v3
   accumulate_grad_batches: 1
   check_val_every_n_epoch: 1
