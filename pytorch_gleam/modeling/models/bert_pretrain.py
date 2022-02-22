@@ -1,4 +1,6 @@
 import torch
+from transformers import AdamW, get_constant_schedule
+
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
 
 
@@ -45,3 +47,29 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             "loss": loss,
         }
         return results
+
+    def configure_optimizers(self):
+        params = self._get_optimizer_params(self.weight_decay)
+        optimizer = AdamW(
+            params,
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+            correct_bias=False,
+        )
+        scheduler = get_constant_schedule(optimizer)
+        opt_dict = {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                # REQUIRED: The scheduler instance
+                "scheduler": scheduler,
+                # The unit of the scheduler's step size, could also be 'step'.
+                # 'epoch' updates the scheduler on epoch end whereas 'step'
+                # updates it after a optimizer update.
+                "interval": "step",
+                # How many epochs/steps should pass between calls to
+                # `scheduler.step()`. 1 corresponds to updating the learning
+                # rate after every epoch/step.
+                "frequency": 1,
+            },
+        }
+        return opt_dict
