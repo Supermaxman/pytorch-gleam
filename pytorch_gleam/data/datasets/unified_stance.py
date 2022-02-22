@@ -26,12 +26,13 @@ def read_jsonl(path):
 class UnifiedQADataset(Dataset):
     examples: List[Dict[Any, Union[Any, Dict]]]
 
-    def __init__(self, qa_task: MultiQATaskModule, split: str, cache_path: str):
+    def __init__(self, qa_task: MultiQATaskModule, split: str):
         super().__init__()
         self.qa_task = qa_task
         self.split = split
-        self.cache_path = cache_path
-        self.examples = qa_task.load(self.cache_path, self.split)
+
+    def load(self, data_path):
+        self.examples = self.qa_task.load(data_path, self.split)
 
     def display_length_percentiles(self, key="input_ids"):
         lengths = [len(x[key]) for x in self.examples]
@@ -73,25 +74,25 @@ class UnifiedQADataModule(BaseDataModule):
         if self.train_path is not None:
             self.train_dataset = self.load_or_create(
                 UnifiedQADataset,
+                self.train_path,
                 qa_task=self.qa_task,
                 split="train",
-                cache_path=self.train_path,
                 pickle_path=self.pickle_path,
             )
         if self.val_path is not None:
             self.val_dataset = self.load_or_create(
                 UnifiedQADataset,
+                self.val_path,
                 qa_task=self.qa_task,
                 split="val",
-                cache_path=self.val_path,
                 pickle_path=self.pickle_path,
             )
         if self.test_path is not None:
             self.test_dataset = self.load_or_create(
                 UnifiedQADataset,
+                self.test_path,
                 qa_task=self.qa_task,
                 split="test",
-                cache_path=self.test_path,
                 pickle_path=self.pickle_path,
             )
         if self.predict_path is not None:

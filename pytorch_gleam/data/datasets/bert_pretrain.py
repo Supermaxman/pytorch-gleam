@@ -64,7 +64,6 @@ class BertPreDataset(Dataset):
         self,
         tokenizer_config: BertTokenizerConfig,
         masked_lm_prob: float,
-        data_path: Union[str, List[str]],
         tokenizer,
         short_seq_prob: float,
         max_seq_length: int,
@@ -78,13 +77,20 @@ class BertPreDataset(Dataset):
         self.max_predictions_per_seq = max_predictions_per_seq
         self.dupe_factor = dupe_factor
         self.do_whole_word_mask = do_whole_word_mask
-
         self.masked_lm_prob = masked_lm_prob
         self.tokenizer_config = tokenizer_config
         self.tokenizer = tokenizer
         self.documents = []
         self.examples = []
-        self.vocab_words = list(tokenizer.vocab.keys())
+        self.vocab_words = None
+        self.nlp = None
+        self.rng = None
+        self.num_examples = 0
+
+    def load(self, data_path):
+        self.rng = random.Random(torch.seed())
+        self.nlp = build_spacy_model()
+        self.vocab_words = list(self.tokenizer.vocab.keys())
 
         if isinstance(data_path, str):
             self.read_path(data_path)
@@ -92,14 +98,14 @@ class BertPreDataset(Dataset):
             for stage, stage_path in enumerate(data_path):
                 self.read_path(stage_path, stage)
 
-        self.rng = random.Random(torch.seed())
         self.rng.shuffle(self.documents)
         self.create_examples()
         self.documents = None
         self.rng.shuffle(self.examples)
-
         self.num_examples = len(self.examples)
-        self.nlp = build_spacy_model()
+        self.nlp = None
+        self.rng = None
+        self.vocab_words = None
 
     def create_examples(self):
         with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
@@ -208,10 +214,10 @@ class BertPreDataModule(BaseDataModule):
         if self.train_path is not None:
             self.train_dataset = self.load_or_create(
                 BertPreDataset,
+                self.train_path,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
-                data_path=self.train_path,
                 short_seq_prob=self.short_seq_prob,
                 max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
@@ -222,10 +228,10 @@ class BertPreDataModule(BaseDataModule):
         if self.val_path is not None:
             self.val_dataset = self.load_or_create(
                 BertPreDataset,
+                self.val_path,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
-                data_path=self.val_path,
                 short_seq_prob=self.short_seq_prob,
                 max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
@@ -236,10 +242,10 @@ class BertPreDataModule(BaseDataModule):
         if self.test_path is not None:
             self.test_dataset = self.load_or_create(
                 BertPreDataset,
+                self.test_path,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
-                data_path=self.test_path,
                 short_seq_prob=self.short_seq_prob,
                 max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
@@ -250,10 +256,10 @@ class BertPreDataModule(BaseDataModule):
         if self.predict_path is not None:
             self.predict_dataset = self.load_or_create(
                 BertPreDataset,
+                self.predict_path,
                 tokenizer_config=self.bert_tokenizer_config,
                 masked_lm_prob=self.masked_lm_prob,
                 tokenizer=self.tokenizer,
-                data_path=self.predict_path,
                 short_seq_prob=self.short_seq_prob,
                 max_seq_length=self.max_seq_len,
                 max_predictions_per_seq=self.max_predictions_per_seq,
