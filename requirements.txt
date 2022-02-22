@@ -10,5 +10,6 @@ jsonargparse>=3.19.*
 pre-commit>=2.17.*
 emoji>=1.6.*
 datasets>=1.18.*
+sentencepiece>=0.1.96
 unidecode
 py_lex
