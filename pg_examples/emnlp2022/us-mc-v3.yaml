@@ -189,17 +189,17 @@ model:
 
 trainer:
   max_epochs: 10
-  devices: ['TPU:0', 'TPU:1', 'TPU:2', 'TPU:3', 'TPU:4', 'TPU:5', 'TPU:6', 'TPU:7']
+  tpu_cores: 8
   default_root_dir: /home/supermaxman1/models/us-mc-v3
   accumulate_grad_batches: 1
   check_val_every_n_epoch: 1
-  deterministic: true
+#  deterministic: true
   num_sanity_val_steps: 0
-  callbacks:
-    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
-    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
-      init_args:
-        every_n_epochs: 1
+#  callbacks:
+#    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+#    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+#      init_args:
+#        every_n_epochs: 1
 #    - class_path: pytorch_lightning.profiler.XLAProfile
 #      init_args:
 #        port: 9012
