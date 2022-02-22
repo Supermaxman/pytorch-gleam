@@ -45,7 +45,7 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         self.predict_dataset = None
 
     @staticmethod
-    def load_or_create(cls: Type, data_path: str, **kwargs):
+    def load_or_create(cls: Type, data_path, **kwargs):
         key_kwargs = {k: v for k, v in kwargs.items() if k != "pickle_path"}
         if "pickle_path" not in kwargs or kwargs["pickle_path"] is None:
             return cls(**key_kwargs)
