@@ -154,23 +154,101 @@ ______________________________________________________________________
 These are a work-in-progress, as my original research code is a bit messy, but they will be updated soon!
 
 ###### COVID-19 Vaccine Misinformation Detection on Twitter
+```
+@article{weinzierl-covid-glp,
+	title        = {Automatic detection of COVID-19 vaccine misinformation with graph link prediction},
+	author       = {Maxwell A. Weinzierl and Sanda M. Harabagiu},
+	year         = 2021,
+	journal      = {Journal of Biomedical Informatics},
+	volume       = 124,
+	pages        = 103955,
+	doi          = {https://doi.org/10.1016/j.jbi.2021.103955},
+	issn         = {1532-0464},
+	url          = {https://www.sciencedirect.com/science/article/pii/S1532046421002847},
+	keywords     = {Natural Language Processing, Machine learning, COVID-19, vaccine misinformation, Social Media, knowledge graph embedding}
+}
+```
 
 - [CoVaxLies V1 with Graph-Link Prediction]()
 
 ###### COVID-19 Vaccine Misinformation Stance Identification on Twitter
+```
+@inproceedings{weinzierl-covid19-acs-stance,
+    author = {Weinzierl, Maxwell and Harabagiu, Sanda},
+    title = {Identifying the Adoption or Rejection of Misinformation Targeting COVID-19 Vaccines in Twitter Discourse},
+    year = {2022},
+    isbn = {9781450390965},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/3485447.3512039},
+    doi = {10.1145/3485447.3512039},
+    booktitle = {Proceedings of the Web Conference 2022 Forthcoming},
+    pages = {},
+    numpages = {10},
+    location = {Lyon, France},
+    series = {WWW '22}
+}
+```
 
 - [CoVaxLies V2 with Attitude Consistency Scoring]()
 
 ###### COVID-19 Misinformation Stance Identification on Twitter
+```
+@article{Weinzierl_Hopfer_Harabagiu_2021,
+	title        = {Misinformation Adoption or Rejection in the Era of COVID-19},
+	author       = {Weinzierl, Maxwell and Hopfer, Suellen and Harabagiu, Sanda M.},
+	year         = 2021,
+	month        = {May},
+	journal      = {Proceedings of the International AAAI Conference on Web and Social Media},
+	volume       = 15,
+	number       = 1,
+	pages        = {787--795},
+	url          = {https://ojs.aaai.org/index.php/ICWSM/article/view/18103}
+}
+```
+
 
 - [COVIDLies with Lexical, Emotion, and Semantic GATs for Stance Identification]()
 
 ###### Vaccine Misinformation Transfer Learning
+```
+@misc{weinzierl2022vaccinelies,
+	title        = {VaccineLies: A Natural Language Resource for Learning to Recognize Misinformation about the COVID-19 and HPV Vaccines},
+	author       = {Maxwell Weinzierl and Sanda Harabagiu},
+	year         = 2022,
+	eprint       = {2202.09449},
+	archiveprefix = {arXiv},
+	primaryclass = {cs.CL}
+}
+```
 
 - [COVID-19 to HPV on VaccineLies]()
 - [HPV to COVID-19 on VaccineLies]()
 
 
 ###### Vaccine Hesitancy Profiling on Twitter
+```
+@article{weinzierl-hesitancy-profiling,
+	author = {Weinzierl, Maxwell A. and Hopfer, Suellen and Harabagiu, Sanda M.},
+	title = {Scaling Up the Discovery of Hesitancy Profiles by Identifying the Framing of Beliefs towards Vaccine Confidence in Twitter Discourse},
+	elocation-id = {2021.10.01.21264439},
+	year = {2021},
+	doi = {10.1101/2021.10.01.21264439},
+	publisher = {Cold Spring Harbor Laboratory Press},
+	URL = {https://www.medrxiv.org/content/early/2021/10/06/2021.10.01.21264439},
+	journal = {medRxiv}
+}
+```
+
+```
+@misc{weinzierl2022hesitancy,
+	title        = {From Hesitancy Framings to Vaccine Hesitancy Profiles: A Journey of Stance, Ontological Commitments and Moral Foundations},
+	author       = {Maxwell Weinzierl and Sanda Harabagiu},
+	year         = 2022,
+	eprint       = {2202.09456},
+	archiveprefix = {arXiv},
+	primaryclass = {cs.CL}
+}
+```
 
 - TODO
