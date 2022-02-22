@@ -194,7 +194,7 @@ trainer:
   accumulate_grad_batches: 1
   check_val_every_n_epoch: 1
   deterministic: true
-  num_sanity_val_steps: 1
+  num_sanity_val_steps: -1
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
@@ -203,12 +203,15 @@ trainer:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
       init_args:
         logging_interval: step
+    - class_path: pytorch_lightning.profiler.XLAProfile
+      init_args:
+        port: 9012
 
 data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
   init_args:
     use_tpus: true
-    batch_size: 8
+    batch_size: 32
     max_seq_len: 128
     max_label_seq_len: 6
     num_workers: 4
