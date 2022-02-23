@@ -200,6 +200,9 @@ trainer:
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
         every_n_epochs: 1
+        # save all checkpoints
+        save_top_k: -1
+        save_weights_only: false
 
 data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
