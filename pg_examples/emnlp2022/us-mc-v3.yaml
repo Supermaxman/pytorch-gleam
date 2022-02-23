@@ -188,7 +188,7 @@ model:
                   template: "{prompt} \n {choices} \n {text}"
 
 trainer:
-  max_epochs: 10
+  max_epochs: 20
   tpu_cores: 8
   default_root_dir: /home/supermaxman1/artifacts/qa/models/us-mc-v3
   accumulate_grad_batches: 1
