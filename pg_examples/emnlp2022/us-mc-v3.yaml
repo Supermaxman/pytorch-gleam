@@ -205,6 +205,8 @@ data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
   init_args:
     use_tpus: true
+    # PER TPU core batch size.
+    # effective batch size is batch_size * tpu_cores
     batch_size: 64
     # TPUs work well with [8 x 128] tensors, so we
     # make sure batch size is divisible by 8 and max_seq_len + max_label_seq_len < 128
