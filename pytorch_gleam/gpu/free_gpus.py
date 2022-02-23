@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import os
 import argparse
+import os
+
 from filelock import FileLock
 
 

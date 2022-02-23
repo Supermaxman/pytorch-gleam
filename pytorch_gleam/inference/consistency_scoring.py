@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import networkx as nx
 import numpy as np
@@ -123,29 +123,21 @@ class MultiHopConsistencyScoring(ConsistencyScoring):
     ) -> Tuple[np.array, Dict[str, int]]:
         assert len(node_labels) > 0
 
-        graph, unlabeled_nodes, labeled_nodes, node_idx = self.initialize(
-            adj_list, node_labels
-        )
+        graph, unlabeled_nodes, labeled_nodes, node_idx = self.initialize(adj_list, node_labels)
         num_steps = self.num_steps
         # no need to do any propagation steps if there are no paths in unlabeled graph
         if len(unlabeled_nodes) == 1:
             num_steps = 0
 
         # [num_nodes, num_labels, num_steps]
-        nls = np.zeros(
-            [len(node_idx), self.num_classes, num_steps + 1], dtype=np.float32
-        )
-        nlc = np.zeros(
-            [len(node_idx), self.num_classes, num_steps + 1], dtype=np.float32
-        )
+        nls = np.zeros([len(node_idx), self.num_classes, num_steps + 1], dtype=np.float32)
+        nlc = np.zeros([len(node_idx), self.num_classes, num_steps + 1], dtype=np.float32)
         nlc[:, 0, :] = 1.0
         for node in labeled_nodes:
             n_idx = node_idx[node]
             nlc[n_idx, :, :] = 1.0
 
-        self.propagate_seeds(
-            labeled_nodes, unlabeled_nodes, graph, nls, nlc, node_labels, node_idx
-        )
+        self.propagate_seeds(labeled_nodes, unlabeled_nodes, graph, nls, nlc, node_labels, node_idx)
 
         for s_idx in range(1, num_steps + 1):
             self.propagate(unlabeled_nodes, graph, nls, nlc, s_idx, node_idx)

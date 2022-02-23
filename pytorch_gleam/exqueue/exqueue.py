@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-import os
 import argparse
-from filelock import FileLock
-from datetime import datetime
-import json
 import base64
 import hashlib
+import json
+import os
+from datetime import datetime
 
+from filelock import FileLock
 
 time_format = "%Y%m%d%H%M%S"
 
@@ -42,11 +42,11 @@ def ex_queue(experiment: str, queue_path: str = "~/.default_queue"):
     ex_queue_path = os.path.join(submitted_path, ex_id)
     with FileLock(os.path.join(queue_path, ".lock")):
         if os.path.exists(ex_queue_path):
-            print(f"Experiment already added to queue!")
+            print("Experiment already added to queue!")
         else:
             with open(ex_queue_path, "w") as f:
                 json.dump(ex, f, indent=4)
-            print(f"Experiment successfully added to queue.")
+            print("Experiment successfully added to queue.")
 
 
 def main():

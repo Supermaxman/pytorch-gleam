@@ -1,17 +1,16 @@
 import json
 from collections import defaultdict
-from typing import List, Dict, Any, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
-
-from py_lex import EmoLex
 import torch
+from py_lex import EmoLex
 from torch.utils.data import Dataset
-
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-from pytorch_gleam.data.collators import MultiClassFrameEdgeBatchCollator
-import pytorch_gleam.data.datasets.senticnet5 as senticnet5
 from tqdm import tqdm
+
+import pytorch_gleam.data.datasets.senticnet5 as senticnet5
+from pytorch_gleam.data.collators import MultiClassFrameEdgeBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 
 
 def read_jsonl(path):
@@ -25,12 +24,7 @@ def read_jsonl(path):
 
 def get_sentic(word_text):
     word_text = word_text.lower()
-    if (
-        word_text == "coronavirus"
-        or word_text == "covid-19"
-        or word_text == "covid"
-        or word_text == "covid19"
-    ):
+    if word_text == "coronavirus" or word_text == "covid-19" or word_text == "covid" or word_text == "covid19":
         word_text = "virus"
     if word_text not in senticnet5.senticnet:
         word_text = word_text[:-1]
@@ -79,9 +73,7 @@ def align_tokens(tokens, wpt_tokens, seq_offset=0):
         start = token["start"]
         end = token["end"]
         for char_idx in range(start, end):
-            sub_token_idx = wpt_tokens.char_to_token(
-                char_idx, sequence_index=seq_offset
-            )
+            sub_token_idx = wpt_tokens.char_to_token(char_idx, sequence_index=seq_offset)
             # White spaces have no token and will return None
             if sub_token_idx is not None:
                 align_map[sub_token_idx] = token
@@ -181,9 +173,7 @@ def create_edges(
             for sem in sentic["semantics"]:
                 semantic_edges[text].add(sem)
             for i in range(num_semantic_hops - 1):
-                semantic_edges[text] = sentic_expand(
-                    semantic_edges[text], [8, 9, 10, 11, 12]
-                )
+                semantic_edges[text] = sentic_expand(semantic_edges[text], [8, 9, 10, 11, 12])
             if emotion_type == "senticnet":
                 emotion_edges[text].add(sentic["primary_mood"])
                 emotion_edges[text].add(sentic["secondary_mood"])
@@ -230,15 +220,9 @@ def create_edges(
                 set(flatten(reverse_lexical_pos_edges[pos] for pos in text_pos))
             )
 
-    semantic_adj = create_adjacency_matrix(
-        edges=semantic_edges, size=seq_len, t_map=t_map, r_map=r_map
-    )
-    emotion_adj = create_adjacency_matrix(
-        edges=emotion_edges, size=seq_len, t_map=t_map, r_map=r_map
-    )
-    lexical_adj = create_adjacency_matrix(
-        edges=lexical_edges, size=seq_len, t_map=t_map, r_map=r_map
-    )
+    semantic_adj = create_adjacency_matrix(edges=semantic_edges, size=seq_len, t_map=t_map, r_map=r_map)
+    emotion_adj = create_adjacency_matrix(edges=emotion_edges, size=seq_len, t_map=t_map, r_map=r_map)
+    lexical_adj = create_adjacency_matrix(edges=lexical_edges, size=seq_len, t_map=t_map, r_map=r_map)
 
     edges = {
         "semantic": semantic_adj,

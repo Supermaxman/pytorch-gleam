@@ -3,12 +3,11 @@ import re
 from collections import defaultdict
 from string import ascii_lowercase
 from typing import Dict, List, Optional, Union
-from tqdm import tqdm
-
-from datasets import load_dataset
 
 import torch
+from datasets import load_dataset
 from torch import nn
+from tqdm import tqdm
 from transformers import AutoTokenizer
 
 
@@ -75,23 +74,14 @@ class QATaskModule(nn.Module):
         self.inv_choice_map = {v: k for k, v in self.choice_map.items()}
 
         self.choices_text = " ".join(
-            [
-                f"({o_letter}) {o_text}"
-                for o_letter, o_text in zip(ascii_lowercase, self.choices)
-            ]
+            [f"({o_letter}) {o_text}" for o_letter, o_text in zip(ascii_lowercase, self.choices)]
         )
         self.pattern_keys = list(set(re.findall(r"\{\w*\}", self.template)))
         self.pattern = re.compile(
-            "|".join(
-                [re.escape(k) for k in sorted(self.pattern_keys, key=len, reverse=True)]
-            ),
+            "|".join([re.escape(k) for k in sorted(self.pattern_keys, key=len, reverse=True)]),
             flags=re.DOTALL,
         )
-        self.data_keys = [
-            (x[1:-1], x)
-            for x in self.pattern_keys
-            if x not in {"{prompt}", "{choices}"}
-        ]
+        self.data_keys = [(x[1:-1], x) for x in self.pattern_keys if x not in {"{prompt}", "{choices}"}]
         ds_name = self.config.name
         ds_path = self.config.path
         if ds_name is not None:
@@ -108,9 +98,7 @@ class QATaskModule(nn.Module):
             split=self.config.split[split],
             cache_dir=data_path,
         )
-        for ds_idx, ex in tqdm(
-            enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"
-        ):
+        for ds_idx, ex in tqdm(enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"):
             rep_dict = {
                 "{prompt}": self.config.prompt,
                 "{choices}": self.choices_text,
@@ -150,9 +138,7 @@ class QATaskModule(nn.Module):
 
     def forward(self, qa_ids, qa_responses):
         # List[str]
-        qa_response_texts = self.tokenizer.batch_decode(
-            qa_responses, skip_special_tokens=True
-        )
+        qa_response_texts = self.tokenizer.batch_decode(qa_responses, skip_special_tokens=True)
         preds = []
         for qa_response in qa_response_texts:
             qa_response = qa_response.title()
@@ -176,9 +162,7 @@ class MultiQATaskModule(nn.Module):
             self.datasets[ds.path] = ds
 
     def __str__(self):
-        return (
-            f"{type(self)}tokenizer_name-({self.tokenizer_name})|config-({self.config})"
-        )
+        return f"{type(self)}tokenizer_name-({self.tokenizer_name})|config-({self.config})"
 
     def load(self, data_path: str, split: str):
         examples = []

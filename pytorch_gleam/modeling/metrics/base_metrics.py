@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 import torch
 
@@ -30,9 +30,7 @@ class Metric(torch.nn.Module, ABC):
         threshold_delta: float = None,
     ):
         max_threshold, max_metrics = self.mode_reduce(
-            self.best_iterator(
-                labels, scores, threshold, threshold_min, threshold_max, threshold_delta
-            ),
+            self.best_iterator(labels, scores, threshold, threshold_min, threshold_max, threshold_delta),
             key=lambda x: x[1][0],
         )
         return max_threshold, max_metrics
@@ -46,8 +44,6 @@ class Metric(torch.nn.Module, ABC):
         threshold_max: float = None,
         threshold_delta: float = None,
     ):
-        for threshold, preds in threshold.get_range_predictions(
-            scores, threshold_min, threshold_max, threshold_delta
-        ):
+        for threshold, preds in threshold.get_range_predictions(scores, threshold_min, threshold_max, threshold_delta):
             metrics = self(labels, preds)
             yield threshold, metrics

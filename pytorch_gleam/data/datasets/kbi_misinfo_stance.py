@@ -1,16 +1,15 @@
-import torch
+import itertools
 from collections import defaultdict
 
+import torch
+
+from pytorch_gleam.data.collators import KbiBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.datasets.misinfo_stance import MisinfoStanceDataset
-from pytorch_gleam.data.collators import KbiBatchCollator
-import itertools
 
 
 class KbiMisinfoStanceDataset(MisinfoStanceDataset):
-    def __init__(
-        self, tokenizer, pos_samples: int = 1, neg_samples: int = 1, *args, **kwargs
-    ):
+    def __init__(self, tokenizer, pos_samples: int = 1, neg_samples: int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tokenizer = tokenizer
         self.pos_samples = pos_samples
@@ -86,7 +85,6 @@ class KbiMisinfoStanceDataset(MisinfoStanceDataset):
         # 0 is no stance, and is only in negative_examples
         tm_stance = t_ex["m_label"]
         m_id = m_ex["m_id"]
-        t_id = t_ex["t_id"]
 
         # TODO positive examples
         # 0 is entail
@@ -112,9 +110,7 @@ class KbiMisinfoStanceDataset(MisinfoStanceDataset):
         # all four permutations could be useful for training
         # first three are necessary
         # fourth is only needed if ns will be used in seed kb for inference
-        neg_relation_samples = self._negative_sample(
-            m_id, tmp_relation, pm_stance, pos_samples, self.neg_samples
-        )
+        neg_relation_samples = self._negative_sample(m_id, tmp_relation, pm_stance, pos_samples, self.neg_samples)
         neg_samples = []
         neg_relations = []
         for neg_relation, neg_sample in neg_relation_samples:
@@ -124,16 +120,8 @@ class KbiMisinfoStanceDataset(MisinfoStanceDataset):
         direction = self._sample_direction()
         # [pos sample relation labels + neg_sample_relation_labels]
         # not used for training, stance labels are unnecessary
-        labels = (
-            [tm_stance]
-            + [p_ex["m_label"] for p_ex in pos_samples]
-            + [n_ex["m_label"] for n_ex in neg_samples]
-        )
-        stages = (
-            [t_ex["stage"]]
-            + [p_ex["stage"] for p_ex in pos_samples]
-            + [n_ex["stage"] for n_ex in neg_samples]
-        )
+        labels = [tm_stance] + [p_ex["m_label"] for p_ex in pos_samples] + [n_ex["m_label"] for n_ex in neg_samples]
+        stages = [t_ex["stage"]] + [p_ex["stage"] for p_ex in pos_samples] + [n_ex["stage"] for n_ex in neg_samples]
         relations = [tmp_relation for _ in range(len(pos_samples))] + neg_relations
         ex = {
             "t_ex": t_ex,
@@ -148,9 +136,7 @@ class KbiMisinfoStanceDataset(MisinfoStanceDataset):
 
         return ex
 
-    def _negative_sample(
-        self, m_id, tmp_relation, pm_stance, pos_samples, sample_count
-    ):
+    def _negative_sample(self, m_id, tmp_relation, pm_stance, pos_samples, sample_count):
         possible_permutations = [
             permutation
             for permutation in self.permutations
@@ -160,10 +146,7 @@ class KbiMisinfoStanceDataset(MisinfoStanceDataset):
             high=len(possible_permutations),
             size=[sample_count],
         ).tolist()
-        samples = [
-            possible_permutations[i](m_id, tmp_relation, pm_stance, pos_samples)
-            for i in p_indices
-        ]
+        samples = [possible_permutations[i](m_id, tmp_relation, pm_stance, pos_samples) for i in p_indices]
 
         return samples
 

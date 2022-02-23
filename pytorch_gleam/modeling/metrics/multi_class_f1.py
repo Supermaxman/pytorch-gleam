@@ -1,5 +1,6 @@
-from pytorch_gleam.modeling.metrics.base_metrics import Metric
 from sklearn.metrics import precision_recall_fscore_support
+
+from pytorch_gleam.modeling.metrics.base_metrics import Metric
 
 
 class F1PRMultiClassMetric(Metric):
@@ -21,12 +22,7 @@ class F1PRMultiClassMetric(Metric):
             mode_precision = cls_precision.mean()
             mode_recall = cls_recall.mean()
         elif self.mode == "micro":
-            (
-                mode_precision,
-                mode_recall,
-                mode_f1,
-                mode_sup,
-            ) = precision_recall_fscore_support(
+            (mode_precision, mode_recall, mode_f1, mode_sup,) = precision_recall_fscore_support(
                 labels,
                 predictions,
                 average="micro",

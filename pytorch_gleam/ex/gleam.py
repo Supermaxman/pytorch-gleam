@@ -3,7 +3,7 @@ from pytorch_lightning.utilities.cli import LightningCLI
 
 
 def main():
-    cli = LightningCLI(
+    cli = LightningCLI(  # noqa: F841
         pl.LightningModule,
         pl.LightningDataModule,
         run=True,

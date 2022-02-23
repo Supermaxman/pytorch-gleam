@@ -2,11 +2,11 @@ from typing import Dict, List, Optional
 
 import torch
 
-from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
-from pytorch_gleam.modeling.thresholds import ThresholdModule
-from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.layers.gcn import GraphAttention
 from pytorch_gleam.modeling.layers.hopfield import HopfieldPooling
+from pytorch_gleam.modeling.metrics import Metric
+from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
+from pytorch_gleam.modeling.thresholds import ThresholdModule
 
 
 # noinspection PyAbstractClass
@@ -47,7 +47,8 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -56,8 +57,10 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not
+                        be initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there
+                        is no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -73,9 +76,7 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
         self.num_threshold_steps = num_threshold_steps
         self.update_threshold = update_threshold
 
-        self.cls_layer = torch.nn.Linear(
-            in_features=self.hidden_size, out_features=self.num_classes
-        )
+        self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
 
         self.f_dropout = torch.nn.Dropout(p=self.hidden_dropout_prob)
@@ -102,9 +103,7 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
 
         self.threshold.to(self.device)
 
-    def eval_outputs(
-        self, outputs, stage, num_threshold_steps=100, update_threshold=True
-    ):
+    def eval_outputs(self, outputs, stage, num_threshold_steps=100, update_threshold=True):
         results = {}
 
         t_ids = self.flatten([x["ids"] for x in outputs])
@@ -202,9 +201,7 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
 
 # noinspection PyAbstractClass
 class MultiClassFrameGraphLanguageModel(MultiClassFrameLanguageModel):
-    def __init__(
-        self, graphs: List[str], gcn_size: int, gcn_depth: int, *args, **kwargs
-    ):
+    def __init__(self, graphs: List[str], gcn_size: int, gcn_depth: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.graphs = graphs
         self.gcn_size = gcn_size
@@ -212,10 +209,7 @@ class MultiClassFrameGraphLanguageModel(MultiClassFrameLanguageModel):
 
         if self.hidden_size != self.gcn_size:
             self.gcn_projs = torch.nn.ModuleDict(
-                {
-                    f"{graph}_proj": torch.nn.Linear(self.hidden_size, self.gcn_size)
-                    for graph in self.graphs
-                }
+                {f"{graph}_proj": torch.nn.Linear(self.hidden_size, self.gcn_size) for graph in self.graphs}
             )
         else:
             self.gcn_projs = None
@@ -237,9 +231,7 @@ class MultiClassFrameGraphLanguageModel(MultiClassFrameLanguageModel):
                     concat=True,
                 )
 
-        self.cls_layer = torch.nn.Linear(
-            in_features=self.gcn_hidden_size, out_features=self.num_classes
-        )
+        self.cls_layer = torch.nn.Linear(in_features=self.gcn_hidden_size, out_features=self.num_classes)
 
     def gcn_pool(self, graph_outputs, graph_mask, batch):
         # [bsize, seq_len] -> [bsize] -> [bsize, 1]
@@ -271,14 +263,10 @@ class MultiClassFrameGraphLanguageModel(MultiClassFrameLanguageModel):
         contextualized_embeddings = self.lm_step(
             batch["input_ids"],
             attention_mask=batch["attention_mask"],
-            token_type_ids=batch["token_type_ids"]
-            if "token_type_ids" in batch
-            else None,
+            token_type_ids=batch["token_type_ids"] if "token_type_ids" in batch else None,
         )
         graph_outputs = self.gcn_forward(contextualized_embeddings, batch)
-        classifier_inputs = self.gcn_pool(
-            graph_outputs, graph_mask=batch["attention_mask"], batch=batch
-        )
+        classifier_inputs = self.gcn_pool(graph_outputs, graph_mask=batch["attention_mask"], batch=batch)
         classifier_inputs = self.f_dropout(classifier_inputs)
         logits = self.cls_layer(classifier_inputs)
         return logits

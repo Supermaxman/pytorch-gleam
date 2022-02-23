@@ -1,6 +1,7 @@
 import math
-from torch import nn
+
 import torch
+from torch import nn
 
 from pytorch_gleam.modeling.knowledge_embedding.base_emb import KnowledgeEmbedding
 

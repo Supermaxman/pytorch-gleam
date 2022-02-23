@@ -1,9 +1,9 @@
-import os
 import json
-import requests
-from pprint import pprint
-from datetime import timedelta, date
+import os
 import time
+from datetime import date, timedelta
+
+import requests
 from tqdm import tqdm
 
 
@@ -48,22 +48,15 @@ if __name__ == "__main__":
         "possibly_sensitive,reply_settings,source,withheld,entities"
     )
     user_fields = (
-        "user.fields=id,created_at,description,name,public_metrics,url,"
-        "username,verified,location,withheld,entities"
+        "user.fields=id,created_at,description,name,public_metrics,url," "username,verified,location,withheld,entities"
     )
     expansions = (
         "expansions=author_id,in_reply_to_user_id,referenced_tweets.id,"
         "referenced_tweets.id.author_id,attachments.media_keys,geo.place_id,"
         "entities.mentions.username"
     )
-    media_fields = (
-        "media.fields=duration_ms,height,media_key,preview_image_url,type,"
-        "url,width,public_metrics"
-    )
-    place_fields = (
-        "place.fields=contained_within,country,country_code,full_name,geo,id,"
-        "name,place_type"
-    )
+    media_fields = "media.fields=duration_ms,height,media_key,preview_image_url,type," "url,width,public_metrics"
+    place_fields = "place.fields=contained_within,country,country_code,full_name,geo,id," "name,place_type"
 
     all_dates = list(date_range(start_date, end_date))
     for q_date_start, q_date_end in tqdm(all_dates, total=len(all_dates)):
@@ -71,20 +64,14 @@ if __name__ == "__main__":
         end_time = q_date_end.strftime("%Y-%m-%dT%H:%M:%SZ")
         next_token = ""
         page_idx = 0
-        completed_file = (
-            q_date_start.strftime("%Y%m%dT%H%M%SZ")
-            + q_date_end.strftime("%Y%m%dT%H%M%SZ")
-            + ".lock"
-        )
+        completed_file = q_date_start.strftime("%Y%m%dT%H%M%SZ") + q_date_end.strftime("%Y%m%dT%H%M%SZ") + ".lock"
         completed_path = os.path.join(output_path, completed_file)
         if os.path.exists(completed_path):
             continue
         num_results = 0
         while next_token is not None:
             result_name = (
-                q_date_start.strftime("%Y%m%dT%H%M%SZ")
-                + q_date_end.strftime("%Y%m%dT%H%M%SZ")
-                + f"-{page_idx}.json"
+                q_date_start.strftime("%Y%m%dT%H%M%SZ") + q_date_end.strftime("%Y%m%dT%H%M%SZ") + f"-{page_idx}.json"
             )
             result_path = os.path.join(output_path, result_name)
             fields = [

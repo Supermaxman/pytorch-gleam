@@ -1,5 +1,6 @@
-import torch
 from abc import ABC, abstractmethod
+
+import torch
 
 
 class BatchCollator(ABC):
@@ -21,9 +22,7 @@ class BatchCollator(ABC):
             pad_seq_len = 1
         return pad_seq_len
 
-    def pad_and_apply(
-        self, id_list, id_tensor, ex_idx, max_seq_len=None, dtype=torch.long
-    ):
+    def pad_and_apply(self, id_list, id_tensor, ex_idx, max_seq_len=None, dtype=torch.long):
         if max_seq_len is None:
             max_seq_len = self.max_seq_len
         ex_ids = id_list[:max_seq_len]

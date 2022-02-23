@@ -252,4 +252,3 @@ python pytorch-gleam/pytorch_gleam/stance/cluster_statistics.py \
   --scores_path ${data_path}/covid19-frame-rel-v2_stance-scores.json  \
   --tweets_path ${data_path}/covid19-frame-rel-v2_candidates.jsonl \
   --output_path ${data_path}/${base_name}-clusters-m${profile_type}-v${cluster_version}-k${cluster_count}-stats.json
-

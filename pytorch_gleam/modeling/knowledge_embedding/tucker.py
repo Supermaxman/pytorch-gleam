@@ -1,6 +1,6 @@
-from torch import nn
-import torch
 import numpy as np
+import torch
+from torch import nn
 
 from pytorch_gleam.modeling.knowledge_embedding.base_emb import KnowledgeEmbedding
 
@@ -10,9 +10,7 @@ class TuckEREmbedding(KnowledgeEmbedding):
         super().__init__(*args, **kwargs)
 
         self.weight = nn.parameter.Parameter(
-            torch.tensor(
-                np.random.uniform(-1, 1, (self.emb_size, self.emb_size, self.emb_size))
-            )
+            torch.tensor(np.random.uniform(-1, 1, (self.emb_size, self.emb_size, self.emb_size)))
         )
 
         self.e_emb_layer = nn.Linear(self.hidden_size, self.emb_size)

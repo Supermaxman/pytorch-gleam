@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Any, Union
+from typing import Any, Dict, List, Union
 
 import torch
 from torch.utils.data import Dataset

@@ -1,22 +1,21 @@
 import dataclasses
+import html
 import json
 import random
-from typing import List, Union
 import re
 import unicodedata
-import html
-import emoji
-import unidecode
-from tqdm import tqdm
+from typing import List, Union
 
+import emoji
+import torch
+import unidecode
 from spacy.lang.en import English
 from spacy.language import Language
-
-import torch
 from torch.utils.data import Dataset
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-from pytorch_gleam.data.collators import BertPreBatchCollator
+from tqdm import tqdm
 
+from pytorch_gleam.data.collators import BertPreBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 
 # compile regexes
 username_regex = re.compile(r"(^|[^@\w])@(\w{1,15})\b")
@@ -134,9 +133,7 @@ class BertPreDataset(Dataset):
         # masked_lm_labels is token strings of [mask] indices
         input_ids = self.tokenizer.convert_tokens_to_ids(instance["tokens"])
         masked_lm_positions = list(instance["masked_lm_positions"])
-        masked_lm_ids = self.tokenizer.convert_tokens_to_ids(
-            instance["masked_lm_labels"]
-        )
+        masked_lm_ids = self.tokenizer.convert_tokens_to_ids(instance["masked_lm_labels"])
         masked_lm_weights = [1.0] * len(masked_lm_ids)
         next_sentence_label = 1 if instance["is_random_next"] else 0
         example = {
@@ -276,7 +273,7 @@ class BertPreDataModule(BaseDataModule):
 
 
 def preprocess_bert(text: str, args: BertTokenizerConfig):
-    """Preprocesses tweet for BERT"""
+    """Preprocesses tweet for BERT."""
     # standardize
     text = standardize_text(text)
     # replace usernames/urls
@@ -312,7 +309,7 @@ def remove_unicode_symbols(text):
 
 
 def replace_multi_occurrences(text, filler):
-    """Replaces multiple occurrences of filler with n filler"""
+    """Replaces multiple occurrences of filler with n filler."""
     # only run if we have multiple occurrences of filler
     if text.count(filler) <= 1:
         return text
@@ -353,21 +350,19 @@ def replace_multi_occurrences(text, filler):
 
 
 def asciify_emojis(text):
-    """
-    Converts emojis into text aliases. E.g. 👍 becomes :thumbs_up:
-    For a full list of text aliases see: https://www.webfx.com/tools/emoji-cheat-sheet/
+    """Converts emojis into text aliases.
+
+    E.g. 👍 becomes :thumbs_up: For a full list of text aliases see: https://www.webfx.com/tools/emoji-cheat-sheet/
     """
     text = emoji.demojize(text)
     return text
 
 
 def standardize_text(text):
-    """
-    1) Escape HTML
-    2) Replaces some non-standard punctuation with standard versions.
-    3) Replace \r, \n and \t with white spaces
-    4) Removes all other control characters and the NULL byte
-    5) Removes duplicate white spaces
+    """1) Escape HTML 2) Replaces some non-standard punctuation with standard versions.
+
+    3) Replace \r, \n and \t with white spaces 4) Removes all other control characters and the NULL byte 5) Removes
+    duplicate white spaces
     """
     # escape HTML symbols
     text = html.unescape(text)
@@ -384,12 +379,7 @@ def standardize_text(text):
 
 
 def standardize_punctuation(text):
-    return "".join(
-        [
-            unidecode.unidecode(t) if unicodedata.category(t)[0] == "P" else t
-            for t in text
-        ]
-    )
+    return "".join([unidecode.unidecode(t) if unicodedata.category(t)[0] == "P" else t for t in text])
 
 
 def replace_usernames(text, filler="user"):
@@ -521,11 +511,7 @@ def create_instances_from_document(
                 tokens.append("[SEP]")
                 segment_ids.append(1)
 
-                (
-                    tokens,
-                    masked_lm_positions,
-                    masked_lm_labels,
-                ) = create_masked_lm_predictions(
+                (tokens, masked_lm_positions, masked_lm_labels,) = create_masked_lm_predictions(
                     tokens,
                     masked_lm_prob,
                     max_predictions_per_seq,
@@ -584,9 +570,7 @@ def create_masked_lm_predictions(
 
     output_tokens = list(tokens)
 
-    num_to_predict = min(
-        max_predictions_per_seq, max(1, int(round(len(tokens) * masked_lm_prob)))
-    )
+    num_to_predict = min(max_predictions_per_seq, max(1, int(round(len(tokens) * masked_lm_prob))))
 
     masked_lms = []
     covered_indexes = set()

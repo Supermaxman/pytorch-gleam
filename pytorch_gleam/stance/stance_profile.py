@@ -2,11 +2,10 @@ import argparse
 import pickle
 from multiprocessing import Pool
 
-import ujson as json
-from tqdm import tqdm
 import numpy as np
 import scipy.sparse as scp
-
+import ujson as json
+from tqdm import tqdm
 
 vec_size = 0
 frame_map = {}
@@ -72,9 +71,7 @@ def main():
     user_count = len(user_scores)
     user_vecs = {"users": [], "matrix": []}
     with Pool(processes=num_processes) as p:
-        for user_id, u_vec in tqdm(
-            p.imap_unordered(embed_user, user_scores.items()), total=user_count
-        ):
+        for user_id, u_vec in tqdm(p.imap_unordered(embed_user, user_scores.items()), total=user_count):
             if user_id is not None:
                 user_vecs["users"].append(user_id)
                 user_vecs["matrix"].append(u_vec)

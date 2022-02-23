@@ -1,5 +1,6 @@
-from pytorch_gleam.modeling.thresholds.base_thresholds import ThresholdModule
 from torch import nn
+
+from pytorch_gleam.modeling.thresholds.base_thresholds import ThresholdModule
 
 
 class MultiClassThresholdModule(ThresholdModule):
@@ -36,9 +37,7 @@ class MultiClassCallableThresholdModule(MultiClassThresholdModule):
         return predictions
 
 
-class MultiClassMultiLabelCallableThresholdModule(
-    MultiClassCallableThresholdModule, nn.ModuleDict
-):
+class MultiClassMultiLabelCallableThresholdModule(MultiClassCallableThresholdModule, nn.ModuleDict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

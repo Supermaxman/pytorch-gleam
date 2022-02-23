@@ -1,12 +1,12 @@
 import argparse
 import pickle
+import random
+import string
 from collections import defaultdict
 from textwrap import wrap
-import random
-import ujson as json
-import string
 
 import pandas as pd
+import ujson as json
 
 
 def create_user_text(u_tweets):
@@ -16,7 +16,7 @@ def create_user_text(u_tweets):
         tweet_text = tweet["full_text"] if "full_text" in tweet else tweet["text"]
         for line in wrap(tweet_text, 50):
             lines.append(f"    {line}")
-        lines.append(f"  ----")
+        lines.append("  ----")
     return "\n".join(lines)
 
 
@@ -130,15 +130,11 @@ def main():
     for cluster_a_id in cluster_ids:
         pos_pop = cluster_samples[cluster_a_id]
         neg_pop = negative_samples[cluster_a_id]
-        pos_samples = sample_from_pop(
-            pos_pop, pos_pop, seen_sample_ids, samples_per_cluster
-        )
+        pos_samples = sample_from_pop(pos_pop, pos_pop, seen_sample_ids, samples_per_cluster)
         for ps in pos_samples:
             labels[ps["sample_id"]] = 1
         samples.extend(pos_samples)
-        neg_samples = sample_from_pop(
-            pos_pop, neg_pop, seen_sample_ids, samples_per_cluster
-        )
+        neg_samples = sample_from_pop(pos_pop, neg_pop, seen_sample_ids, samples_per_cluster)
         for ns in neg_samples:
             labels[ns["sample_id"]] = 0
         samples.extend(neg_samples)

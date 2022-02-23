@@ -1,5 +1,4 @@
-from pytorch_gleam.callbacks.checkpoint import FitCheckpointCallback
-from pytorch_gleam.callbacks.checkpoint import PreTrainedCheckpointCallback
+from pytorch_gleam.callbacks.checkpoint import FitCheckpointCallback, PreTrainedCheckpointCallback
 from pytorch_gleam.callbacks.config import CopyConfigCallback
 from pytorch_gleam.callbacks.prediction import JsonlWriter
 from pytorch_gleam.callbacks.results import JsonSaveResultsCallback

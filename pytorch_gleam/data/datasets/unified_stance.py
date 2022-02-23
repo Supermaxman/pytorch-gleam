@@ -1,11 +1,12 @@
-import ujson as json
-from typing import List, Dict, Any, Union, Type
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import torch
+import ujson as json
 from torch.utils.data import Dataset
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
+
 from pytorch_gleam.data.collators import SequenceToSequenceBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.qa import MultiQATaskModule
 
 

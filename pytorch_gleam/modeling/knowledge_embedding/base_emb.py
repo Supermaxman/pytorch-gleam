@@ -1,13 +1,11 @@
 from abc import abstractmethod
 
-from torch import nn
 import torch
+from torch import nn
 
 
 class KnowledgeEmbedding(nn.Module):
-    def __init__(
-        self, hidden_size: int, emb_size: int, gamma: float, loss_norm: int = 2
-    ):
+    def __init__(self, hidden_size: int, emb_size: int, gamma: float, loss_norm: int = 2):
         super().__init__()
         self.gamma = gamma
         self.hidden_size = hidden_size

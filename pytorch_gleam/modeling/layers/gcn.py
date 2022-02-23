@@ -1,10 +1,11 @@
 import math
-import torch
+
 import numpy as np
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.parameter import Parameter
 from torch.nn.modules.module import Module
+from torch.nn.parameter import Parameter
 
 
 class GraphConvolution(Module):
@@ -58,14 +59,7 @@ class GraphConvolution(Module):
             return output
 
     def __repr__(self):
-        return (
-            self.__class__.__name__
-            + " ("
-            + str(self.in_features)
-            + " -> "
-            + str(self.out_features)
-            + ")"
-        )
+        return self.__class__.__name__ + " (" + str(self.in_features) + " -> " + str(self.out_features) + ")"
 
 
 class GraphAttention(nn.Module):
@@ -87,9 +81,7 @@ class GraphAttention(nn.Module):
         self.return_attention = return_attention
 
         self.W = nn.Parameter(
-            nn.init.xavier_normal_(
-                torch.Tensor(in_features, out_features), gain=np.sqrt(2.0)
-            ),
+            nn.init.xavier_normal_(torch.Tensor(in_features, out_features), gain=np.sqrt(2.0)),
             requires_grad=True,
         )
         self.a1 = nn.Parameter(
@@ -131,14 +123,7 @@ class GraphAttention(nn.Module):
         return return_vals
 
     def __repr__(self):
-        return (
-            self.__class__.__name__
-            + " ("
-            + str(self.in_features)
-            + " -> "
-            + str(self.out_features)
-            + ")"
-        )
+        return self.__class__.__name__ + " (" + str(self.in_features) + " -> " + str(self.out_features) + ")"
 
 
 class TransformerGraphAttention(nn.Module):
@@ -181,14 +166,7 @@ class TransformerGraphAttention(nn.Module):
             return h_prime
 
     def __repr__(self):
-        return (
-            self.__class__.__name__
-            + " ("
-            + str(self.in_features)
-            + " -> "
-            + str(self.out_features)
-            + ")"
-        )
+        return self.__class__.__name__ + " (" + str(self.in_features) + " -> " + str(self.out_features) + ")"
 
 
 # TODO multi-head graph attention
@@ -233,11 +211,4 @@ class EdgeTransformerGraphAttention(nn.Module):
             return h_prime
 
     def __repr__(self):
-        return (
-            self.__class__.__name__
-            + " ("
-            + str(self.in_features)
-            + " -> "
-            + str(self.out_features)
-            + ")"
-        )
+        return self.__class__.__name__ + " (" + str(self.in_features) + " -> " + str(self.out_features) + ")"

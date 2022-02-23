@@ -1,11 +1,12 @@
 import json
-from typing import List, Dict, Any, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
+
 from pytorch_gleam.data.collators import SequenceToSequenceBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.qa import QAModule
 
 
@@ -79,14 +80,13 @@ class MultiTurnQAFrameDataset(Dataset):
 
                     self.examples.append(example)
 
-
-    def display_length_percentiles(self, key='input_ids'):
+    def display_length_percentiles(self, key="input_ids"):
         lengths = [len(x[key]) for x in self.examples]
-        print(f'mean={np.mean(lengths):.0f}')
-        print(f'90%={np.percentile(lengths, 90):.0f}')
-        print(f'95%={np.percentile(lengths, 95):.0f}')
-        print(f'min={np.min(lengths):.0f}')
-        print(f'max={np.max(lengths):.0f}')
+        print(f"mean={np.mean(lengths):.0f}")
+        print(f"90%={np.percentile(lengths, 90):.0f}")
+        print(f"95%={np.percentile(lengths, 95):.0f}")
+        print(f"min={np.min(lengths):.0f}")
+        print(f"max={np.max(lengths):.0f}")
 
     def __len__(self):
         return len(self.examples)

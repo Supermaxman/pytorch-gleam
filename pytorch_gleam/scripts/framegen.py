@@ -2,6 +2,7 @@
 
 import argparse
 import json
+
 import pandas as pd
 
 
@@ -15,9 +16,7 @@ def parse_frames(frame_path):
             "text": row["text"],
             "short_text": row["short_text"],
             "q_id": row["q_id"],
-            "moralities": {
-                key.strip().lower(): True for key in row["moralities"].split()
-            },
+            "moralities": {key.strip().lower(): True for key in row["moralities"].split()},
         }
         frames[f_id] = frame
     return frames

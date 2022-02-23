@@ -1,13 +1,13 @@
 from collections import defaultdict
 from typing import Optional
 
-import torch
 import numpy as np
+import torch
 
-from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
-from pytorch_gleam.modeling.thresholds import ThresholdModule, MultiClassThresholdModule
-from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.inference import ConsistencyScoring
+from pytorch_gleam.modeling.metrics import Metric
+from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
+from pytorch_gleam.modeling.thresholds import MultiClassThresholdModule, ThresholdModule
 
 
 # noinspection PyAbstractClass
@@ -34,9 +34,7 @@ class NliTextLanguageModel(BaseLanguageModel):
         self.num_threshold_steps = num_threshold_steps
         self.update_threshold = update_threshold
 
-        self.cls_layer = torch.nn.Linear(
-            in_features=self.hidden_size, out_features=self.num_classes
-        )
+        self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
         self.criterion = torch.nn.CrossEntropyLoss(reduction="none")
         self.score_func = torch.nn.Softmax(dim=-1)
         self.f_dropout = torch.nn.Dropout(p=self.hidden_dropout_prob)
@@ -63,9 +61,7 @@ class NliTextLanguageModel(BaseLanguageModel):
     def infer_m_scores(self, adj_list, stage_labels, stage):
         # always use stage 0 (val) for seeds
         seed_labels = stage_labels[0]
-        seed_examples = [
-            (ex_id, label) for (ex_id, label) in seed_labels.items() if label != 0
-        ]
+        seed_examples = [(ex_id, label) for (ex_id, label) in seed_labels.items() if label != 0]
         # if the stage is val then we have no test set, so pick
         # some number of seed examples from val and test on remaining val
         if stage == "val":
@@ -149,16 +145,12 @@ class NliTextLanguageModel(BaseLanguageModel):
                 m_threshold.update_thresholds(max_threshold)
 
             m_ex_preds = m_threshold(m_ex_scores)
-            m_f1, m_p, m_r, m_cls_f1, m_cls_p, m_cls_r, m_cls_indices = self.m_metric(
-                m_ex_labels, m_ex_preds
-            )
+            m_f1, m_p, m_r, m_cls_f1, m_cls_p, m_cls_r, m_cls_indices = self.m_metric(m_ex_labels, m_ex_preds)
             self.log(f"{stage}_{m_id}_micro_f1", m_f1)
             self.log(f"{stage}_{m_id}_micro_p", m_p)
             self.log(f"{stage}_{m_id}_micro_r", m_r)
             self.log(f"{stage}_{m_id}_threshold", m_threshold.thresholds.item())
-            for cls_index, c_f1, c_p, c_r in zip(
-                m_cls_indices, m_cls_f1, m_cls_p, m_cls_r
-            ):
+            for cls_index, c_f1, c_p, c_r in zip(m_cls_indices, m_cls_f1, m_cls_p, m_cls_r):
                 self.log(f"{stage}_{m_id}_{cls_index}_f1", c_f1)
                 self.log(f"{stage}_{m_id}_{cls_index}_p", c_p)
                 self.log(f"{stage}_{m_id}_{cls_index}_r", c_r)
@@ -250,8 +242,8 @@ class NliTextLanguageModel(BaseLanguageModel):
         return results
 
 
-def flatten(l):
-    return [item for sublist in l for item in sublist]
+def flatten(list_of_lists):
+    return [item for sublist in list_of_lists for item in sublist]
 
 
 def build_adj_list(outputs):

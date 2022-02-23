@@ -1,8 +1,8 @@
 import argparse
-import ujson as json
 import math
 
 import pandas as pd
+import ujson as json
 
 
 def jaccard_coefficient(tp, tn, fp, fn):
@@ -39,7 +39,6 @@ def main():
 
     df["correct"] = df["judgement"] == df["label"]
     df["incorrect"] = df["judgement"] != df["label"]
-    total_count = len(df)
     tp = (df["correct"] & (df["judgement"] == 1)).sum()
     tn = (df["correct"] & (df["judgement"] == 0)).sum()
     fp = (df["incorrect"] & (df["label"] == 1)).sum()

@@ -1,13 +1,13 @@
 from typing import Dict
 
 import torch
+import torch.nn.functional as F
 from transformers import Adafactor, get_constant_schedule_with_warmup
 from transformers.optimization import get_adafactor_schedule
 
-from pytorch_gleam.qa import QAModule
-from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
 from pytorch_gleam.modeling.metrics import Metric
-import torch.nn.functional as F
+from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
+from pytorch_gleam.qa import QAModule
 
 
 # noinspection PyAbstractClass
@@ -90,10 +90,7 @@ class MultiTurnQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         # need to pad to max length
         max_pred_length = max([torch.max(x["pred_ids"]) for x in outputs]).item()
         pred_ids = torch.cat(
-            [
-                F.pad(x["pred_ids"], (0, max_pred_length - x["pred_ids"].shape[1]))
-                for x in outputs
-            ],
+            [F.pad(x["pred_ids"], (0, max_pred_length - x["pred_ids"].shape[1])) for x in outputs],
             dim=0,
         ).cpu()
         ex_ids, preds = self.qa(qa_ids=tq_ids, qa_responses=pred_ids)
@@ -125,9 +122,7 @@ class MultiTurnQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         label_ids = batch["label_ids"]
-        lm_out = self.lm(
-            input_ids=input_ids, attention_mask=attention_mask, labels=label_ids
-        )
+        lm_out = self.lm(input_ids=input_ids, attention_mask=attention_mask, labels=label_ids)
         loss = lm_out.loss
         return loss
 

@@ -1,19 +1,16 @@
 import argparse
-import os
 import json
+import os
 import time
+from datetime import datetime, timedelta
 
 import requests
-from datetime import timedelta, datetime
 from tqdm import tqdm
 
 
 def format_parameters(endpoint, parameters):
     p_text = "".join(
-        [
-            ("?" if idx == 0 else "&") + f"{key}={value}"
-            for idx, (key, value) in enumerate(parameters.items())
-        ]
+        [("?" if idx == 0 else "&") + f"{key}={value}" for idx, (key, value) in enumerate(parameters.items())]
     )
     return endpoint + p_text
 
@@ -82,18 +79,14 @@ def main():
     parser.add_argument("-s", "--start", required=True)
     parser.add_argument("-e", "--end", required=True)
     parser.add_argument("-q", "--query", default=default_search_query)
-    parser.add_argument(
-        "-u", "--endpoint_url", default="https://api.crowdtangle.com/posts/search"
-    )
+    parser.add_argument("-u", "--endpoint_url", default="https://api.crowdtangle.com/posts/search")
     parser.add_argument("-p", "--platform", default="facebook")
     parser.add_argument("-ln", "--language", default="en")
     parser.add_argument("-rd", "--request_delay", type=float, default=50.0 / 60.0)
     parser.add_argument("-rc", "--request_max_count", type=int, default=100)
     parser.add_argument("-sp", "--secrets_path", default="private/secrets.json")
     parser.add_argument("-st", "--secrets_type", default="crowdtangle")
-    parser.add_argument(
-        "-td", "--request_time_delta", default="01:00:00", help="hours:minutes:seconds"
-    )
+    parser.add_argument("-td", "--request_time_delta", default="01:00:00", help="hours:minutes:seconds")
     parser.add_argument("-qtf", "--query_time_format", default="%Y-%m-%dT%H:%M:%S")
     parser.add_argument("-ftf", "--file_time_format", default="%Y%m%dT%H%M%S")
     args = parser.parse_args()

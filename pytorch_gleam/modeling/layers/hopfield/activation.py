@@ -1,9 +1,9 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
-
 from torch import Tensor
 from torch.nn import Linear, Module, Parameter
-from typing import Optional
 
 from pytorch_gleam.modeling.layers.hopfield.functional import hopfield_core_forward
 
@@ -37,10 +37,6 @@ class HopfieldCore(Module):
         Note: if kdim and vdim are None, they will be set to embed_dim such that
         query, key, and value have the same number of features.
 
-    Examples::
-
-        >>> hopfield_attn = HopfieldCore(embed_dim, num_heads)
-        >>> attn_output, attn_output_weights, attn_matrix = hopfield_attn(query, key, value)
     """
     __annotations__ = {
         "bias_k": torch._jit_internal.Optional[torch.Tensor],
@@ -69,19 +65,13 @@ class HopfieldCore(Module):
     ):
         super(HopfieldCore, self).__init__()
 
-        assert (
-            (type(key_as_static) == bool)
-            and (type(query_as_static) == bool)
-            and (type(value_as_static) == bool)
-        )
+        assert (type(key_as_static) == bool) and (type(query_as_static) == bool) and (type(value_as_static) == bool)
         self.key_as_static, self.query_as_static, self.value_as_static = (
             key_as_static,
             query_as_static,
             value_as_static,
         )
-        num_non_static = 3 - (
-            self.key_as_static + self.query_as_static + self.value_as_static
-        )
+        num_non_static = 3 - (self.key_as_static + self.query_as_static + self.value_as_static)
         assert 0 <= num_non_static < 4
 
         self.value_as_connected = value_as_connected
@@ -96,22 +86,14 @@ class HopfieldCore(Module):
         if self.static_execution:
             embed_dim, kdim, vdim = None, None, None
         if embed_dim is None:
-            assert (
-                self.static_execution
-            ), r"static-only execution requires all projections to be deactivated."
+            assert self.static_execution, r"static-only execution requires all projections to be deactivated."
 
         # Check and set all other properties, conditioned on <static_execution>.
         self.embed_dim = embed_dim
         self.kdim = kdim if kdim is not None else embed_dim
         self.vdim = vdim if vdim is not None else embed_dim
-        self._qkv_same_embed_dim = (
-            self.kdim == embed_dim
-            and self.vdim == embed_dim
-            and not self.value_as_connected
-        )
-        assert (not self.value_as_connected) or (
-            self.kdim == self.vdim
-        ), r"key and value need to be of same dimension."
+        self._qkv_same_embed_dim = self.kdim == embed_dim and self.vdim == embed_dim and not self.value_as_connected
+        assert (not self.value_as_connected) or (self.kdim == self.vdim), r"key and value need to be of same dimension."
 
         self.num_heads = num_heads
         self.dropout = dropout
@@ -119,27 +101,17 @@ class HopfieldCore(Module):
         if not self.static_execution:
             if head_dim is None:
                 self.head_dim = embed_dim // num_heads
-                assert (
-                    self.head_dim * num_heads == self.embed_dim
-                ), "embed_dim must be divisible by num_heads."
+                assert self.head_dim * num_heads == self.embed_dim, "embed_dim must be divisible by num_heads."
             else:
-                assert (
-                    head_dim > 0
-                ), "dimension of the association space has to be positive."
+                assert head_dim > 0, "dimension of the association space has to be positive."
                 self.head_dim = head_dim
-        self.virtual_hopfield_dim = (
-            None if (self.head_dim is None) else (self.num_heads * self.head_dim)
-        )
+        self.virtual_hopfield_dim = None if (self.head_dim is None) else (self.num_heads * self.head_dim)
 
         self.out_dim = embed_dim if out_dim is None else out_dim
-        assert disable_out_projection or (
-            self.out_dim > 0
-        ), "output projection dimension has to be positive."
+        assert disable_out_projection or (self.out_dim > 0), "output projection dimension has to be positive."
 
         if normalize_pattern_affine:
-            assert (
-                normalize_pattern
-            ), "affine pattern normalization without pattern normalization has no effect."
+            assert normalize_pattern, "affine pattern normalization without pattern normalization has no effect."
             self.p_norm_weight = Parameter(torch.Tensor(head_dim))
             self.p_norm_bias = Parameter(torch.Tensor(head_dim))
         else:
@@ -150,32 +122,24 @@ class HopfieldCore(Module):
             if query_as_static:
                 self.register_parameter("q_proj_weight", None)
             else:
-                self.q_proj_weight = Parameter(
-                    torch.Tensor(self.virtual_hopfield_dim, embed_dim)
-                )
+                self.q_proj_weight = Parameter(torch.Tensor(self.virtual_hopfield_dim, embed_dim))
             if key_as_static:
                 self.register_parameter("k_proj_weight", None)
             else:
-                self.k_proj_weight = Parameter(
-                    torch.Tensor(self.virtual_hopfield_dim, self.kdim)
-                )
+                self.k_proj_weight = Parameter(torch.Tensor(self.virtual_hopfield_dim, self.kdim))
             if value_as_static:
                 self.register_parameter("v_proj_weight", None)
             else:
                 self.v_proj_weight = Parameter(
                     torch.Tensor(
                         self.virtual_hopfield_dim,
-                        self.virtual_hopfield_dim
-                        if (value_as_connected and not key_as_static)
-                        else self.vdim,
+                        self.virtual_hopfield_dim if (value_as_connected and not key_as_static) else self.vdim,
                     )
                 )
             self.register_parameter("in_proj_weight", None)
         else:
             if num_non_static > 0:
-                self.in_proj_weight = Parameter(
-                    torch.empty(num_non_static * self.virtual_hopfield_dim, embed_dim)
-                )
+                self.in_proj_weight = Parameter(torch.empty(num_non_static * self.virtual_hopfield_dim, embed_dim))
             else:
                 self.register_parameter("in_proj_weight", None)
             self.register_parameter("q_proj_weight", None)
@@ -183,9 +147,7 @@ class HopfieldCore(Module):
             self.register_parameter("v_proj_weight", None)
 
         if bias and (num_non_static > 0):
-            self.in_proj_bias = Parameter(
-                torch.empty(num_non_static * self.virtual_hopfield_dim)
-            )
+            self.in_proj_bias = Parameter(torch.empty(num_non_static * self.virtual_hopfield_dim))
         else:
             self.register_parameter("in_proj_bias", None)
         if disable_out_projection:
@@ -194,9 +156,7 @@ class HopfieldCore(Module):
             if bias and _LinearWithBias is not None:
                 self.out_proj = _LinearWithBias(self.virtual_hopfield_dim, self.out_dim)
             else:
-                self.out_proj = Linear(
-                    self.virtual_hopfield_dim, self.out_dim, bias=bias
-                )
+                self.out_proj = Linear(self.virtual_hopfield_dim, self.out_dim, bias=bias)
 
         self.bias_k, self.bias_v = None, None
         if add_bias_kv:
@@ -204,9 +164,7 @@ class HopfieldCore(Module):
                 self.bias_k = Parameter(torch.empty(1, 1, self.virtual_hopfield_dim))
             if not value_as_static:
                 self.bias_v = Parameter(torch.empty(1, 1, self.virtual_hopfield_dim))
-            assert not (
-                self.bias_k is None and self.bias_v is None
-            ), r"cannot set key/value bias if both are static."
+            assert not (self.bias_k is None and self.bias_v is None), r"cannot set key/value bias if both are static."
 
         self.add_zero_attn = add_zero_attn
         self._reset_parameters()
@@ -265,7 +223,6 @@ class HopfieldCore(Module):
         return_raw_associations=False,  # type: bool
         return_pattern_projections=False,  # type: bool
     ):
-        # type: (...) -> Tuple[Tensor, Optional[Tensor], Optional[Tensor]]
         r"""
         Args:
             query, key, value: map a query and a set of key-value pairs to an output.

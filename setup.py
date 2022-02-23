@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 _PATH_ROOT = os.path.dirname(__file__)
 
@@ -9,14 +9,10 @@ VERSION = "0.6.1"
 # python setup.py sdist
 # twine upload .\dist\pytorch-gleam-VERSION.tar.gz
 HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
-DESCRIPTION = (
-    "Social Media NLP package for pytorch and pytorch_lightning with pre-built models"
-)
+DESCRIPTION = "Social Media NLP package for pytorch and pytorch_lightning with pre-built models"
 
 
-def _load_requirements(
-    path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#"
-) -> List[str]:
+def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#") -> List[str]:
     with open(os.path.join(path_dir, file_name)) as file:
         lines = [ln.strip() for ln in file.readlines()]
     requirements = []
@@ -39,9 +35,7 @@ def _load_readme_description(path_dir: str, homepage: str) -> str:
 
     github_source_url = os.path.join(homepage, "blob/master")
     # replace relative repository path to absolute link to the release
-    text = text.replace(
-        "docs/images/", f"{os.path.join(github_source_url, 'docs/images/')}"
-    )
+    text = text.replace("docs/images/", f"{os.path.join(github_source_url, 'docs/images/')}")
 
     return text
 

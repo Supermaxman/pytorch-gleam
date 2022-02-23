@@ -1,8 +1,9 @@
-import torch
 import argparse
-from collections import defaultdict
-import os
 import json
+import os
+from collections import defaultdict
+
+import torch
 
 
 def load_predictions(input_path):
@@ -20,10 +21,7 @@ def load_predictions(input_path):
         q_p_id = prediction["question_id"]
         # score = prediction['pos_score']
         score = prediction["pos_score"] - prediction["neg_score"]
-        if (
-            doc_pass_id not in question_scores
-            or q_p_id not in question_scores[doc_pass_id]
-        ):
+        if doc_pass_id not in question_scores or q_p_id not in question_scores[doc_pass_id]:
             p_count += 1
         u_count += 1
         question_scores[doc_pass_id][q_p_id] = score

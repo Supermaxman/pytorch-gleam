@@ -2,9 +2,9 @@ from typing import Dict
 
 import torch
 
-from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
-from pytorch_gleam.modeling.thresholds import ThresholdModule, MultiClassThresholdModule
 from pytorch_gleam.modeling.metrics import Metric
+from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
+from pytorch_gleam.modeling.thresholds import MultiClassThresholdModule, ThresholdModule
 
 
 # noinspection PyAbstractClass
@@ -51,7 +51,8 @@ class MultiLabelLanguageModel(BaseLanguageModel):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -60,8 +61,10 @@ class MultiLabelLanguageModel(BaseLanguageModel):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -107,9 +110,7 @@ class MultiLabelLanguageModel(BaseLanguageModel):
 
         self.threshold.to(self.device)
 
-    def eval_outputs(
-        self, outputs, stage, num_threshold_steps=100, update_threshold=True
-    ):
+    def eval_outputs(self, outputs, stage, num_threshold_steps=100, update_threshold=True):
         results = {}
 
         t_ids = self.flatten([x["ids"] for x in outputs])
@@ -142,16 +143,12 @@ class MultiLabelLanguageModel(BaseLanguageModel):
                 m_threshold.update_thresholds(max_threshold)
 
             m_ex_preds = m_threshold(m_ex_scores)
-            m_f1, m_p, m_r, m_cls_f1, m_cls_p, m_cls_r, m_cls_indices = self.m_metric(
-                m_ex_labels, m_ex_preds
-            )
+            m_f1, m_p, m_r, m_cls_f1, m_cls_p, m_cls_r, m_cls_indices = self.m_metric(m_ex_labels, m_ex_preds)
             results[f"{stage}_{label_name}_micro_f1"] = m_f1
             results[f"{stage}_{label_name}_micro_p"] = m_p
             results[f"{stage}_{label_name}_micro_r"] = m_r
             results[f"{stage}_{label_name}_threshold"] = m_threshold.thresholds.item()
-            for cls_index, c_f1, c_p, c_r in zip(
-                m_cls_indices, m_cls_f1, m_cls_p, m_cls_r
-            ):
+            for cls_index, c_f1, c_p, c_r in zip(m_cls_indices, m_cls_f1, m_cls_p, m_cls_r):
                 results[f"{stage}_{label_name}_{cls_index}_f1"] = c_f1
                 results[f"{stage}_{label_name}_{cls_index}_p"] = c_p
                 results[f"{stage}_{label_name}_{cls_index}_r"] = c_r
@@ -237,5 +234,5 @@ class MultiLabelLanguageModel(BaseLanguageModel):
         return results
 
     @staticmethod
-    def flatten(l):
-        return [item for sublist in l for item in sublist]
+    def flatten(list_of_lists):
+        return [item for sublist in list_of_lists for item in sublist]

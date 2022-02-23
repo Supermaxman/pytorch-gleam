@@ -1,8 +1,9 @@
 import argparse
 from collections import defaultdict
+
+import numpy as np
 import ujson as json
 from tqdm import tqdm
-import numpy as np
 
 
 def read_jsonl(path):
@@ -71,12 +72,8 @@ def main():
     max_fc = np.max(f_counts)
     max_f = [k for k, v in frame_count.items() if v == int(max_fc)][0]
     print()
-    print(
-        f"{len(users_kept):,}/{len(users_seen):,} ({100 * len(users_kept)/len(users_seen):.0f}%) users"
-    )
-    print(
-        f"{len(tweets_kept):,}/{tweet_count:,} ({100 * len(tweets_kept)/tweet_count:.0f}%) tweets"
-    )
+    print(f"{len(users_kept):,}/{len(users_seen):,} ({100 * len(users_kept)/len(users_seen):.0f}%) users")
+    print(f"{len(tweets_kept):,}/{tweet_count:,} ({100 * len(tweets_kept)/tweet_count:.0f}%) tweets")
     print()
     print(f"{med_uc:,.2f} tweets / user (median)")
     print(f"{mean_uc:,.2f} tweets / user (mean)")

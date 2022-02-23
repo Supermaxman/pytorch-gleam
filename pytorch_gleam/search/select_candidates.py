@@ -1,8 +1,7 @@
-import os
-import json
-from collections import defaultdict
-
 import argparse
+import json
+import os
+from collections import defaultdict
 
 from tqdm import tqdm
 
@@ -62,7 +61,7 @@ def main():
         for q_id, score in t_scores.items():
             question_scores[q_id].append((score, tweet_id))
 
-    print(f"Sorting tweets for each subquestion...")
+    print("Sorting tweets for each subquestion...")
     for q_id in tqdm(list(question_scores)):
         question_scores[q_id] = sorted(
             question_scores[q_id],
@@ -71,7 +70,7 @@ def main():
             reverse=True,
         )
 
-    print(f"Collecting candidates for each tweet...")
+    print("Collecting candidates for each tweet...")
     tweet_candidates = {}
     for q_id, q_rel in tqdm(question_scores.items()):
         for rank, (t_score, tweet_id) in enumerate(q_rel, start=1):
@@ -83,7 +82,7 @@ def main():
             t_candidates = tweet_candidates[tweet_id]
             t_candidates[q_id] = {"rank": rank, "score": t_score}
 
-    print(f"Writing candidate tweets...")
+    print("Writing candidate tweets...")
     write_jsonl(collect_tweets(args.index_path, tweet_candidates), args.output_path)
 
 

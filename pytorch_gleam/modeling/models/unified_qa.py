@@ -1,12 +1,11 @@
-from typing import Dict, Optional
+from typing import Optional
 
 import torch
-from transformers import Adafactor, get_constant_schedule_with_warmup
+from transformers import Adafactor
 from transformers.optimization import get_adafactor_schedule, get_constant_schedule
 
-from pytorch_gleam.qa import MultiQATaskModule
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
-import torch.nn.functional as F
+from pytorch_gleam.qa import MultiQATaskModule
 
 
 # noinspection PyAbstractClass
@@ -62,9 +61,7 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         label_ids = batch["label_ids"]
-        lm_out = self.lm(
-            input_ids=input_ids, attention_mask=attention_mask, labels=label_ids
-        )
+        lm_out = self.lm(input_ids=input_ids, attention_mask=attention_mask, labels=label_ids)
         loss = lm_out.loss
         return loss
 

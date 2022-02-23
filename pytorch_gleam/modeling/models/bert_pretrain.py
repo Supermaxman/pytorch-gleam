@@ -30,8 +30,8 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             next_sentence_label=batch["next_sentence_labels"],
         )
         # TODO more metrics than just loss
-        prediction_logits = outputs.prediction_logits
-        seq_relationship_logits = outputs.seq_relationship_logits
+        # prediction_logits = outputs.prediction_logits
+        # seq_relationship_logits = outputs.seq_relationship_logits
         loss = outputs.loss
         return loss
 

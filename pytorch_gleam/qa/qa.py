@@ -2,7 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from string import ascii_lowercase
-from typing import List, Tuple, Dict, Optional, Iterable
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import torch
 from torch import nn, Tensor
@@ -39,9 +39,7 @@ class QAModule(nn.Module, ABC):
         """
 
     @abstractmethod
-    def forward(
-        self, qa_ids: List[str], qa_responses: Tensor
-    ) -> Tuple[List[str], Tensor]:
+    def forward(self, qa_ids: List[str], qa_responses: Tensor) -> Tuple[List[str], Tensor]:
         r"""
         Create Question-Answering predictions from qa responses.
 
@@ -96,10 +94,7 @@ class MultipleChoiceQAModule(QAModule):
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
         self.inv_choice_map = {v: k for k, v in self.choice_map.items()}
         self.choices_text = " ".join(
-            [
-                f"({o_letter}) {o_text}"
-                for o_letter, o_text in zip(ascii_lowercase, self.choices)
-            ]
+            [f"({o_letter}) {o_text}" for o_letter, o_text in zip(ascii_lowercase, self.choices)]
         )
 
     def generate(
@@ -147,9 +142,7 @@ class MultipleChoiceQAModule(QAModule):
         q_id = "0"
         yield q_id, input_ids, attention_mask, label_ids
 
-    def forward(
-        self, qa_ids: List[str], qa_responses: Tensor
-    ) -> Tuple[List[str], Tensor]:
+    def forward(self, qa_ids: List[str], qa_responses: Tensor) -> Tuple[List[str], Tensor]:
         r"""
         Create Question-Answering predictions from qa responses.
 
@@ -165,9 +158,7 @@ class MultipleChoiceQAModule(QAModule):
 
         """
         # List[str]
-        qa_response_texts = self.tokenizer.batch_decode(
-            qa_responses, skip_special_tokens=True
-        )
+        qa_response_texts = self.tokenizer.batch_decode(qa_responses, skip_special_tokens=True)
         ex_ids = []
         preds = []
         for qa_id, qa_response in zip(qa_ids, qa_response_texts):
@@ -231,15 +222,11 @@ class MultiTurnQAModule(QAModule):
 
         """
         for t_idx, (turn, tl_map) in enumerate(zip(self.turns, self.label_turn_map)):
-            for t_qid, input_ids, attention_mask, label_ids in turn.generate(
-                body, tl_map[label], context
-            ):
+            for t_qid, input_ids, attention_mask, label_ids in turn.generate(body, tl_map[label], context):
                 q_id = f"{t_idx}|{t_qid}"
                 yield q_id, input_ids, attention_mask, label_ids
 
-    def forward(
-        self, qa_ids: List[str], qa_responses: Tensor
-    ) -> Tuple[List[str], Tensor]:
+    def forward(self, qa_ids: List[str], qa_responses: Tensor) -> Tuple[List[str], Tensor]:
         r"""
         Create Question-Answering predictions from qa responses.
 

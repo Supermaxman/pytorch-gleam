@@ -60,9 +60,7 @@ def main():
     print("collecting users for each cluster")
     cluster_samples = defaultdict(list)
     keep_users = set()
-    for cluster_id, cluster in sorted(
-        clusters.items(), key=lambda x: len(x[1]["users"]), reverse=True
-    ):
+    for cluster_id, cluster in sorted(clusters.items(), key=lambda x: len(x[1]["users"]), reverse=True):
         c_users = cluster["users"]
         c_centroid = np.array(cluster["centroid"], dtype=np.float32)
         cluster_user_idxs = [user_lookup[user_id] for user_id in c_users]
@@ -90,10 +88,8 @@ def main():
     cluster_users = defaultdict(list)
     for cluster_id, sample_users in cluster_samples.items():
         for user_id in sample_users:
-            cluster_users[cluster_id].append(
-                {"user_id": user_id, "tweets": users[user_id]}
-            )
-    print(f"saving users...")
+            cluster_users[cluster_id].append({"user_id": user_id, "tweets": users[user_id]})
+    print("saving users...")
     with open(output_path, "wb") as f:
         pickle.dump(cluster_users, f)
 

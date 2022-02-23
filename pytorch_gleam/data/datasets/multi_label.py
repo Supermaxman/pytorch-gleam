@@ -1,10 +1,11 @@
 import json
-from typing import List, Dict, Any, Union
+from typing import Any, Dict, List, Union
 
 import torch
 from torch.utils.data import Dataset
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
+
 from pytorch_gleam.data.collators import MultiLabelBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 
 
 def read_jsonl(path):

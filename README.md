@@ -23,21 +23,21 @@ ______________________________________________________________________
 
 ## PyTorch Gleam
 
-PyTorch Gleam builds upon [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning) 
-for the specific use-case of Natural Language Processing on Social Media, such as Twitter. 
-PyTorch Gleam strives to make Social Media NLP research easier to understand, use, and extend. 
+PyTorch Gleam builds upon [PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning)
+for the specific use-case of Natural Language Processing on Social Media, such as Twitter.
+PyTorch Gleam strives to make Social Media NLP research easier to understand, use, and extend.
 Gleam contains models I use in my research, from fine-tuning a BERT-based model with Lexical, Emotion, and Semantic
-information in a Graph Attention Network for stance identification towards COVID-19 misinformation, to 
+information in a Graph Attention Network for stance identification towards COVID-19 misinformation, to
 using Information Retrieval systems to identify new types of misinformation on Twitter.
 
-
 ## About Me
-My name is [Maxwell Weinzierl](https://personal.utdallas.edu/~maxwell.weinzierl/), and I am a 
-Natural Language Processing researcher at the Human Technology Research Institute (HLTRI) at the 
-University of Texas at Dallas. I am currently working on my PhD, which focuses on COVID-19 and 
-HPV vaccine misinformation, trust, and more on Social Media platforms such as Twitter. I have built 
-PyTorch Gleam to enable easy reproducibility for my published research, and for my own quick 
-iterations on research ideas. 
+
+My name is [Maxwell Weinzierl](https://personal.utdallas.edu/~maxwell.weinzierl/), and I am a
+Natural Language Processing researcher at the Human Technology Research Institute (HLTRI) at the
+University of Texas at Dallas. I am currently working on my PhD, which focuses on COVID-19 and
+HPV vaccine misinformation, trust, and more on Social Media platforms such as Twitter. I have built
+PyTorch Gleam to enable easy reproducibility for my published research, and for my own quick
+iterations on research ideas.
 
 ## How To Use
 
@@ -49,15 +49,16 @@ Simple installation from PyPI
 pip install pytorch-gleam
 ```
 
-You may need to install CUDA drivers and other versions of PyTorch. 
-See [PyTorch](https://pytorch.org/get-started/locally/) and 
-[PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning#how-to-use) 
-for installation help. 
+You may need to install CUDA drivers and other versions of PyTorch.
+See [PyTorch](https://pytorch.org/get-started/locally/) and
+[PyTorch Lightning](https://github.com/PyTorchLightning/pytorch-lightning#how-to-use)
+for installation help.
 
 ### Step 1: Create Experiment
-Create a `configs` folder with a YAML experiment file. Gleam utilizes PyTorch Lightning's CLI tools 
+
+Create a `configs` folder with a YAML experiment file. Gleam utilizes PyTorch Lightning's CLI tools
 to configure experiments from YAML files, which enables researchers to clearly look back
-and identify both hyper-parameters and model code used in their experiments. 
+and identify both hyper-parameters and model code used in their experiments.
 This example is from COVID-19 vaccine misinformation stance identification:
 
 [pg_examples/covid-stance.yaml](https://github.com/Supermaxman/pytorch-gleam/tree/master/pg_examples)
@@ -110,36 +111,38 @@ data:
     test_path:
       - covid19/stance-test.jsonl
 ```
-Documentation on available `models`, `datasets`, and `callbacks` 
+
+Documentation on available `models`, `datasets`, and `callbacks`
 will be provided soon.
 
-
-Details about how to set up YAML experiment files are provided by 
+Details about how to set up YAML experiment files are provided by
 PyTorch Lightning's [documentation](https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_cli.html).
-
 
 Annotations for this example are provided in the *VaccineLies* repository under covid19 as the *CoVaxLies* collection:
 [CoVaxLies](https://github.com/Supermaxman/vaccine-lies/tree/master/covid19).
 You will need to download the tweet texts from the tweet ids from the Twitter API.
 
-
 ### Step 2: Run Experiment
-Create a `models` folder for your saved [TensorBoard](https://www.tensorflow.org/tensorboard) logs and model weights. 
-Determine the GPU ID for the GPU you would like to utilize (multi-gpu supported) and provide the ID in a list, with 
-a comma at the end if it is a single GPU ID. You can also just specify an integer, such as `1`, and PyTorch Lightning 
+
+Create a `models` folder for your saved [TensorBoard](https://www.tensorflow.org/tensorboard) logs and model weights.
+Determine the GPU ID for the GPU you would like to utilize (multi-gpu supported) and provide the ID in a list, with
+a comma at the end if it is a single GPU ID. You can also just specify an integer, such as `1`, and PyTorch Lightning
 will try to find a single free GPU automatically.
 Run the following command to start training:
+
 ```bash
 gleam-train \
   --config configs/covid-stance.yaml \
   --trainer.gpus 1 \
   --trainer.default_root_dir models/covid-stance
 ```
+
 Your model will train, with [TensorBoard](https://www.tensorflow.org/tensorboard) logging all metrics, and a checkpoint will be saved upon completion.
 
-
 ### Step 3: Evaluate Experiment
+
 You can easily evaluate your system on a test collection as follows:
+
 ```bash
 gleam-test \
   --config configs/covid-stance.yaml \
@@ -155,21 +158,20 @@ These are a work-in-progress, as my original research code is a bit messy, but t
 
 ###### COVID-19 Vaccine Misinformation Detection on Twitter
 
-- [CoVaxLies V1 with Graph-Link Prediction]()
+- [CoVaxLies V1 with Graph-Link Prediction](<>)
 
 ###### COVID-19 Vaccine Misinformation Stance Identification on Twitter
 
-- [CoVaxLies V2 with Attitude Consistency Scoring]()
+- [CoVaxLies V2 with Attitude Consistency Scoring](<>)
 
 ###### COVID-19 Misinformation Stance Identification on Twitter
 
-- [COVIDLies with Lexical, Emotion, and Semantic GATs for Stance Identification]()
+- [COVIDLies with Lexical, Emotion, and Semantic GATs for Stance Identification](<>)
 
 ###### Vaccine Misinformation Transfer Learning
 
-- [COVID-19 to HPV on VaccineLies]()
-- [HPV to COVID-19 on VaccineLies]()
-
+- [COVID-19 to HPV on VaccineLies](<>)
+- [HPV to COVID-19 on VaccineLies](<>)
 
 ###### Vaccine Hesitancy Profiling on Twitter
 

@@ -24,6 +24,7 @@ model:
                     Contradict: 2
                     Entail: 0
                     Neutral: 1
+                  # textual entailment
                   name: mnli
                   path: glue
                   prompt: "Does the sentence entail or contradict the following:"
@@ -39,6 +40,7 @@ model:
                   label_map:
                     Entailment: 0
                     Not Entailment: 1
+                  # textual entailment
                   name: rte
                   path: glue
                   prompt: "Does the sentence entail the following:"
@@ -56,6 +58,7 @@ model:
                     Contradict: 2
                     Entail: 0
                     Neutral: 1
+                  # textual entailment
                   path: snli
                   prompt: "Does the sentence entail or contradict the following:"
                   split:
@@ -71,6 +74,7 @@ model:
                   label_map:
                     Negative: 0
                     Positive: 1
+                  # sentiment
                   name: sst2
                   path: glue
                   prompt: "Does the author express a positive or negative sentiment?"
@@ -88,6 +92,7 @@ model:
                     Negative: 0
                     Neutral: 1
                     Positive: 2
+                  # sentiment
                   name: sentiment
                   path: tweet_eval
                   prompt: "Does the author express a positive, negative, or neutral sentiment?"
@@ -106,6 +111,7 @@ model:
                     Against: 1
                     In Favor: 2
                     None: 0
+                  # stance
                   name: stance_abortion
                   path: tweet_eval
                   prompt: "What stance does the author hold towards the following: Abortion"
@@ -124,6 +130,7 @@ model:
                     Against: 1
                     In Favor: 2
                     None: 0
+                  # stance
                   name: stance_atheism
                   path: tweet_eval
                   prompt: "What stance does the author hold towards the following: Atheism"
@@ -142,6 +149,7 @@ model:
                     Against: 1
                     In Favor: 2
                     None: 0
+                  # stance
                   name: stance_climate
                   path: tweet_eval
                   prompt: "What stance does the author hold towards the following: Climate Change"
@@ -160,6 +168,7 @@ model:
                     Against: 1
                     In Favor: 2
                     None: 0
+                  # stance
                   name: stance_feminist
                   path: tweet_eval
                   prompt: "What stance does the author hold towards the following: Feminism"
@@ -178,6 +187,7 @@ model:
                     Against: 1
                     In Favor: 2
                     None: 0
+                  # stance
                   name: stance_hillary
                   path: tweet_eval
                   prompt: "What stance does the author hold towards the following: Hillary Clinton"

@@ -1,16 +1,15 @@
-from typing import List, Dict, Any, Union
-from itertools import islice, chain, zip_longest
+from itertools import islice
+from math import ceil
+from typing import Dict
 
 import numpy as np
 import torch
-from torch.utils.data import Dataset, IterableDataset
 import torch.distributed as dist
-
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-from pytorch_gleam.data.collators import MultiClassFrameEdgeMoralityBatchCollator
-from tqdm import tqdm
 import ujson as json
-from math import ceil
+from torch.utils.data import IterableDataset
+
+from pytorch_gleam.data.collators import MultiClassFrameEdgeMoralityBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 
 
 def batch(iterable, n):
@@ -115,10 +114,7 @@ class MultiClassFrameEdgeMoralityIterableDataset(IterableDataset):
                         ex_edges[edge_type] = adj_list
                     ex_morality = []
                     if "morality_preds" in tweet:
-                        ex_morality = [
-                            self.morality_map[m_name]
-                            for m_name in tweet["morality_preds"]
-                        ]
+                        ex_morality = [self.morality_map[m_name] for m_name in tweet["morality_preds"]]
                     f_morality = []
                     for m_name, m_val in frame["moralities"].items():
                         if m_val:

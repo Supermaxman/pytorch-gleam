@@ -35,9 +35,9 @@ def main():
     print("collecting user vectors...")
     with open(user_path, "rb") as f:
         profiles = pickle.load(f)
-        user_ids = profiles["users"]
+        # user_ids = profiles["users"]
         user_vecs = profiles["matrix"]
-        user_lookup = {user_id: idx for (idx, user_id) in enumerate(user_ids)}
+        # user_lookup = {user_id: idx for (idx, user_id) in enumerate(user_ids)}
 
     print(user_vecs.shape)
     print("loading clusters...")
@@ -47,9 +47,7 @@ def main():
         clusters = pickle.load(f)
 
     total_users = user_vecs.shape[0]
-    for cluster_id, cluster in sorted(
-        clusters.items(), key=lambda x: len(x[1]["users"]), reverse=True
-    ):
+    for cluster_id, cluster in sorted(clusters.items(), key=lambda x: len(x[1]["users"]), reverse=True):
         c_users = cluster["users"]
         c_centroid = cluster["centroid"]
         c_avg_centroid_dist = cluster["dist"]
@@ -86,9 +84,7 @@ def main():
                     tax_name = tax_name.title()
                     # print(f'  {tax_name} Taxonomy')
                     tax_info[f"  {tax_name} Taxonomy"] = []
-                tax_info[f"  {tax_name.title()} Taxonomy"].append(
-                    (abs(t_score), f"    {t_score:+.2f}: {t_text}")
-                )
+                tax_info[f"  {tax_name.title()} Taxonomy"].append((abs(t_score), f"    {t_score:+.2f}: {t_text}"))
         for tax, tax_s in tax_info.items():
             print(tax)
             for _, s_line in sorted(tax_s, key=lambda x: x[0], reverse=True):

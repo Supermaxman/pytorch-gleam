@@ -1,7 +1,8 @@
-import json
 import argparse
-from tqdm import tqdm
+import json
 from collections import defaultdict
+
+from tqdm import tqdm
 
 
 def read_jsonl(path):

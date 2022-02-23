@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+import argparse
 import os
 import subprocess
-import argparse
+
 from filelock import FileLock
 
 

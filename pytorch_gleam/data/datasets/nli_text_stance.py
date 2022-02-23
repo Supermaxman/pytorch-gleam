@@ -1,11 +1,8 @@
 import torch
 
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-from pytorch_gleam.data.datasets.kbi_misinfo_stance import (
-    KbiMisinfoInferStanceDataset,
-    KbiMisinfoStanceDataset,
-)
 from pytorch_gleam.data.collators import NliTextBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
+from pytorch_gleam.data.datasets.kbi_misinfo_stance import KbiMisinfoInferStanceDataset, KbiMisinfoStanceDataset
 
 
 class NliTextMisinfoStanceDataset(KbiMisinfoStanceDataset):

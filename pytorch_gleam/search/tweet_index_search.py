@@ -1,8 +1,8 @@
-import json
-from tqdm import tqdm
 import argparse
+import json
 
 from pyserini.search import SimpleSearcher
+from tqdm import tqdm
 
 
 def batch(iterable, chunk_size=1):
@@ -28,7 +28,7 @@ def main():
 
     searcher = SimpleSearcher(args.index_path)
     searcher.set_bm25(args.bm25_k1, args.bm25_b)
-    print(f"Running search...")
+    print("Running search...")
 
     queries = []
     for q_id, q in questions.items():
@@ -41,9 +41,7 @@ def main():
         batch_q_txt = [q_txt for q_p_id, q_txt in batch_pairs]
         batch_q_ids = [f"{q_p_id}" for q_p_id, q_txt in batch_pairs]
 
-        q_hits = searcher.batch_search(
-            queries=batch_q_txt, qids=batch_q_ids, k=args.top_k, threads=args.threads
-        )
+        q_hits = searcher.batch_search(queries=batch_q_txt, qids=batch_q_ids, k=args.top_k, threads=args.threads)
         for q_id, hits in q_hits.items():
             for rank, hit in enumerate(hits[: args.top_k], start=1):
                 tweet_id = hit.docid

@@ -1,16 +1,14 @@
-import os
-import json
 import argparse
+import json
 import logging
-import pytorch_lightning as pl
-from torch.utils.data import IterableDataset
-from transformers import BertTokenizer, AutoModelForSequenceClassification
-from torch.utils.data import DataLoader
-from tqdm import tqdm
+import os
 from collections import defaultdict
 
+import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
+from torch.utils.data import DataLoader, IterableDataset
+from transformers import AutoModelForSequenceClassification, BertTokenizer
 
 
 def get_tweet_text(tweet):
@@ -163,9 +161,7 @@ class RerankBert(pl.LightningModule):
 
     def forward(self, input_ids, attention_mask, token_type_ids):
         # [batch_size, 2]
-        logits = self.bert(
-            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
-        )[0]
+        logits = self.bert(input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0]
         return logits
 
     def training_step(self, batch, batch_nb):
@@ -233,9 +229,7 @@ def main():
     parser.add_argument("-i", "--data_path", required=True)
     parser.add_argument("-qp", "--questions_path", default=None)
     parser.add_argument("-op", "--output_path", required=True)
-    parser.add_argument(
-        "-pm", "--pre_model_name", default="nboost/pt-biobert-base-msmarco"
-    )
+    parser.add_argument("-pm", "--pre_model_name", default="nboost/pt-biobert-base-msmarco")
     parser.add_argument("-sd", "--save_directory", default="models")
     parser.add_argument("-w", "--num_workers", default=1, type=int)
     parser.add_argument("-bs", "--batch_size", default=4, type=int)
@@ -292,9 +286,7 @@ def main():
     )
 
     if args.use_tpus:
-        logging.warning(
-            "Gradient clipping slows down TPU training drastically, disabled for now."
-        )
+        logging.warning("Gradient clipping slows down TPU training drastically, disabled for now.")
         trainer = pl.Trainer(
             tpu_cores=tpu_cores,
             max_epochs=0,

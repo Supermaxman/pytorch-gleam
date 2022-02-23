@@ -63,7 +63,7 @@ def main():
                         f_stance = "Reject"
                     cluster_frame_stances[user_cluster_id][f_id][f_stance] += 1
 
-    print(f"saving stats...")
+    print("saving stats...")
     with open(output_path, "w") as f:
         json.dump(cluster_frame_stances, f)
 

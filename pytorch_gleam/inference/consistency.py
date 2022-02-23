@@ -1,13 +1,13 @@
-import torch
-from abc import abstractmethod, ABC
+import heapq
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Dict, List, Tuple
-import heapq
 
-from torch import nn
 import networkx as nx
 import numpy as np
+import torch
 from networkx.algorithms.traversal.breadth_first_search import bfs_predecessors
+from torch import nn
 
 from pytorch_gleam.data.datasets.kbi_misinfo_stance import flip_tm_stance, tmp_stance
 
@@ -73,9 +73,7 @@ class CountConsistencyInference(ConsistencyInference):
                 if max_label == "entail" or max_label == "contradict":
                     node_relations[node] += 1
 
-        max_rel_node, max_rel_count = max(
-            node_relations.items(), key=lambda x: x[1], default=(first_node, 0)
-        )
+        max_rel_node, max_rel_count = max(node_relations.items(), key=lambda x: x[1], default=(first_node, 0))
 
         # assume the node with the most entailments is stance 1
         for node, _ in bfs_predecessors(g, max_rel_node):
@@ -117,9 +115,7 @@ class CountConsistencyInference(ConsistencyInference):
 
             # if there are no scores for a node then default to no stance
             # this would only happen if all the adjacent nodes were assigned 0
-            max_label, max_score = max(
-                node_label_scores.items(), key=lambda x: x[-1], default=(0, 0)
-            )
+            max_label, max_score = max(node_label_scores.items(), key=lambda x: x[-1], default=(0, 0))
             node_labels[node] = max_label
 
         return node_labels
@@ -175,9 +171,7 @@ class ScoreConsistencyInference(ConsistencyInference):
         for node, scores in node_scores.items():
             node_avg_scores[node] = np.mean(scores)
 
-        max_rel_node, max_avg_score = max(
-            node_avg_scores.items(), key=lambda x: x[1], default=(first_node, 0.0)
-        )
+        max_rel_node, max_avg_score = max(node_avg_scores.items(), key=lambda x: x[1], default=(first_node, 0.0))
 
         # assume the node with the most entailments is stance 1
         for node, _ in bfs_predecessors(g, max_rel_node):
@@ -262,9 +256,7 @@ class ScoreSeedConsistencyInference(ConsistencyInference):
         for node, scores in node_scores.items():
             node_avg_scores[node] = np.mean(scores)
 
-        max_rel_node, max_avg_score = max(
-            node_avg_scores.items(), key=lambda x: x[1], default=(first_node, 0.0)
-        )
+        max_rel_node, max_avg_score = max(node_avg_scores.items(), key=lambda x: x[1], default=(first_node, 0.0))
 
         # assume the node with the most entailments is stance 1
         for node, _ in bfs_predecessors(g, max_rel_node):
@@ -338,12 +330,8 @@ class MaxScoreConsistencyInference(ConsistencyInference):
                 edge = g.get_edge_data(node, other_node)
                 entail_weight = edge["entail_weight"]
                 contradict_weight = edge["contradict_weight"]
-                min_weight, min_relation = min(
-                    [(entail_weight, 0), (contradict_weight, 1)], key=lambda x: x[0]
-                )
-                heapq.heappush(
-                    edge_heap, (min_weight, (node, other_node, min_relation))
-                )
+                min_weight, min_relation = min([(entail_weight, 0), (contradict_weight, 1)], key=lambda x: x[0])
+                heapq.heappush(edge_heap, (min_weight, (node, other_node, min_relation)))
 
         while edge_heap:
             weight, (other_node, node, relation) = heapq.heappop(edge_heap)
@@ -362,9 +350,7 @@ class MaxScoreConsistencyInference(ConsistencyInference):
                 edge = g.get_edge_data(node, next_node)
                 entail_weight = edge["entail_weight"]
                 contradict_weight = edge["contradict_weight"]
-                min_weight, min_relation = min(
-                    [(entail_weight, 0), (contradict_weight, 1)], key=lambda x: x[0]
-                )
+                min_weight, min_relation = min([(entail_weight, 0), (contradict_weight, 1)], key=lambda x: x[0])
                 heapq.heappush(edge_heap, (min_weight, (node, next_node, min_relation)))
 
         for node in g.nodes():
@@ -431,9 +417,7 @@ class SortedScoreConsistencyInference(ConsistencyInference):
         for node, scores in node_scores.items():
             node_avg_scores[node] = np.mean(scores)
         # loop over nodes and label in order of max avg relation score to labeled nodes.
-        node_list = sorted(
-            list(node_avg_scores.keys()), key=lambda x: -node_avg_scores[x]
-        )
+        node_list = sorted(list(node_avg_scores.keys()), key=lambda x: -node_avg_scores[x])
         # assume the node with the most entailments is stance 1
         for node in node_list:
             #       print(f'{node}')

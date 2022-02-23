@@ -1,16 +1,17 @@
-from abc import abstractmethod, ABC
-from typing import Optional, Union, Callable, Type
+from abc import ABC, abstractmethod
+from typing import Callable, Optional, Type, Union
 
 import pytorch_lightning as pl
 from transformers import (
-    AutoModel,
+    AdamW,
     AutoConfig,
-    AutoModelForSequenceClassification,
-    AutoModelForSeq2SeqLM,
+    AutoModel,
     AutoModelForMaskedLM,
+    AutoModelForSeq2SeqLM,
+    AutoModelForSequenceClassification,
     BertForPreTraining,
+    get_linear_schedule_with_warmup,
 )
-from transformers import AdamW, get_linear_schedule_with_warmup
 
 
 class BasePreModel(pl.LightningModule, ABC):
@@ -45,7 +46,8 @@ class BasePreModel(pl.LightningModule, ABC):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -54,8 +56,10 @@ class BasePreModel(pl.LightningModule, ABC):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -74,13 +78,9 @@ class BasePreModel(pl.LightningModule, ABC):
         self.train_steps = 0
         self.torch_cache_dir = torch_cache_dir
         if load_pre_model:
-            self.lm = self.pre_model_type.from_pretrained(
-                pre_model_name, cache_dir=torch_cache_dir
-            )
+            self.lm = self.pre_model_type.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
         else:
-            config = AutoConfig.from_pretrained(
-                pre_model_name, cache_dir=torch_cache_dir
-            )
+            config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
             self.lm = self.pre_model_type.from_config(config)
 
     def setup(self, stage: Optional[str] = None):
@@ -111,15 +111,11 @@ class BasePreModel(pl.LightningModule, ABC):
         no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         optimizer_params = [
             {
-                "params": [
-                    p for n, p in param_optimizer if not any(nd in n for nd in no_decay)
-                ],
+                "params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
                 "weight_decay": weight_decay,
             },
             {
-                "params": [
-                    p for n, p in param_optimizer if any(nd in n for nd in no_decay)
-                ],
+                "params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
                 "weight_decay": 0.0,
             },
         ]
@@ -154,9 +150,7 @@ class BaseLanguageModel(BasePreModel, ABC):
     def __init__(
         self,
         pre_model_name: str,
-        pre_model_type: Type[
-            Union[AutoModel, AutoModelForSequenceClassification]
-        ] = AutoModel,
+        pre_model_type: Type[Union[AutoModel, AutoModelForSequenceClassification]] = AutoModel,
         *args,
         **kwargs
     ):
@@ -171,7 +165,8 @@ class BaseLanguageModel(BasePreModel, ABC):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -180,8 +175,10 @@ class BaseLanguageModel(BasePreModel, ABC):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -218,9 +215,7 @@ class BaseLanguageModelForSequenceClassification(BasePreModel, ABC):
     def __init__(
         self,
         pre_model_name: str,
-        pre_model_type: Type[
-            Union[AutoModel, AutoModelForSequenceClassification]
-        ] = AutoModelForSequenceClassification,
+        pre_model_type: Type[Union[AutoModel, AutoModelForSequenceClassification]] = AutoModelForSequenceClassification,
         *args,
         **kwargs
     ):
@@ -235,7 +230,8 @@ class BaseLanguageModelForSequenceClassification(BasePreModel, ABC):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -244,8 +240,10 @@ class BaseLanguageModelForSequenceClassification(BasePreModel, ABC):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -295,11 +293,7 @@ class BaseLanguageModelForSequenceClassification(BasePreModel, ABC):
 
 class BaseLanguageModelForSeq2SeqLM(BasePreModel, ABC):
     def __init__(
-        self,
-        pre_model_name: str,
-        pre_model_type: Type[AutoModelForSeq2SeqLM] = AutoModelForSeq2SeqLM,
-        *args,
-        **kwargs
+        self, pre_model_name: str, pre_model_type: Type[AutoModelForSeq2SeqLM] = AutoModelForSeq2SeqLM, *args, **kwargs
     ):
         r"""
         Base class for Pre-Trained Language Models for sequence 2 sequence.
@@ -312,7 +306,8 @@ class BaseLanguageModelForSeq2SeqLM(BasePreModel, ABC):
                         Default: [`AutoModelForSeq2SeqLM`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -321,8 +316,10 @@ class BaseLanguageModelForSeq2SeqLM(BasePreModel, ABC):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -351,11 +348,7 @@ class BaseLanguageModelForSeq2SeqLM(BasePreModel, ABC):
 
 class BaseLanguageModelForPreTraining(BasePreModel, ABC):
     def __init__(
-        self,
-        pre_model_name: str,
-        pre_model_type: Type[BertForPreTraining] = BertForPreTraining,
-        *args,
-        **kwargs
+        self, pre_model_name: str, pre_model_type: Type[BertForPreTraining] = BertForPreTraining, *args, **kwargs
     ):
         r"""
         Base class for Masked Language Modeling.
@@ -368,7 +361,8 @@ class BaseLanguageModelForPreTraining(BasePreModel, ABC):
                         Default: [`BertForPreTraining`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                         over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -377,8 +371,10 @@ class BaseLanguageModelForPreTraining(BasePreModel, ABC):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 

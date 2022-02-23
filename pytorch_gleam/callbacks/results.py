@@ -1,8 +1,8 @@
-import os
 import json
+import os
 
-from pytorch_lightning.callbacks import Callback
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities import rank_zero_only
 
 
@@ -22,6 +22,6 @@ class JsonSaveResultsCallback(Callback):
     def on_test_epoch_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
         results_path = self._get_results_path(trainer)
         results = trainer.accelerator.results
-        print(f"Saving results...")
+        print("Saving results...")
         with open(results_path, "w") as f:
             json.dump(results, f, indent=2)

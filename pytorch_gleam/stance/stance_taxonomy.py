@@ -1,12 +1,12 @@
-from abc import ABC, abstractmethod
 import argparse
-from collections import defaultdict
 import os
+from abc import ABC, abstractmethod
+from collections import defaultdict
 from typing import List
 
-import ujson as json
 import numpy as np
 import pandas as pd
+import ujson as json
 
 
 class Taxonomy(ABC):
@@ -52,16 +52,12 @@ class MisinformationTaxonomy(HierarchicalTaxonomy):
         self.frames = frames[accept_mask | reject_mask]
 
     def load_concerns(self, file_path):
-        m_concerns = pd.read_excel(
-            file_path, index_col="m_id", engine="openpyxl", dtype=str
-        )
+        m_concerns = pd.read_excel(file_path, index_col="m_id", engine="openpyxl", dtype=str)
         m_concerns.index = m_concerns.index.astype(str)
         return m_concerns
 
     def load_themes(self, file_path):
-        m_themes = pd.read_excel(
-            file_path, index_col="theme_id", engine="openpyxl", dtype=str
-        )
+        m_themes = pd.read_excel(file_path, index_col="theme_id", engine="openpyxl", dtype=str)
         m_themes.index = m_themes.index.astype(str)
         return m_themes
 
@@ -95,12 +91,14 @@ class MisinformationTaxonomy(HierarchicalTaxonomy):
             for m_id in frames.loc[f_id]["misinformation|Accept"]:
                 if len(m_id) > 0:
                     mt_id = self.concerns.loc[m_id]["theme"]
-                    # ensure same theme only gets score once for one frame - stance pair, no need to count multiple times
+                    # ensure same theme only gets score once for one frame - stance pair,
+                    # no need to count multiple times
                     fs_themes[mt_id] = fs_score
             for m_id in frames.loc[f_id]["misinformation|Reject"]:
                 if len(m_id) > 0:
                     mt_id = self.concerns.loc[m_id]["theme"]
-                    # ensure same theme only gets score once for one frame - stance pair, no need to count multiple times
+                    # ensure same theme only gets score once for one frame - stance pair,
+                    # no need to count multiple times
                     fs_themes[mt_id] = -fs_score
             for mt_id, mt_score in fs_themes.items():
                 mt_scores[mt_id].append(mt_score)
@@ -123,16 +121,12 @@ class TrustTaxonomy(HierarchicalTaxonomy):
         self.frames = frames[accept_mask | reject_mask]
 
     def load_concerns(self, file_path):
-        t_concerns = pd.read_excel(
-            file_path, index_col="trust_id", engine="openpyxl", dtype=str
-        ).fillna("")
+        t_concerns = pd.read_excel(file_path, index_col="trust_id", engine="openpyxl", dtype=str).fillna("")
         t_concerns.index = t_concerns.index.astype(str)
         return t_concerns
 
     def load_themes(self, file_path):
-        t_themes = pd.read_excel(
-            file_path, index_col="theme_id", engine="openpyxl", dtype=str
-        )
+        t_themes = pd.read_excel(file_path, index_col="theme_id", engine="openpyxl", dtype=str)
         t_themes.index = t_themes.index.astype(str)
         return t_themes
 
@@ -167,14 +161,16 @@ class TrustTaxonomy(HierarchicalTaxonomy):
             fs_tp_themes = {}
             for t_id in frames.loc[f_id]["trust|Accept"]:
                 if len(t_id) > 0 and t_id in self.concerns.index:
-                    # ensure same theme only gets score once for one frame - stance pair, no need to count multiple times
+                    # ensure same theme only gets score once for one frame - stance pair, no need
+                    # to count multiple times
                     t_score = fs_score
                     tp_id = self.concerns.loc[t_id]["theme"]
                     if len(tp_id) > 0:
                         fs_tp_themes[tp_id] = t_score
             for t_id in frames.loc[f_id]["trust|Reject"]:
                 if len(t_id) > 0 and t_id in self.concerns.index:
-                    # ensure same theme only gets score once for one frame - stance pair, no need to count multiple times
+                    # ensure same theme only gets score once for one frame - stance pair, no need
+                    # to count multiple times
                     t_score = -fs_score
                     tp_id = self.concerns.loc[t_id]["theme"]
                     if len(tp_id) > 0:
@@ -273,9 +269,7 @@ class LiteracyTaxonomy(Taxonomy):
         self.frames = frames[accept_mask | reject_mask]
 
     def load_themes(self, file_path):
-        lt_themes = pd.DataFrame(
-            columns=["theme_id", "text"], data=[["+", "+"], ["-", "-"]]
-        )
+        lt_themes = pd.DataFrame(columns=["theme_id", "text"], data=[["+", "+"], ["-", "-"]])
         return lt_themes
 
     def frames_to_themes(self):
@@ -326,9 +320,7 @@ class CivilRightsTaxonomy(Taxonomy):
         self.frames = frames[accept_mask | reject_mask]
 
     def load_themes(self, file_path):
-        cr_themes = pd.DataFrame(
-            columns=["theme_id", "text"], data=[["+", "+"], ["-", "-"]]
-        )
+        cr_themes = pd.DataFrame(columns=["theme_id", "text"], data=[["+", "+"], ["-", "-"]])
         return cr_themes
 
     def frames_to_themes(self):
@@ -518,30 +510,18 @@ def main():
         frames=frames,
         taxonomies=[
             MisinformationTaxonomy(
-                concern_path=os.path.join(
-                    taxonomy_path, "misinformation-concerns-covid19.xlsx"
-                ),
-                theme_path=os.path.join(
-                    taxonomy_path, "misinformation-themes-covid19.xlsx"
-                ),
+                concern_path=os.path.join(taxonomy_path, "misinformation-concerns-covid19.xlsx"),
+                theme_path=os.path.join(taxonomy_path, "misinformation-themes-covid19.xlsx"),
                 frames=frames,
             ),
             TrustBuildingTaxonomy(
-                concern_path=os.path.join(
-                    taxonomy_path, "trust-building-concerns-covid19.xlsx"
-                ),
-                theme_path=os.path.join(
-                    taxonomy_path, "trust-building-themes-covid19.xlsx"
-                ),
+                concern_path=os.path.join(taxonomy_path, "trust-building-concerns-covid19.xlsx"),
+                theme_path=os.path.join(taxonomy_path, "trust-building-themes-covid19.xlsx"),
                 frames=frames,
             ),
             TrustErodingTaxonomy(
-                concern_path=os.path.join(
-                    taxonomy_path, "trust-eroding-concerns-covid19.xlsx"
-                ),
-                theme_path=os.path.join(
-                    taxonomy_path, "trust-eroding-themes-covid19.xlsx"
-                ),
+                concern_path=os.path.join(taxonomy_path, "trust-eroding-concerns-covid19.xlsx"),
+                theme_path=os.path.join(taxonomy_path, "trust-eroding-themes-covid19.xlsx"),
                 frames=frames,
             ),
             LiteracyTaxonomy(
@@ -549,9 +529,7 @@ def main():
                 frames=frames,
             ),
             CivilRightsTaxonomy(
-                theme_path=os.path.join(
-                    taxonomy_path, "civil-rights-themes-covid19.xlsx"
-                ),
+                theme_path=os.path.join(taxonomy_path, "civil-rights-themes-covid19.xlsx"),
                 frames=frames,
             ),
             # MoralityTaxonomy(

@@ -7,17 +7,13 @@ from collections import defaultdict
 import numpy as np
 from tqdm import tqdm
 from transformers import AutoTokenizer
+
 import pytorch_gleam.data.datasets.senticnet5 as senticnet5
 
 
 def get_sentic(word_text):
     word_text = word_text.lower()
-    if (
-        word_text == "coronavirus"
-        or word_text == "covid-19"
-        or word_text == "covid"
-        or word_text == "covid19"
-    ):
+    if word_text == "coronavirus" or word_text == "covid-19" or word_text == "covid" or word_text == "covid19":
         word_text = "virus"
     if word_text not in senticnet5.senticnet:
         word_text = word_text[:-1]
@@ -67,9 +63,7 @@ def align_tokens(tokens, wpt_tokens, seq_offset=0):
         start = token["start"]
         end = token["end"]
         for char_idx in range(start, end):
-            sub_token_idx = wpt_tokens.char_to_token(
-                char_idx, sequence_index=seq_offset
-            )
+            sub_token_idx = wpt_tokens.char_to_token(char_idx, sequence_index=seq_offset)
             # White spaces have no token and will return None
             if sub_token_idx is not None:
                 align_map[sub_token_idx] = token
@@ -151,9 +145,7 @@ def create_edges(m_tokens, t_tokens, wpt_tokens, num_semantic_hops):
             for sem in sentic["semantics"]:
                 semantic_edges[text].add(sem)
             for i in range(num_semantic_hops - 1):
-                semantic_edges[text] = sentic_expand(
-                    semantic_edges[text], [8, 9, 10, 11, 12]
-                )
+                semantic_edges[text] = sentic_expand(semantic_edges[text], [8, 9, 10, 11, 12])
             reverse_emotion_edges[sentic["primary_mood"]].add(text)
             reverse_emotion_edges[sentic["secondary_mood"]].add(text)
 
@@ -250,9 +242,7 @@ def main():
     parser.add_argument("-f", "--frame_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-l", "--label_name", default="labels")
-    parser.add_argument(
-        "-t", "--tokenizer", default="digitalepidemiologylab/covid-twitter-bert-v2"
-    )
+    parser.add_argument("-t", "--tokenizer", default="digitalepidemiologylab/covid-twitter-bert-v2")
     parser.add_argument("-sh", "--num_semantic_hops", default=3)
     args = parser.parse_args()
 
@@ -261,9 +251,7 @@ def main():
 
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     write_jsonl(
-        parse_tweets(
-            args.input_path, tokenizer, args.num_semantic_hops, args.label_name, frames
-        ),
+        parse_tweets(args.input_path, tokenizer, args.num_semantic_hops, args.label_name, frames),
         args.output_path,
     )
 

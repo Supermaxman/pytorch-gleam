@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import os
 import argparse
+import os
+
 from pytorch_gleam.exqueue.exqueue import ex_queue
 
 

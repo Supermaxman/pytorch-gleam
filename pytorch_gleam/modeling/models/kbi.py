@@ -1,14 +1,14 @@
 from collections import defaultdict
 from typing import Optional
 
-import torch
 import numpy as np
+import torch
 
-from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
-from pytorch_gleam.modeling.thresholds import ThresholdModule, MultiClassThresholdModule
+from pytorch_gleam.inference import ConsistencyScoring
 from pytorch_gleam.modeling.knowledge_embedding import KnowledgeEmbedding
 from pytorch_gleam.modeling.metrics import Metric
-from pytorch_gleam.inference import ConsistencyScoring
+from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
+from pytorch_gleam.modeling.thresholds import MultiClassThresholdModule, ThresholdModule
 
 
 # noinspection PyAbstractClass
@@ -65,7 +65,8 @@ class KbiLanguageModel(BaseLanguageModel):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -74,8 +75,10 @@ class KbiLanguageModel(BaseLanguageModel):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -97,15 +100,11 @@ class KbiLanguageModel(BaseLanguageModel):
 
         self.ke_rel_layers = torch.nn.ModuleList(
             [
-                torch.nn.Linear(
-                    in_features=self.hidden_size, out_features=self.ke.hidden_size
-                )
+                torch.nn.Linear(in_features=self.hidden_size, out_features=self.ke.hidden_size)
                 for _ in range(self.num_relations)
             ]
         )
-        self.ke_entity_layer = torch.nn.Linear(
-            in_features=self.hidden_size, out_features=self.ke.hidden_size
-        )
+        self.ke_entity_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.ke.hidden_size)
         self.f_dropout = torch.nn.Dropout(p=self.hidden_dropout_prob)
 
         self.metric = metric
@@ -131,9 +130,7 @@ class KbiLanguageModel(BaseLanguageModel):
     def infer_m_scores(infer, adj_list, stage_labels, stage, num_val_seeds=1):
         # always use stage 0 (val) for seeds
         seed_labels = stage_labels[0]
-        seed_examples = [
-            (ex_id, label) for (ex_id, label) in seed_labels.items() if label != 0
-        ]
+        seed_examples = [(ex_id, label) for (ex_id, label) in seed_labels.items() if label != 0]
         # if the stage is val then we have no test set, so pick
         # some number of seed examples from val and test on remaining val
         if stage == "val":
@@ -202,9 +199,7 @@ class KbiLanguageModel(BaseLanguageModel):
         results = {}
         # stage 0 is validation
         # stage 1 is test
-        m_adj_lists, m_stage_labels = KbiLanguageModel.build_adj_list(
-            infer_eval_outputs
-        )
+        m_adj_lists, m_stage_labels = KbiLanguageModel.build_adj_list(infer_eval_outputs)
 
         for m_id in m_stage_labels:
             if m_id not in threshold:
@@ -231,9 +226,7 @@ class KbiLanguageModel(BaseLanguageModel):
                 m_ex_ids.append(ex_id)
                 m_ex_m_ids.append(m_id)
             m_ex_labels = torch.tensor(m_ex_labels, dtype=torch.long)
-            m_ex_scores = KbiLanguageModel.infer_m_scores(
-                infer, m_adj_list, stage_labels, stage, num_val_seeds
-            )
+            m_ex_scores = KbiLanguageModel.infer_m_scores(infer, m_adj_list, stage_labels, stage, num_val_seeds)
             if update_threshold:
                 m_min_score = torch.min(m_ex_scores).item()
                 m_max_score = torch.max(m_ex_scores).item()
@@ -252,16 +245,12 @@ class KbiLanguageModel(BaseLanguageModel):
                 m_threshold.update_thresholds(max_threshold)
 
             m_ex_preds = m_threshold(m_ex_scores)
-            m_f1, m_p, m_r, m_cls_f1, m_cls_p, m_cls_r, m_cls_indices = m_metric(
-                m_ex_labels, m_ex_preds
-            )
+            m_f1, m_p, m_r, m_cls_f1, m_cls_p, m_cls_r, m_cls_indices = m_metric(m_ex_labels, m_ex_preds)
             results[f"{stage}_{m_id}_micro_f1"] = m_f1
             results[f"{stage}_{m_id}_micro_p"] = m_p
             results[f"{stage}_{m_id}_micro_r"] = m_r
             results[f"{stage}_{m_id}_threshold"] = m_threshold.thresholds.item()
-            for cls_index, c_f1, c_p, c_r in zip(
-                m_cls_indices, m_cls_f1, m_cls_p, m_cls_r
-            ):
+            for cls_index, c_f1, c_p, c_r in zip(m_cls_indices, m_cls_f1, m_cls_p, m_cls_r):
                 results[f"{stage}_{m_id}_{cls_index}_f1"] = c_f1
                 results[f"{stage}_{m_id}_{cls_index}_p"] = c_p
                 results[f"{stage}_{m_id}_{cls_index}_r"] = c_r
@@ -290,9 +279,7 @@ class KbiLanguageModel(BaseLanguageModel):
     @staticmethod
     def eval_triplet(triplet_eval_outputs, stage):
         loss = torch.cat([x["loss"] for x in triplet_eval_outputs], dim=0).mean()
-        accuracy = torch.cat(
-            [x["accuracy"] for x in triplet_eval_outputs], dim=0
-        ).mean()
+        accuracy = torch.cat([x["accuracy"] for x in triplet_eval_outputs], dim=0).mean()
         results = {f"{stage}_loss": loss, f"{stage}_accuracy": accuracy}
         return results
 
@@ -315,16 +302,10 @@ class KbiLanguageModel(BaseLanguageModel):
         pad_seq_len = batch["pad_seq_len"]
 
         # [bsize, num_seq, seq_len] -> [bsize * num_seq, seq_len]
-        input_ids = batch["input_ids"].view(
-            num_examples * num_sequences_per_example, pad_seq_len
-        )
-        attention_mask = batch["attention_mask"].view(
-            num_examples * num_sequences_per_example, pad_seq_len
-        )
+        input_ids = batch["input_ids"].view(num_examples * num_sequences_per_example, pad_seq_len)
+        attention_mask = batch["attention_mask"].view(num_examples * num_sequences_per_example, pad_seq_len)
         if "token_type_ids" in batch:
-            token_type_ids = batch["token_type_ids"].view(
-                num_examples * num_sequences_per_example, pad_seq_len
-            )
+            token_type_ids = batch["token_type_ids"].view(num_examples * num_sequences_per_example, pad_seq_len)
         else:
             token_type_ids = None
         # [bsize * num_seq, seq_len, hidden_size]
@@ -334,15 +315,11 @@ class KbiLanguageModel(BaseLanguageModel):
         # [bsize * num_seq, hidden_size]
         lm_output = contextualized_embeddings[:, 0]
         lm_output = self.f_dropout(lm_output)
-        lm_output = lm_output.view(
-            num_examples, num_sequences_per_example, self.hidden_size
-        )
+        lm_output = lm_output.view(num_examples, num_sequences_per_example, self.hidden_size)
         # [bsize, hidden_size]
         r_lm_output = lm_output[:, 0]
         # [bsize * num_entities, hidden_size]
-        e_lm_output = lm_output[:, 1:].reshape(
-            num_examples * num_entities, self.hidden_size
-        )
+        e_lm_output = lm_output[:, 1:].reshape(num_examples * num_entities, self.hidden_size)
         e_proj = self.ke_entity_layer(e_lm_output)
         e_embs = self.ke(e_proj, "entity")
         # [bsize, num_entities, emb_size]
@@ -357,9 +334,7 @@ class KbiLanguageModel(BaseLanguageModel):
         # [bsize, num_relations, ke_hidden_size]
         r_projections = torch.stack(r_projections, dim=1)
         # [bsize * num_relations, ke_hidden_size]
-        r_projections = r_projections.view(
-            num_examples * self.num_relations, r_projections.shape[-1]
-        )
+        r_projections = r_projections.view(num_examples * self.num_relations, r_projections.shape[-1])
         # [bsize * num_relations, ke_emb_size]
         r_embs = self.ke(r_projections, "rel")
         # [bsize, num_relations, ke_emb_size]
@@ -493,8 +468,8 @@ class KbiLanguageModel(BaseLanguageModel):
         return results
 
     @staticmethod
-    def flatten(l):
-        return [item for sublist in l for item in sublist]
+    def flatten(list_of_lists):
+        return [item for sublist in list_of_lists for item in sublist]
 
     @staticmethod
     def build_adj_list(outputs):

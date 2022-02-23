@@ -1,13 +1,13 @@
 import json
-from typing import List, Dict, Any, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-from pytorch_gleam.data.collators import MultiClassFrameEdgeMoralityBatchCollator
 from tqdm import tqdm
+
+from pytorch_gleam.data.collators import MultiClassFrameEdgeMoralityBatchCollator
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 
 
 def read_jsonl(path):
@@ -57,15 +57,11 @@ class MultiClassFrameEdgeMoralityDataset(Dataset):
             if f_label in self.label_map:
                 ex_label = self.label_map[f_label]
 
-            ex_edges = {
-                e_key: np.array(e_value) for e_key, e_value in f_ex["edges"].items()
-            }
+            ex_edges = {e_key: np.array(e_value) for e_key, e_value in f_ex["edges"].items()}
 
             ex_morality = []
             if "morality_preds" in ex:
-                ex_morality = [
-                    self.morality_map[m_name] for m_name in ex["morality_preds"]
-                ]
+                ex_morality = [self.morality_map[m_name] for m_name in ex["morality_preds"]]
             f_morality = []
             for m_name, m_val in frame["moralities"].items():
                 if m_val:

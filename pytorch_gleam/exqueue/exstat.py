@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-import os
 import argparse
-from datetime import datetime
 import json
+import os
+from datetime import datetime
 
 from filelock import FileLock
-
 
 time_format = "%Y%m%d%H%M%S"
 
@@ -49,13 +48,9 @@ def main():
         os.mkdir(queue_path)
 
     with FileLock(os.path.join(queue_path, ".lock")):
-        for ts, ex in sorted(
-            get_experiments(queue_path, "running"), key=lambda x: x[0], reverse=False
-        ):
+        for ts, ex in sorted(get_experiments(queue_path, "running"), key=lambda x: x[0], reverse=False):
             print(f"{ex_format(ex)}")
-        for ts, ex in sorted(
-            get_experiments(queue_path, "submitted"), key=lambda x: x[0], reverse=False
-        ):
+        for ts, ex in sorted(get_experiments(queue_path, "submitted"), key=lambda x: x[0], reverse=False):
             print(f"{ex_format(ex)}")
         if args.completed:
             for ts, ex in sorted(

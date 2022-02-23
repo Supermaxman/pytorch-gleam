@@ -1,8 +1,8 @@
 import os
 import shutil
 
-from pytorch_lightning.callbacks import Callback
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import Callback
 
 
 class CopyConfigCallback(Callback):
@@ -17,7 +17,7 @@ class CopyConfigCallback(Callback):
     def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
         if trainer.should_rank_save_checkpoint:
             config_path = self._get_config_path(trainer)
-            print(f"Saving config...")
+            print("Saving config...")
             root_config_path = os.path.join(trainer.default_root_dir, "config.yaml")
             print(config_path)
             print(root_config_path)

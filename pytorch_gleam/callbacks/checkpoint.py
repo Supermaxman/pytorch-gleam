@@ -1,8 +1,8 @@
 import os
-import torch
 
-from pytorch_lightning.callbacks import Callback
 import pytorch_lightning as pl
+import torch
+from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.trainer.states import TrainerFn
 from pytorch_lightning.utilities import rank_zero_only
 
@@ -18,12 +18,12 @@ class FitCheckpointCallback(Callback):
     @rank_zero_only
     def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
         checkpoint_path = self._get_checkpoint_path(trainer)
-        print(f"Saving checkpoint...")
+        print("Saving checkpoint...")
         pl_module.to("cpu")
         torch.save(pl_module.state_dict(), checkpoint_path)
 
     def _load_fit_checkpoint(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
-        print(f"Loading checkpoint...")
+        print("Loading checkpoint...")
         checkpoint_path = self._get_checkpoint_path(trainer)
         pl_module.load_state_dict(torch.load(checkpoint_path), strict=False)
 
@@ -41,18 +41,14 @@ class FitCheckpointCallback(Callback):
 
 
 class PreTrainedCheckpointCallback(Callback):
-    def __init__(
-        self, pre_model_path: str, pre_checkpoint_name: str = "pytorch_model.bin"
-    ):
+    def __init__(self, pre_model_path: str, pre_checkpoint_name: str = "pytorch_model.bin"):
         super().__init__()
         self.pre_model_path = pre_model_path
         self.pre_checkpoint_name = pre_checkpoint_name
-        self.checkpoint_path = os.path.join(
-            self.pre_model_path, self.pre_checkpoint_name
-        )
+        self.checkpoint_path = os.path.join(self.pre_model_path, self.pre_checkpoint_name)
 
     def _load_pre_checkpoint(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
-        print(f"Loading checkpoint...")
+        print("Loading checkpoint...")
         pl_module.load_state_dict(torch.load(self.checkpoint_path), strict=False)
 
     def on_fit_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule):

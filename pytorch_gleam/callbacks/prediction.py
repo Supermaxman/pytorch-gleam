@@ -1,14 +1,13 @@
 import argparse
-
-import ujson as json
 import os
-import torch
 from collections import defaultdict
 from typing import Any, List
 
-from pytorch_lightning.callbacks import BasePredictionWriter
 import pytorch_lightning as pl
+import torch
 import torch.distributed as dist
+import ujson as json
+from pytorch_lightning.callbacks import BasePredictionWriter
 
 
 class JsonlWriter(BasePredictionWriter):

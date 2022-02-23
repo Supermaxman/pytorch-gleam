@@ -1,10 +1,11 @@
 import argparse
-import os
 import json
-from tqdm import tqdm
-from pprint import pprint
+import os
 from collections import defaultdict
 from multiprocessing import Pool
+from pprint import pprint
+
+from tqdm import tqdm
 
 
 def read_file(file_path):
@@ -109,11 +110,7 @@ def main():
     parser.add_argument("-ps", "--processes", default=8)
     args = parser.parse_args()
 
-    files = [
-        os.path.join(args.input_path, x)
-        for x in os.listdir(args.input_path)
-        if x.endswith(".json")
-    ]
+    files = [os.path.join(args.input_path, x) for x in os.listdir(args.input_path) if x.endswith(".json")]
     with open(args.output_path, "w") as f:
         with Pool(processes=args.processes) as p:
             for tweets in tqdm(p.imap(parse_tweet_file, files), total=len(files)):

@@ -1,10 +1,8 @@
 import torch
 
-from pytorch_gleam.modeling.models.base_models import (
-    BaseLanguageModelForSequenceClassification,
-)
-from pytorch_gleam.modeling.thresholds.multi_class import MultiClassThresholdModule
 from pytorch_gleam.modeling.metrics.multi_class_f1 import F1PRMultiClassMetric
+from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSequenceClassification
+from pytorch_gleam.modeling.thresholds.multi_class import MultiClassThresholdModule
 
 
 # noinspection PyAbstractClass
@@ -37,7 +35,8 @@ class NliMisinfoLanguageModel(BaseLanguageModelForSequenceClassification):
                         Default: [`AutoModel`].
 
                 learning_rate: Maximum learning rate. Learning rate will warm up from ``0`` to ``learning_rate`` over
-                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly over the remaining
+                        ``lr_warm_up`` training steps, and will then decay from ``learning_rate`` to ``0`` linearly
+                        over the remaining
                         ``1.0-lr_warm_up`` training steps.
 
                 weight_decay: How much weight decay to apply in the AdamW optimizer.
@@ -46,8 +45,10 @@ class NliMisinfoLanguageModel(BaseLanguageModelForSequenceClassification):
                 lr_warm_up: The percent of training steps to warm up learning rate from ``0`` to ``learning_rate``.
                         Default: ``0.1``.
 
-                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be initialized.
-                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is no reason to
+                load_pre_model: If ``False``, Model structure will load from pre_model_name, but weights will not be
+                        initialized.
+                        Cuts down on model load time if you plan on loading your model from a checkpoint, as there is
+                        no reason to
                         initialize your model twice.
                         Default: ``True``.
 
@@ -62,9 +63,7 @@ class NliMisinfoLanguageModel(BaseLanguageModelForSequenceClassification):
         self.score_func = torch.nn.Softmax(dim=-1)
         self.threshold = MultiClassThresholdModule()
         # TODO select based on metric
-        self.metric = F1PRMultiClassMetric(
-            num_classes=self.num_classes, mode=metric_mode
-        )
+        self.metric = F1PRMultiClassMetric(num_classes=self.num_classes, mode=metric_mode)
 
     def forward(self, batch):
         if "token_type_ids" in batch:
@@ -101,9 +100,7 @@ class NliMisinfoLanguageModel(BaseLanguageModelForSequenceClassification):
 
         if stage == "val":
             # select max f1 threshold
-            max_threshold, max_metrics = self.metric.best(
-                labels, scores, self.threshold
-            )
+            max_threshold, max_metrics = self.metric.best(labels, scores, self.threshold)
             self.threshold.update_thresholds(max_threshold)
         preds = self.threshold(scores)
 
