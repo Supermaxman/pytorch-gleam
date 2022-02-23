@@ -95,7 +95,7 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 worker_init_fn=ds.worker_init_fn,
                 # ensures same samples because rng will get assigned during worker creation
                 persistent_workers=False,
-                pin_memory=True,
+                pin_memory=not self.use_tpus,
             )
             for ds in datasets
         ]
@@ -113,8 +113,11 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 worker_init_fn=ds.worker_init_fn,
                 # ensures different samples across epochs from rng generator
                 # seeded on creation with worker seed
-                persistent_workers=True,
-                pin_memory=True,
+                # causes memory leak on TPUs
+                # TODO maybe bad on ddp in general
+                persistent_workers=not self.use_tpus,
+                # causes memory leak on TPUs
+                pin_memory=not self.use_tpus,
             )
             for ds in datasets
         ]
