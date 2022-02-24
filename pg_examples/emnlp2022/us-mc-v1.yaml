@@ -153,11 +153,12 @@ model:
                   # stance
                   name: stance_atheism
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Atheism"
                   split:
                     test: test
@@ -177,11 +178,12 @@ model:
                   # stance
                   name: stance_climate
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Climate Change"
                   split:
                     test: test
@@ -201,11 +203,12 @@ model:
                   # stance
                   name: stance_feminist
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Feminism"
                   split:
                     test: test
@@ -225,11 +228,12 @@ model:
                   # stance
                   name: stance_hillary
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Hillary Clinton"
                   split:
                     test: test
@@ -413,11 +417,12 @@ data:
                   # stance
                   name: stance_atheism
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Atheism"
                   split:
                     test: test
@@ -437,11 +442,12 @@ data:
                   # stance
                   name: stance_climate
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Climate Change"
                   split:
                     test: test
@@ -461,11 +467,12 @@ data:
                   # stance
                   name: stance_feminist
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Feminism"
                   split:
                     test: test
@@ -485,11 +492,12 @@ data:
                   # stance
                   name: stance_hillary
                   path: tweet_eval
-                  class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
-                  init_args:
-                    mode: macro
-                    num_classes: 3
-                    pos_labels: [ 1, 2 ]
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
                   prompt: "What stance does the author hold towards the following: Hillary Clinton"
                   split:
                     test: test

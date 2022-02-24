@@ -14,3 +14,4 @@ sentencepiece>=0.1.96
 unidecode
 py_lex
 networkx
+docstring_parser
