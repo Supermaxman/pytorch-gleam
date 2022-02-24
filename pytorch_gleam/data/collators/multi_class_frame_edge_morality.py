@@ -41,12 +41,10 @@ class MultiClassFrameEdgeMoralityBatchCollator(BatchCollator):
                 edge_values = edge_values[:pad_seq_len, :pad_seq_len]
                 batch_edge_name = edge_name + "_edges"
                 if batch_edge_name not in edges:
-                    edges[batch_edge_name] = torch.zeros(
-                        [batch_size, pad_seq_len, pad_seq_len], dtype=torch.float
-                    )
-                edges[batch_edge_name][
-                    ex_idx, : edge_values.shape[0], : edge_values.shape[1]
-                ] = torch.tensor(edge_values, dtype=torch.float)
+                    edges[batch_edge_name] = torch.zeros([batch_size, pad_seq_len, pad_seq_len], dtype=torch.float)
+                edges[batch_edge_name][ex_idx, : edge_values.shape[0], : edge_values.shape[1]] = torch.tensor(
+                    edge_values, dtype=torch.float
+                )
             for m_idx in ex["ex_morality"]:
                 ex_morality[ex_idx, m_idx] = 1
             for m_idx in ex["f_morality"]:

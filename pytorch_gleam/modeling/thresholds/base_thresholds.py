@@ -15,9 +15,7 @@ class ThresholdModule(torch.nn.Module):
         self.threshold_max = threshold_max
         self.threshold_delta = threshold_delta
 
-        self._thresholds = torch.nn.Parameter(
-            torch.zeros(num_thresholds, dtype=torch.float32), requires_grad=False
-        )
+        self._thresholds = torch.nn.Parameter(torch.zeros(num_thresholds, dtype=torch.float32), requires_grad=False)
 
     @property
     def thresholds(self):
@@ -56,9 +54,7 @@ class ThresholdModule(torch.nn.Module):
         threshold_delta: float = None,
     ):
         if self.num_thresholds == 1:
-            t_preds = self.get_range_threshold_predictions(
-                scores, threshold_min, threshold_max, threshold_delta
-            )
+            t_preds = self.get_range_threshold_predictions(scores, threshold_min, threshold_max, threshold_delta)
             for threshold, preds in t_preds:
                 yield threshold, preds
         else:

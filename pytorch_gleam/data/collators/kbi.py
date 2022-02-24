@@ -16,9 +16,7 @@ class KbiBatchCollator(BatchCollator):
             for ex in examples:
                 ex_seqs = [ex["t_ex"], ex["m_ex"]] + ex["p_samples"] + ex["n_samples"]
                 for ex_seq in ex_seqs:
-                    pad_seq_len = max(
-                        pad_seq_len, min(len(ex_seq["input_ids"]), self.max_seq_len)
-                    )
+                    pad_seq_len = max(pad_seq_len, min(len(ex_seq["input_ids"]), self.max_seq_len))
         return pad_seq_len
 
     def __call__(self, examples):
@@ -31,25 +29,13 @@ class KbiBatchCollator(BatchCollator):
         # ex + m + pos_samples + neg_samples
         num_sequences = num_examples * num_sequences_per_example
 
-        input_ids = torch.zeros(
-            [num_examples, num_sequences_per_example, pad_seq_len], dtype=torch.long
-        )
-        attention_mask = torch.zeros(
-            [num_examples, num_sequences_per_example, pad_seq_len], dtype=torch.long
-        )
-        token_type_ids = torch.zeros(
-            [num_examples, num_sequences_per_example, pad_seq_len], dtype=torch.long
-        )
+        input_ids = torch.zeros([num_examples, num_sequences_per_example, pad_seq_len], dtype=torch.long)
+        attention_mask = torch.zeros([num_examples, num_sequences_per_example, pad_seq_len], dtype=torch.long)
+        token_type_ids = torch.zeros([num_examples, num_sequences_per_example, pad_seq_len], dtype=torch.long)
         direction_mask = torch.zeros([num_examples, 2], dtype=torch.float)
-        labels = torch.zeros(
-            [num_examples, num_sequences_per_example - 1], dtype=torch.long
-        )
-        stages = torch.zeros(
-            [num_examples, num_sequences_per_example - 1], dtype=torch.long
-        )
-        relation_mask = torch.zeros(
-            [num_examples, num_samples, self.num_relations], dtype=torch.float
-        )
+        labels = torch.zeros([num_examples, num_sequences_per_example - 1], dtype=torch.long)
+        stages = torch.zeros([num_examples, num_sequences_per_example - 1], dtype=torch.long)
+        relation_mask = torch.zeros([num_examples, num_samples, self.num_relations], dtype=torch.float)
         ids = []
         m_ids = []
         p_ids = []
@@ -68,13 +54,9 @@ class KbiBatchCollator(BatchCollator):
             direction_mask[ex_idx, ex["direction"]] = 1.0
             for seq_idx, seq in enumerate(ex_seqs):
                 self.pad_and_apply_seq(seq["input_ids"], input_ids, ex_idx, seq_idx)
-                self.pad_and_apply_seq(
-                    seq["attention_mask"], attention_mask, ex_idx, seq_idx
-                )
+                self.pad_and_apply_seq(seq["attention_mask"], attention_mask, ex_idx, seq_idx)
                 if "token_type_ids" in seq:
-                    self.pad_and_apply_seq(
-                        seq["token_type_ids"], token_type_ids, ex_idx, seq_idx
-                    )
+                    self.pad_and_apply_seq(seq["token_type_ids"], token_type_ids, ex_idx, seq_idx)
                 else:
                     has_token_type_ids = False
             for p_ex in ex["p_samples"]:
@@ -104,6 +86,4 @@ class KbiBatchCollator(BatchCollator):
 
     def pad_and_apply_seq(self, id_list, id_tensor, ex_idx, seq_idx):
         ex_ids = id_list[: self.max_seq_len]
-        id_tensor[ex_idx, seq_idx, : len(ex_ids)] = torch.tensor(
-            ex_ids, dtype=torch.long
-        )
+        id_tensor[ex_idx, seq_idx, : len(ex_ids)] = torch.tensor(ex_ids, dtype=torch.long)

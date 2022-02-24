@@ -8,7 +8,5 @@ try:
 
     senticnet = senticnet5.senticnet
 except ImportError:
-    warn(
-        "SenticNet 5 not properly installed, skipping. See `pytorch_gleam.data.datasets.senticnet5`"
-    )
+    warn("SenticNet 5 not properly installed, skipping. See `pytorch_gleam.data.datasets.senticnet5`")
     senticnet = {}

@@ -51,9 +51,7 @@ class BaseDataModule(pl.LightningDataModule, ABC):
             return cls(**key_kwargs)
 
         pickle_path = kwargs["pickle_path"]
-        class_repr = f"{cls}" + "|".join(
-            [f"{k}-({str(v)})" for k, v in key_kwargs.items()]
-        )
+        class_repr = f"{cls}" + "|".join([f"{k}-({str(v)})" for k, v in key_kwargs.items()])
         ex_hasher = hashlib.sha1(class_repr.encode("utf-8"))
         ex_hash = ex_hasher.digest()[:12]
         file_name = base64.urlsafe_b64encode(ex_hash).decode("utf-8") + ".pickle"

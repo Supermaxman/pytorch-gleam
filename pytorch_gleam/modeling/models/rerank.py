@@ -13,9 +13,7 @@ class ReRankLanguageModel(BaseLanguageModelForSequenceClassification):
             token_type_ids = batch["token_type_ids"]
         else:
             token_type_ids = None
-        logits = self.lm_step(
-            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
-        )
+        logits = self.lm_step(input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
 
         return logits
 

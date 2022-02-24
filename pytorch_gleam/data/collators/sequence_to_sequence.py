@@ -10,9 +10,7 @@ class SequenceToSequenceBatchCollator(BatchCollator):
 
     def __call__(self, examples: list) -> dict:
         pad_seq_len = self._calculate_seq_padding(examples)
-        label_pad_seq_len = self._calculate_seq_padding(
-            examples, key="label_ids", max_seq_len=self.max_label_seq_len
-        )
+        label_pad_seq_len = self._calculate_seq_padding(examples, key="label_ids", max_seq_len=self.max_label_seq_len)
 
         batch_size = len(examples)
         input_ids = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)

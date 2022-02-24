@@ -20,9 +20,7 @@ class BertPreBatchCollator(BatchCollator):
         # "masked_lm_positions": masked_lm_positions,
         # "masked_lm_ids": masked_lm_ids,
         # -100 is ignored by loss function
-        masked_lm_labels = -100 * torch.ones(
-            [batch_size, pad_seq_len], dtype=torch.long
-        )
+        masked_lm_labels = -100 * torch.ones([batch_size, pad_seq_len], dtype=torch.long)
 
         next_sentence_labels = torch.zeros([batch_size], dtype=torch.long)
         for ex_idx, ex in enumerate(examples):
