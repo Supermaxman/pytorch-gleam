@@ -131,7 +131,7 @@ will try to find a single free GPU automatically.
 Run the following command to start training:
 
 ```bash
-gleam-train \
+gleam fit \
   --config configs/covid-stance.yaml \
   --trainer.gpus 1 \
   --trainer.default_root_dir models/covid-stance
@@ -144,7 +144,7 @@ Your model will train, with [TensorBoard](https://www.tensorflow.org/tensorboard
 You can easily evaluate your system on a test collection as follows:
 
 ```bash
-gleam-test \
+gleam test \
   --config configs/covid-stance.yaml \
   --trainer.gpus 1 \
   --trainer.default_root_dir models/covid-stance
