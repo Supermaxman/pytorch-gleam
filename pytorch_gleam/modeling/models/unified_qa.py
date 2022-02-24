@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import torch
 from transformers import Adafactor
 from transformers.optimization import get_adafactor_schedule, get_constant_schedule
 
+from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForSeq2SeqLM
 from pytorch_gleam.qa import MultiQATaskModule
 
@@ -13,11 +14,13 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
     def __init__(
         self,
         qa_task: MultiQATaskModule,
+        task_metrics: Dict[str, Metric],
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.qa_task = qa_task
+        self.task_metrics = task_metrics
 
     def eval_epoch_end(self, outputs, stage):
         loss = torch.stack([x["loss"] for x in outputs], dim=0).mean().cpu()
@@ -38,6 +41,12 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         # TODO this metric needs to be task-specific
         accuracy = labels.eq(preds).float().mean()
         results[f"{stage}_accuracy"] = accuracy
+
+        task_metrics = self.qa_task.calculate_metrics(ex_ids, labels, preds)
+
+        for task, metric in task_metrics.items():
+            p_metric = metric[0]
+            results[f"{stage}_{task}_metric"] = p_metric
 
         # f1, p, r, cls_f1, cls_p, cls_r, cls_indices = self.metric(labels, preds)
         #

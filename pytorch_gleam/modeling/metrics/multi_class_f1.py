@@ -1,14 +1,19 @@
+from typing import List, Optional
+
 from sklearn.metrics import precision_recall_fscore_support
 
 from pytorch_gleam.modeling.metrics.base_metrics import Metric
 
 
 class F1PRMultiClassMetric(Metric):
-    def __init__(self, num_classes: int, mode: str = "macro", *args, **kwargs):
+    def __init__(self, num_classes: int, mode: str = "macro", pos_labels: Optional[List[int]] = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.num_classes = num_classes
         self.mode = mode
-        self.pos_labels = list(range(self.num_classes))[1:]
+        if pos_labels is None:
+            pos_labels = list(range(self.num_classes))[1:]
+
+        self.pos_labels = pos_labels
 
     def forward(self, labels, predictions):
         # labels = labels.numpy()

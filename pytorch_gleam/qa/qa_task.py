@@ -10,6 +10,8 @@ from torch import nn
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
+from pytorch_gleam.modeling.metrics import Metric
+
 
 class QATaskConfig:
     def __init__(
@@ -20,6 +22,7 @@ class QATaskConfig:
         prompt: Union[str, dict],
         split: Dict[str, str],
         template: str,
+        metric: Metric,
         max_size: int = -1,
         name: Optional[str] = None,
     ):
@@ -33,6 +36,7 @@ class QATaskConfig:
         self.split = split
         self.template = template
         self.max_size = max_size
+        self.metric = metric
 
     def __str__(self):
         choices_txt = "|".join([f"{k}-({str(v)})" for k, v in self.choices.items()])
@@ -68,6 +72,7 @@ class QATaskModule(nn.Module):
         self.config = config
         self.template = self.config.template
         self.choice_map = self.config.choices
+        self.metric = self.config.metric
         self.choices = list(self.choice_map.keys())
         self.label_map = self.config.label_map
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
@@ -194,3 +199,22 @@ class MultiQATaskModule(nn.Module):
             f_preds.append(d_preds)
         f_preds = torch.cat(f_preds, dim=0)
         return f_ids, f_preds
+
+    def calculate_metrics(self, qa_ids, qa_labels, qa_preds):
+        # ds_path||ex_id
+        ds_ids = defaultdict(list)
+        ds_indices = defaultdict(list)
+        for ex_idx, ex_id in enumerate(qa_ids):
+            ds_path, ds_idx = ex_id.split("||")
+            ds_ids[ds_path].append(ex_id)
+            ds_indices[ds_path].append(ex_idx)
+
+        ds_metrics = {}
+        for ds_path, ds in self.datasets.items():
+            # d_ids = ds_ids[ds_path]
+            d_indices = torch.tensor(ds_indices[ds_path], dtype=torch.long)
+            d_qa_labels = qa_labels[d_indices]
+            d_qa_preds = qa_preds[d_indices]
+            d_metrics = ds.metric(d_qa_labels, d_qa_preds)
+            ds_metrics[ds_path] = d_metrics
+        return ds_metrics
