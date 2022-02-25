@@ -167,7 +167,7 @@ class QATaskModule(nn.Module):
     def load_local_dataset(self, split):
         split_file = self.split[split]
         frames = None
-        if "frames" in self.split["split"]:
+        if "frames" in self.split:
             with open(self.split["frames"]) as f:
                 frames = json.load(f)
         ds = []
