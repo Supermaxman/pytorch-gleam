@@ -2,21 +2,11 @@ from typing import Any, Dict, List, Union
 
 import numpy as np
 import torch
-import ujson as json
 from torch.utils.data import Dataset
 
 from pytorch_gleam.data.collators import SequenceToSequenceBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.qa import MultiQATaskModule
-
-
-def read_jsonl(path):
-    with open(path, "r") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                ex = json.loads(line)
-                yield ex
 
 
 class UnifiedQADataset(Dataset):

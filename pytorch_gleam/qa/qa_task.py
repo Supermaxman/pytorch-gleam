@@ -5,12 +5,22 @@ from string import ascii_lowercase
 from typing import Dict, List, Optional, Union
 
 import torch
+import ujson as json
 from datasets import load_dataset
 from torch import nn
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from pytorch_gleam.modeling.metrics import Metric
+
+
+def read_jsonl(path):
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                ex = json.loads(line)
+                yield ex
 
 
 class QATaskConfig:
@@ -23,6 +33,9 @@ class QATaskConfig:
         split: Dict[str, str],
         template: str,
         metric: Metric,
+        task: str,
+        location: Optional[str] = None,
+        label_name: Optional[str] = None,
         max_size: int = -1,
         name: Optional[str] = None,
     ):
@@ -37,6 +50,9 @@ class QATaskConfig:
         self.template = template
         self.max_size = max_size
         self.metric = metric
+        self.task = task
+        self.location = location
+        self.label_name = label_name
 
     def __str__(self):
         choices_txt = "|".join([f"{k}-({str(v)})" for k, v in self.choices.items()])
@@ -75,6 +91,10 @@ class QATaskModule(nn.Module):
         self.metric = self.config.metric
         self.choices = list(self.choice_map.keys())
         self.label_map = self.config.label_map
+        self.label_name = self.config.label_name
+        self.location = self.config.location
+        self.task = self.config.task
+        self.split = self.config.split
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
         self.inv_choice_map = {v: k for k, v in self.choice_map.items()}
 
@@ -97,12 +117,15 @@ class QATaskModule(nn.Module):
         examples = []
         if split not in self.config.split:
             return examples
-        ds = load_dataset(
-            path=self.config.path,
-            name=self.config.name,
-            split=self.config.split[split],
-            cache_dir=data_path,
-        )
+        if self.location is not None and self.location == "local":
+            ds = self.load_local_dataset(split=split)
+        else:
+            ds = load_dataset(
+                path=self.config.path,
+                name=self.config.name,
+                split=self.config.split[split],
+                cache_dir=data_path,
+            )
         for ds_idx, ex in tqdm(enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"):
             rep_dict = {
                 "{prompt}": self.config.prompt,
@@ -140,6 +163,47 @@ class QATaskModule(nn.Module):
             random.shuffle(examples)
             examples = examples[: self.config.max_size]
         return examples
+
+    def load_local_dataset(self, split):
+        split_file = self.split[split]
+        frames = None
+        if "frames" in self.split["split"]:
+            with open(self.split["frames"]) as f:
+                frames = json.load(f)
+        ds = []
+        for ex in read_jsonl(split_file):
+            ex_id = str(ex["id"])
+            ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
+
+            labels = ex[self.label_name]
+            if isinstance(labels, dict):
+                for f_id, f_label in labels.items():
+                    frame = frames[f_id]
+                    frame_text = frame["text"]
+                    if f_label not in self.label_map:
+                        continue
+                    row = {
+                        "idx": f"{ex_id}|{f_id}",
+                        "text": ex_text,
+                        "frame": frame_text,
+                        "label": self.label_map[f_label],
+                    }
+                    ds.append(row)
+            else:
+                for frame in labels:
+                    f_id = frame["misconception_id"]
+                    frame_text = frame["misconception_text"]
+                    f_label = frame["label"]
+                    if f_label not in self.label_map:
+                        continue
+                    row = {
+                        "idx": f"{ex_id}|{f_id}",
+                        "text": ex_text,
+                        "frame": frame_text,
+                        "label": self.label_map[f_label],
+                    }
+                    ds.append(row)
+        return ds
 
     def forward(self, qa_ids, qa_responses):
         # List[str]
