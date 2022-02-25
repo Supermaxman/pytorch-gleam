@@ -241,6 +241,7 @@ model:
                     val: validation
                   template: "{prompt} \n {choices} \n {text}"
 
+# TODO UPDATE to new checkpoint
 ckpt_path: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/us-mc-v1/e5s99389.ckpt
 trainer:
   gpus: 1
@@ -249,7 +250,7 @@ trainer:
   accumulate_grad_batches: 8
   check_val_every_n_epoch: 1
   deterministic: true
-  num_sanity_val_steps: -1
+  num_sanity_val_steps: 0
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint

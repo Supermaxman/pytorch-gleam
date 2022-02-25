@@ -1,15 +1,30 @@
+#!/usr/bin/env python
 import os
+from importlib.util import module_from_spec, spec_from_file_location
 from typing import List
 
 from setuptools import find_packages, setup
 
 _PATH_ROOT = os.path.dirname(__file__)
 
-VERSION = "0.6.1"
-# python setup.py sdist
-# twine upload .\dist\pytorch-gleam-VERSION.tar.gz
-HOMEPAGE = "https://github.com/Supermaxman/pytorch-gleam"
-DESCRIPTION = "Social Media NLP package for pytorch and pytorch_lightning with pre-built models"
+
+def _load_py_module(fname, pkg="pytorch_gleam"):
+    spec = spec_from_file_location(os.path.join(pkg, fname), os.path.join(_PATH_ROOT, pkg, fname))
+    py = module_from_spec(spec)
+    spec.loader.exec_module(py)
+    return py
+
+
+def _load_readme_description(path_dir: str, homepage: str) -> str:
+    path_readme = os.path.join(path_dir, "README.md")
+    with open(path_readme, encoding="utf-8") as f:
+        text = f.read()
+
+    github_source_url = os.path.join(homepage, "blob/master")
+    # replace relative repository path to absolute link to the release
+    text = text.replace("docs/images/", f"{os.path.join(github_source_url, 'docs/images/')}")
+
+    return text
 
 
 def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comment_char: str = "#") -> List[str]:
@@ -28,28 +43,24 @@ def _load_requirements(path_dir: str, file_name: str = "requirements.txt", comme
     return requirements
 
 
-def _load_readme_description(path_dir: str, homepage: str) -> str:
-    path_readme = os.path.join(path_dir, "README.md")
-    with open(path_readme, encoding="utf-8") as f:
-        text = f.read()
-
-    github_source_url = os.path.join(homepage, "blob/master")
-    # replace relative repository path to absolute link to the release
-    text = text.replace("docs/images/", f"{os.path.join(github_source_url, 'docs/images/')}")
-
-    return text
+about = _load_py_module("__about__.py")
 
 
-LONG_DESCRIPTION = _load_readme_description(_PATH_ROOT, homepage=HOMEPAGE)
+# python setup.py sdist
+# twine upload .\dist\pytorch-gleam-VERSION.tar.gz
+long_description = _load_readme_description(_PATH_ROOT, homepage=about.__homepage__)
+
 
 # Setting up
 setup(
     name="pytorch-gleam",
-    version=VERSION,
-    author="Maxwell Weinzierl",
-    author_email="maxwellweinzierl@gmail.com",
-    description=DESCRIPTION,
-    long_description=LONG_DESCRIPTION,
+    version=about.__version__,
+    author=about.__author__,
+    author_email=about.__author_email__,
+    description=about.__docs__,
+    url=about.__homepage__,
+    license=about.__license__,
+    long_description=long_description,
     packages=find_packages(exclude=["tests*", "pg_examples*", "docs*"]),
     long_description_content_type="text/markdown",
     zip_safe=False,
@@ -70,7 +81,6 @@ setup(
         "Bug Tracker": "https://github.com/Supermaxman/pytorch-gleam/issues",
         "Source Code": "https://github.com/Supermaxman/pytorch-gleam",
     },
-    license="Apache-2.0",
     download_url="https://github.com/Supermaxman/pytorch-gleam",
     classifiers=[
         "Environment :: Console",

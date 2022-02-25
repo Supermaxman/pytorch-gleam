@@ -1,5 +1,5 @@
 torch>=1.9.*
-pytorch-lightning>=1.5.*
+pytorch-lightning>=1.5.10
 transformers>=4.10.*
 scikit-learn>=0.24.*
 filelock>=3.4.*
@@ -11,7 +11,9 @@ pre-commit>=2.17.*
 emoji>=1.6.*
 datasets>=1.18.*
 sentencepiece>=0.1.96
+rich>=11.2.0
+torchmetrics>=0.5.1
+docstring_parser>=0.13
+networkx>=2.6.3
 unidecode
 py_lex
-networkx
-docstring_parser
