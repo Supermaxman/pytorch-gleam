@@ -1,0 +1,116 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.UnifiedQAForConditionalGeneration
+  init_args:
+    # 5e-4 or 1e-4 or 0.0
+    # ~ sets to None and uses Adafactor auto-tuning
+    learning_rate: 1e-3
+    pre_model_name: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v2
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          class_path: pytorch_gleam.qa.MultiQATaskConfig
+          init_args:
+            tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: co_vax_lies
+                  task: stance
+                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  prompt: "Does the author agree, disagree, or have no stance towards the following:"
+                  choices:
+                    Agree: 1
+                    Disagree: 2
+                    Other: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-train.jsonl
+                    val: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-dev.jsonl
+                    test: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-test.jsonl
+                    frames: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/misinfo.json
+                  label_name: misinfo
+                  location: local
+
+#ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/..."
+trainer:
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/covaxlies-umcqa-v2
+  max_epochs: 10
+  accumulate_grad_batches: 4
+  check_val_every_n_epoch: 1
+  deterministic: true
+  num_sanity_val_steps: 0
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        every_n_epochs: 1
+        # save all checkpoints
+        save_top_k: -1
+        save_weights_only: false
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+
+data:
+  class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    max_label_seq_len: 6
+    num_workers: 8
+    pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/qa
+    train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    val_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          class_path: pytorch_gleam.qa.MultiQATaskConfig
+          init_args:
+            tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: co_vax_lies
+                  task: stance
+                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  prompt: "Does the author agree, disagree, or have no stance towards the following:"
+                  choices:
+                    Agree: 1
+                    Disagree: 2
+                    Other: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-train.jsonl
+                    val: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-dev.jsonl
+                    test: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/stance-test.jsonl
+                    frames: /shared/hltdir4/disk1/team/data/corpora/vax-lies/covid-19/misinfo.json
+                  label_name: misinfo
+                  location: local

@@ -369,8 +369,7 @@ model:
                   location: local
 
 # TODO UPDATE to new checkpoint
-#ckpt_path: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/us-mc-v1/e5s99389.ckpt
-#ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/us-mc-v1/lightning_logs/version_4/checkpoints/epoch=7-step=132519.ckpt"
+#ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/us-mc-v4/lightning_logs/version_0/checkpoints/"
 trainer:
   accelerator: gpu
   devices: 1
@@ -379,7 +378,7 @@ trainer:
   accumulate_grad_batches: 8
   check_val_every_n_epoch: 1
   deterministic: true
-  num_sanity_val_steps: -1
+  num_sanity_val_steps: 0
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
