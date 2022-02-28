@@ -57,7 +57,7 @@ model:
                   split:
                     train: train
                     val: validation_matched
-                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+                  template: "{prompt} {premise} \\\\n {choices} \\\\n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # textual entailment
@@ -94,7 +94,7 @@ model:
                   split:
                     train: train
                     val: validation
-                  template: "{prompt} {sentence1} \n {choices} \n {sentence2}"
+                  template: "{prompt} {sentence1} \\\\n {choices} \\\\n {sentence2}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # sentiment
@@ -127,7 +127,7 @@ model:
                   split:
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {sentence}"
+                  template: "{prompt} \\\\n {choices} \\\\n {sentence}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # sentiment
@@ -170,7 +170,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -232,7 +232,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -294,7 +294,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -356,7 +356,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -418,7 +418,7 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -480,13 +480,13 @@ model:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
                   path: co_vax_lies
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -550,7 +550,7 @@ model:
                   # stance
                   path: hpv_vax_lies
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -614,7 +614,7 @@ model:
                   # stance
                   path: co_vax_frames
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -678,7 +678,7 @@ model:
                   # stance
                   path: hpv_vax_frames
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -742,7 +742,7 @@ model:
                   # stance
                   path: covid_lies
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -890,7 +890,7 @@ data:
                   split:
                     train: train
                     val: validation_matched
-                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+                  template: "{prompt} {premise} \\\\n {choices} \\\\n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # textual entailment
@@ -927,7 +927,7 @@ data:
                   split:
                     train: train
                     val: validation
-                  template: "{prompt} {sentence1} \n {choices} \n {sentence2}"
+                  template: "{prompt} {sentence1} \\\\n {choices} \\\\n {sentence2}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # sentiment
@@ -960,7 +960,7 @@ data:
                   split:
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {sentence}"
+                  template: "{prompt} \\\\n {choices} \\\\n {sentence}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # sentiment
@@ -1003,7 +1003,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -1065,7 +1065,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -1127,7 +1127,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -1189,7 +1189,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -1251,7 +1251,7 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
@@ -1313,13 +1313,13 @@ data:
                     test: test
                     train: train
                     val: validation
-                  template: "{prompt} \n {choices} \n {text}"
+                  template: "{prompt} \\\\n {choices} \\\\n {text}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # stance
                   path: co_vax_lies
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -1383,7 +1383,7 @@ data:
                   # stance
                   path: hpv_vax_lies
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -1447,7 +1447,7 @@ data:
                   # stance
                   path: co_vax_frames
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -1511,7 +1511,7 @@ data:
                   # stance
                   path: hpv_vax_frames
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
@@ -1575,7 +1575,7 @@ data:
                   # stance
                   path: covid_lies
                   task: stance
-                  template: "{prompt} {frame} \\n {choices} \\n {text}"
+                  template: "{prompt} {frame} \\\\n {choices} \\\\n {text}"
                   num_samples: 4
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
