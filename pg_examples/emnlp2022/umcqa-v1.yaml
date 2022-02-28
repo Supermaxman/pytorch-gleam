@@ -20,7 +20,7 @@ model:
                   name: mnli
                   path: glue
                   task: textual_entailment
-                  num_samples: 4
+                  num_samples: 1
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
                       init_args:
@@ -808,7 +808,7 @@ trainer:
   default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v1
   max_epochs: 5
   accumulate_grad_batches: 8
-  val_check_interval: 0.25
+  val_check_interval: 20000
   deterministic: true
   num_sanity_val_steps: 0
   callbacks:
@@ -853,7 +853,7 @@ data:
                   name: mnli
                   path: glue
                   task: textual_entailment
-                  num_samples: 4
+                  num_samples: 1
                   prompts:
                     - class_path: pytorch_gleam.qa.QATaskPrompt
                       init_args:

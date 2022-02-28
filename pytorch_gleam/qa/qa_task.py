@@ -90,6 +90,7 @@ class QATaskConfig:
                 f"template-({self.template})",
                 f"max_size-({self.max_size})",
                 f"name-({self.name})",
+                f"num_samples-({self.num_samples})",
             ]
         )
         return config_text
