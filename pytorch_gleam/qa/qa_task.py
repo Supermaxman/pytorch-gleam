@@ -186,6 +186,7 @@ class QATaskModule(nn.Module):
                         rep_dict[key] = value
                 ex_id = f"{self.path}||{idx}"
                 ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
+                ex_text = ex_text.replace("<SEP>", "\\n")
                 ex_text = ex_text.lower()
                 # TODO any more preprocessing, like urls
                 token_data = self.tokenizer(ex_text, truncation=True)
