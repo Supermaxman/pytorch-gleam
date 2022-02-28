@@ -90,8 +90,7 @@ def main():
                 top_to_run = heapq.nsmallest(num_to_run, available_to_run_list, key=lambda x: x[0])
                 for ts, ex in top_to_run:
                     p_id = min([p_id for p_id, p in processes.items() if p is None])
-                    experiment = ex["experiment"]
-                    command = f"bash {experiment}"
+                    command = ex["experiment"]
                     process = subprocess.Popen(command.split())
                     processes[p_id] = process
                     update_status(queue_path=queue_path, ex=ex, status="running", p_id=p_id)
