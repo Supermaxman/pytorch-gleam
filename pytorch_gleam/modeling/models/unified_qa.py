@@ -1,5 +1,6 @@
 from typing import Optional
 
+import numpy as np
 import torch
 from transformers import Adafactor
 from transformers.optimization import get_adafactor_schedule, get_constant_schedule
@@ -46,7 +47,7 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
             results[f"{stage}_{task}_metric"] = p_metric
             total_metrics.append(p_metric)
 
-        avg_metric = torch.stack(total_metrics, dim=0).mean()
+        avg_metric = np.mean(total_metrics)
         results[f"{stage}_metric"] = avg_metric
 
         # f1, p, r, cls_f1, cls_p, cls_r, cls_indices = self.metric(labels, preds)
