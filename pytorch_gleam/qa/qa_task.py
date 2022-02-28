@@ -116,7 +116,7 @@ class QATaskModule(nn.Module):
         self.location = self.config.location
         self.task = self.config.task
         self.split = self.config.split
-        self.num_samples = self.num_samples
+        self.num_samples = self.config.num_samples
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
 
         self.pattern_keys = list(set(re.findall(r"\{\w*\}", self.template)))
@@ -177,7 +177,7 @@ class QATaskModule(nn.Module):
                     "{choices}": choices_text,
                 }
                 idx = ex["idx"] if "idx" in ex else ds_idx
-                if self.num_samples > 1:
+                if self.config.num_samples > 1:
                     idx = f"{idx}-s{s_idx}"
                 for sub_key, key in self.data_keys:
                     if sub_key != "label" and sub_key != "idx":
