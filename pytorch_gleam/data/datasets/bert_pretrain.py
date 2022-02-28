@@ -8,8 +8,8 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 from pytorch_gleam.data.collators import BertPreBatchCollator
-from pytorch_gleam.data.datasets import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
+from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 
 
 @Language.component("avoid_sentencizer_hashtags")

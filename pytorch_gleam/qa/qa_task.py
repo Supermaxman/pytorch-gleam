@@ -11,7 +11,7 @@ from torch import nn
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from pytorch_gleam.data.datasets import preprocess_tweet, read_jsonl, TweetPreprocessConfig
+from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 from pytorch_gleam.modeling.metrics import Metric
 
 
