@@ -2,7 +2,7 @@ import random
 import re
 from collections import defaultdict
 from string import ascii_lowercase
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import torch
 import ujson as json
@@ -24,7 +24,9 @@ def read_jsonl(path):
 
 
 class QATaskPrompt:
-    def __init__(self, text: str, choices: List[Dict[str, int]]):
+    def __init__(self, text: Union[str, Dict[str, Optional[str]]], choices: List[Dict[str, int]]):
+        if isinstance(text, dict):
+            text = list(text.keys())[0]
         self.text = text
         self.choices = choices
         self.inv_choice_lists = {}
