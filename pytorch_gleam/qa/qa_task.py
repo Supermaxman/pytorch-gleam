@@ -11,16 +11,8 @@ from torch import nn
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
+from pytorch_gleam.data.datasets import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 from pytorch_gleam.modeling.metrics import Metric
-
-
-def read_jsonl(path):
-    with open(path, "r") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                ex = json.loads(line)
-                yield ex
 
 
 class QATaskPrompt:
@@ -68,7 +60,7 @@ class QATaskConfig:
         self.path = path
         self.prompts = prompts
         self.split = split
-        self.template = template
+        self.template = template.replace("<SEP>", "\\n")
         self.max_size = max_size
         self.metric = metric
         self.task = task
@@ -138,6 +130,9 @@ class QATaskModule(nn.Module):
 
         self.default_choice = self.prompts[0].default_choice
 
+        # TODO make configurable
+        self.preprocess_config = TweetPreprocessConfig()
+
     def load(self, data_path: str, split: str):
         examples = []
         if split not in self.config.split:
@@ -182,12 +177,11 @@ class QATaskModule(nn.Module):
                 for sub_key, key in self.data_keys:
                     if sub_key != "label" and sub_key != "idx":
                         value = ex[sub_key]
+                        value = preprocess_tweet(value, self.preprocess_config)
                         rep_dict[key] = value
                 ex_id = f"{self.path}||{idx}"
                 ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
-                ex_text = ex_text.replace("<SEP>", "\\n")
                 ex_text = ex_text.lower()
-                # TODO any more preprocessing, like urls
                 token_data = self.tokenizer(ex_text, truncation=True)
                 input_ids = token_data["input_ids"]
                 attention_mask = token_data["attention_mask"]
