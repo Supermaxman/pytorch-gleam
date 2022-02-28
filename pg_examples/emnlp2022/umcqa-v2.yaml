@@ -17,6 +17,50 @@ model:
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # textual entailment
+                  path: snli
+                  task: textual_entailment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following:"
+                        choices:
+                          - Entail: 0
+                            Contradict: 2
+                            Neutral: 1
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                          - Accept: 0
+                            Reject: 2
+                            Other: 1
+                          - Agree: 0
+                            Disagree: 2
+                            No Stance: 1
+                          - In Favor: 0
+                            Against: 2
+                            None: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation
+                    test: test
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # textual entailment
                   name: mnli
                   path: glue
                   task: textual_entailment
@@ -805,7 +849,7 @@ model:
 trainer:
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v2
   max_epochs: 5
   accumulate_grad_batches: 8
   val_check_interval: 0.25
@@ -849,6 +893,50 @@ data:
           class_path: pytorch_gleam.qa.MultiQATaskConfig
           init_args:
             tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # textual entailment
+                  path: snli
+                  task: textual_entailment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following:"
+                        choices:
+                          - Entail: 0
+                            Contradict: 2
+                            Neutral: 1
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                          - Accept: 0
+                            Reject: 2
+                            Other: 1
+                          - Agree: 0
+                            Disagree: 2
+                            No Stance: 1
+                          - In Favor: 0
+                            Against: 2
+                            None: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation
+                    test: test
+                  template: "{prompt} {premise} \n {choices} \n {hypothesis}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # textual entailment
