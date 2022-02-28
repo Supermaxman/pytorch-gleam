@@ -810,7 +810,7 @@ trainer:
   accumulate_grad_batches: 8
   val_check_interval: 0.25
   deterministic: true
-  num_sanity_val_steps: -1
+  num_sanity_val_steps: 0
   callbacks:
     - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
       init_args:
