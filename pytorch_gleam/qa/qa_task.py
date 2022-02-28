@@ -116,6 +116,7 @@ class QATaskModule(nn.Module):
         self.location = self.config.location
         self.task = self.config.task
         self.split = self.config.split
+        self.num_samples = self.num_samples
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
 
         self.pattern_keys = list(set(re.findall(r"\{\w*\}", self.template)))
