@@ -40,10 +40,14 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         results[f"{stage}_accuracy"] = accuracy
 
         task_metrics = self.qa_task.calculate_metrics(ex_ids, labels, preds)
-
+        total_metrics = []
         for task, metric in task_metrics.items():
             p_metric = metric[0]
             results[f"{stage}_{task}_metric"] = p_metric
+            total_metrics.append(p_metric)
+
+        avg_metric = torch.stack(total_metrics, dim=0).mean()
+        results[f"{stage}_metric"] = avg_metric
 
         # f1, p, r, cls_f1, cls_p, cls_r, cls_indices = self.metric(labels, preds)
         #
