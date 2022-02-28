@@ -2,7 +2,7 @@ import random
 import re
 from collections import defaultdict
 from string import ascii_lowercase
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import torch
 import ujson as json
@@ -16,7 +16,10 @@ from pytorch_gleam.modeling.metrics import Metric
 
 
 class QATaskPrompt:
-    def __init__(self, text: str, choices: List[Dict[str, int]]):
+    def __init__(self, text: Union[str, Dict[str, Optional[str]]], choices: List[Dict[str, int]]):
+        if isinstance(text, dict):
+            print(text)
+            text = list(text.keys())[0]
         text = text.replace("<COLON>", ":")
         self.text = text
         self.choices = choices
