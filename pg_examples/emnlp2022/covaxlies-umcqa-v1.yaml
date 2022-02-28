@@ -48,7 +48,8 @@ trainer:
   accelerator: gpu
   devices: 1
   default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/covaxlies-umcqa-v1
-  max_epochs: 10
+  # pre training was 8 epochs so 8 + 10 = 18 for 10 fine-tuning epochs
+  max_epochs: 18
   accumulate_grad_batches: 4
   check_val_every_n_epoch: 1
   deterministic: true
