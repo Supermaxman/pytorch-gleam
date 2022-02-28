@@ -2,7 +2,7 @@ import random
 import re
 from collections import defaultdict
 from string import ascii_lowercase
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import torch
 import ujson as json
@@ -23,13 +23,35 @@ def read_jsonl(path):
                 yield ex
 
 
+class QATaskPrompt:
+    def __init__(self, text: str, choices: List[Dict[str, int]]):
+        self.text = text
+        self.choices = choices
+        self.inv_choice_lists = {}
+        self.choice_map = {}
+        for choices in self.choices:
+            for c_name, c_idx in choices.items():
+                self.choice_map[c_name] = c_idx
+                if c_idx not in self.inv_choice_lists:
+                    self.inv_choice_lists[c_idx] = []
+                self.inv_choice_lists[c_idx].append(c_name)
+        self.default_choice = self.inv_choice_lists[max(self.inv_choice_lists.keys())][0]
+
+    def __str__(self):
+        choices_txt = []
+        for choices in self.choices:
+            choices_txt.append("|".join([f"{k}-({str(v)})" for k, v in choices.items()]))
+        choices_txt = "|".join([f"({x})" for x in choices_txt])
+        config_text = "|".join([f"choices-({choices_txt})", f"text-({self.text})"])
+        return config_text
+
+
 class QATaskConfig:
     def __init__(
         self,
-        choices: Dict[str, int],
         label_map: Dict[str, int],
         path: str,
-        prompt: Union[str, dict],
+        prompts: List[QATaskPrompt],
         split: Dict[str, str],
         template: str,
         metric: Metric,
@@ -38,14 +60,12 @@ class QATaskConfig:
         label_name: Optional[str] = None,
         max_size: int = -1,
         name: Optional[str] = None,
+        num_samples: int = 1,
     ):
-        self.choices = choices
         self.label_map = label_map
         self.name = name
         self.path = path
-        if isinstance(prompt, dict):
-            prompt = list(prompt.keys())[0]
-        self.prompt = prompt
+        self.prompts = prompts
         self.split = split
         self.template = template
         self.max_size = max_size
@@ -53,17 +73,17 @@ class QATaskConfig:
         self.task = task
         self.location = location
         self.label_name = label_name
+        self.num_samples = num_samples
 
     def __str__(self):
-        choices_txt = "|".join([f"{k}-({str(v)})" for k, v in self.choices.items()])
+        prompts_txt = "|".join([f"({str(p)})" for p in self.prompts])
         label_map_txt = "|".join([f"{k}-({str(v)})" for k, v in self.label_map.items()])
         split_txt = "|".join([f"{k}-({str(v)})" for k, v in self.split.items()])
         config_text = "|".join(
             [
-                f"choices-({choices_txt})",
                 f"label_map-({label_map_txt})",
                 f"path-({self.path})",
-                f"prompt-({self.prompt})",
+                f"prompts-({prompts_txt})",
                 f"split-({split_txt})",
                 f"template-({self.template})",
                 f"max_size-({self.max_size})",
@@ -87,20 +107,15 @@ class QATaskModule(nn.Module):
         self.tokenizer = tokenizer
         self.config = config
         self.template = self.config.template
-        self.choice_map = self.config.choices
+        self.prompts = self.config.prompts
         self.metric = self.config.metric
-        self.choices = list(self.choice_map.keys())
         self.label_map = self.config.label_map
         self.label_name = self.config.label_name
         self.location = self.config.location
         self.task = self.config.task
         self.split = self.config.split
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
-        self.inv_choice_map = {v: k for k, v in self.choice_map.items()}
 
-        self.choices_text = " ".join(
-            [f"({o_letter}) {o_text}" for o_letter, o_text in zip(ascii_lowercase, self.choices)]
-        )
         self.pattern_keys = list(set(re.findall(r"\{\w*\}", self.template)))
         self.pattern = re.compile(
             "|".join([re.escape(k) for k in sorted(self.pattern_keys, key=len, reverse=True)]),
@@ -112,6 +127,13 @@ class QATaskModule(nn.Module):
         if ds_name is not None:
             ds_path = f"{ds_path}|{ds_name}"
         self.path = ds_path
+
+        self.choice_map = {}
+        for prompt in self.prompts:
+            for c_name, c_idx in prompt.choice_map.items():
+                self.choice_map[c_name] = c_idx
+
+        self.default_choice = self.prompts[0].default_choice
 
     def load(self, data_path: str, split: str):
         examples = []
@@ -126,38 +148,57 @@ class QATaskModule(nn.Module):
                 split=self.config.split[split],
                 cache_dir=data_path,
             )
-        for ds_idx, ex in tqdm(enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"):
-            rep_dict = {
-                "{prompt}": self.config.prompt,
-                "{choices}": self.choices_text,
-            }
-            idx = ex["idx"] if "idx" in ex else ds_idx
-            for sub_key, key in self.data_keys:
-                if sub_key != "label" and sub_key != "idx":
-                    value = ex[sub_key]
-                    rep_dict[key] = value
-            ex_id = f"{self.path}||{idx}"
-            ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
-            ex_text = ex_text.lower()
-            ex_label = ex["label"]
-            if ex_label < 0:
-                continue
-            token_data = self.tokenizer(ex_text, truncation=True)
-            input_ids = token_data["input_ids"]
-            attention_mask = token_data["attention_mask"]
-            choice_text = self.inv_choice_map[ex_label]
-            choice_text = choice_text.lower()
-            # TODO any more preprocessing, like urls
-            label_data = self.tokenizer(choice_text)
-            label_ids = label_data["input_ids"]
-            example = {
-                "ids": ex_id,
-                "input_ids": input_ids,
-                "attention_mask": attention_mask,
-                "label_ids": label_ids,
-                "label": ex_label,
-            }
-            examples.append(example)
+        for s_idx in range(self.config.num_samples):
+            for ds_idx, ex in tqdm(enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"):
+                ex_label = ex["label"]
+                if ex_label < 0:
+                    continue
+
+                # random prompt with aligned choices
+                prompt = random.choice(self.prompts)
+
+                inv_choices_map = {}
+                # pick a random choice for each label idx
+                for inv_idx, choice_list in prompt.inv_choice_lists.items():
+                    inv_choices_map[inv_idx] = random.choice(choice_list)
+
+                choices = list(inv_choices_map.values())
+                # random order of choices
+                random.shuffle(choices)
+
+                choices_text = " ".join(
+                    [f"({o_letter}) {o_text}" for o_letter, o_text in zip(ascii_lowercase, choices)]
+                )
+                rep_dict = {
+                    "{prompt}": prompt.text,
+                    "{choices}": choices_text,
+                }
+                idx = ex["idx"] if "idx" in ex else ds_idx
+                if self.num_samples > 1:
+                    idx = f"{idx}-s{s_idx}"
+                for sub_key, key in self.data_keys:
+                    if sub_key != "label" and sub_key != "idx":
+                        value = ex[sub_key]
+                        rep_dict[key] = value
+                ex_id = f"{self.path}||{idx}"
+                ex_text = self.pattern.sub(lambda x: rep_dict[x.group(0)], self.template)
+                ex_text = ex_text.lower()
+                # TODO any more preprocessing, like urls
+                token_data = self.tokenizer(ex_text, truncation=True)
+                input_ids = token_data["input_ids"]
+                attention_mask = token_data["attention_mask"]
+                choice_text = inv_choices_map[ex_label]
+                choice_text = choice_text.lower()
+                label_data = self.tokenizer(choice_text)
+                label_ids = label_data["input_ids"]
+                example = {
+                    "ids": ex_id,
+                    "input_ids": input_ids,
+                    "attention_mask": attention_mask,
+                    "label_ids": label_ids,
+                    "label": ex_label,
+                }
+                examples.append(example)
 
         if self.config.max_size > 0:
             random.shuffle(examples)
@@ -171,6 +212,7 @@ class QATaskModule(nn.Module):
             with open(self.split["frames"]) as f:
                 frames = json.load(f)
         ds = []
+        skipped_labels = set()
         for ex in read_jsonl(split_file):
             ex_id = str(ex["id"])
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
@@ -181,6 +223,9 @@ class QATaskModule(nn.Module):
                     frame = frames[f_id]
                     frame_text = frame["text"]
                     if f_label not in self.label_map:
+                        if f_label not in skipped_labels:
+                            print(f"Skipping Label {f_label} in {self.path}")
+                            skipped_labels.add(f_label)
                         continue
                     row = {
                         "idx": f"{ex_id}|{f_id}",
@@ -212,7 +257,7 @@ class QATaskModule(nn.Module):
         for qa_response in qa_response_texts:
             qa_response = qa_response.title()
             if qa_response not in self.choice_map:
-                qa_response = self.choices[-1]
+                qa_response = self.default_choice
             qa_pred = self.choice_map[qa_response]
             preds.append(qa_pred)
         preds = torch.tensor(preds, dtype=torch.long)
