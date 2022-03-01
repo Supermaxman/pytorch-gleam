@@ -94,7 +94,7 @@ model:
                   split:
                     train: train
                     val: validation
-                  template: "{prompt} {sentence1} <SEP> {choices} <SEP> {sentence2}"
+                  template: "{prompt} {sentence2} <SEP> {choices} <SEP> {sentence1}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # sentiment
@@ -930,7 +930,7 @@ data:
                   split:
                     train: train
                     val: validation
-                  template: "{prompt} {sentence1} <SEP> {choices} <SEP> {sentence2}"
+                  template: "{prompt} {sentence2} <SEP> {choices} <SEP> {sentence1}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # sentiment
