@@ -1,0 +1,1636 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.UnifiedQAForConditionalGeneration
+  init_args:
+    # 5e-4 or 1e-4 or 0.0
+    # ~ sets to None and uses Adafactor auto-tuning
+    learning_rate: 1e-3
+    pre_model_name: allenai/unifiedqa-t5-large
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          class_path: pytorch_gleam.qa.MultiQATaskConfig
+          init_args:
+            tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # textual entailment
+                  name: mnli
+                  path: glue
+                  task: textual_entailment
+                  num_samples: 1
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 0
+                            Contradict: 2
+                            Neutral: 1
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                          - Accept: 0
+                            Reject: 2
+                            Other: 1
+                          - Agree: 0
+                            Disagree: 2
+                            No Stance: 1
+                          - In Favor: 0
+                            Against: 2
+                            None: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation_matched
+                  template: "{prompt} {hypothesis} <SEP> {choices} <SEP> {premise}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # textual entailment
+                  name: rte
+                  path: glue
+                  task: textual_entailment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail the following<COLON>"
+                        choices:
+                          - Entail: 0
+                            Not Entail: 1
+                          - Entailment: 0
+                            Not Entailment: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 0
+                            None: 1
+                          - Accept: 0
+                            Other: 1
+                          - Agree: 0
+                            Not Agree: 1
+                          - In Favor: 0
+                            None: 1
+                  label_map:
+                    Entailment: 0
+                    Not Entailment: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} {sentence2} <SEP> {choices} <SEP> {sentence1}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # sentiment
+                  name: sst2
+                  path: glue
+                  task: sentiment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the author express a positive or negative sentiment?"
+                        choices:
+                          - Positive: 1
+                            Negative: 0
+                          - In Favor: 1
+                            Against: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What sentiment does the author express?"
+                        choices:
+                          - Positive: 1
+                            Negative: 0
+                          - In Favor: 1
+                            Against: 0
+                  label_map:
+                    Negative: 0
+                    Positive: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {sentence}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # sentiment
+                  name: sentiment
+                  path: tweet_eval
+                  task: sentiment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the author express a positive, negative, or neutral sentiment?"
+                        choices:
+                          - Positive: 2
+                            Negative: 0
+                            Neutral: 1
+                          - In Favor: 2
+                            Against: 0
+                            None: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What sentiment does the author express?"
+                        choices:
+                          - Positive: 2
+                            Negative: 0
+                            Neutral: 1
+                          - In Favor: 2
+                            Against: 0
+                            None: 1
+                  label_map:
+                    Negative: 0
+                    Neutral: 1
+                    Positive: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 2, 0 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_abortion
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Abortion"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Abortion rights."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Abortion rights."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_atheism
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Atheism"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Atheism."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Atheism."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_climate
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Climate Change"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> Climate Change is a real, serious threat and needs to be addressed."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? Climate Change is a real, serious threat and needs to be addressed."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_feminist
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Feminism"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Feminism."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Feminism."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_hillary
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Hillary Clinton"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Hillary Clinton."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Hillary Clinton."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: co_vax_lies
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/stance-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/stance-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/stance-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/misinfo.json
+                  label_name: misinfo
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: hpv_vax_lies
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/stance-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/stance-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/stance-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/misinfo.json
+                  label_name: misinfo
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: co_vax_frames
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/co-vax-frames-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/co-vax-frames-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/co-vax-frames-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/frames-covid19.json
+                  label_name: labels
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: hpv_vax_frames
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames.json
+                  label_name: labels
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: covid_lies
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    na: 0
+                    pos: 1
+                    neg: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/covid19-lies/normal_unique_split_1_train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/covid19-lies/normal_unique_split_1_eval.jsonl
+                  label_name: misconceptions
+                  location: local
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /nas1-nfs1/data/maw150130/models/unified-qa/umcqa-v6
+  # actual gradient steps
+  max_steps: 100000
+  accumulate_grad_batches: 8
+  # training batches
+  val_check_interval: 50000
+  deterministic: true
+  num_sanity_val_steps: 0
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        save_top_k: -1
+        # actual gradient steps
+        # 50000 / 8 (accumulate_grad_batches) = 6250
+        every_n_train_steps: 6250
+#    - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
+#      init_args:
+#        monitor: val_metric
+#        patience: 3
+#        mode: max
+#        stopping_threshold: 1.0
+
+data:
+  class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    max_label_seq_len: 6
+    num_workers: 8
+    pickle_path: /nas1-nfs1/data/maw150130/data/pickle/qa
+    train_path: /nas1-nfs1/data/maw150130/data/huggingface
+    val_path: /nas1-nfs1/data/maw150130/data/huggingface
+    qa_task:
+      class_path: pytorch_gleam.qa.MultiQATaskModule
+      init_args:
+        tokenizer_name: allenai/unifiedqa-t5-large
+        config:
+          class_path: pytorch_gleam.qa.MultiQATaskConfig
+          init_args:
+            tasks:
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # textual entailment
+                  name: mnli
+                  path: glue
+                  task: textual_entailment
+                  num_samples: 1
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 0
+                            Contradict: 2
+                            Neutral: 1
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 0
+                            Contradiction: 2
+                            None: 1
+                          - Accept: 0
+                            Reject: 2
+                            Other: 1
+                          - Agree: 0
+                            Disagree: 2
+                            No Stance: 1
+                          - In Favor: 0
+                            Against: 2
+                            None: 1
+                  label_map:
+                    Contradict: 2
+                    Entail: 0
+                    Neutral: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation_matched
+                  template: "{prompt} {hypothesis} <SEP> {choices} <SEP> {premise}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # textual entailment
+                  name: rte
+                  path: glue
+                  task: textual_entailment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail the following<COLON>"
+                        choices:
+                          - Entail: 0
+                            Not Entail: 1
+                          - Entailment: 0
+                            Not Entailment: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 0
+                            None: 1
+                          - Accept: 0
+                            Other: 1
+                          - Agree: 0
+                            Not Agree: 1
+                          - In Favor: 0
+                            None: 1
+                  label_map:
+                    Entailment: 0
+                    Not Entailment: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} {sentence2} <SEP> {choices} <SEP> {sentence1}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # sentiment
+                  name: sst2
+                  path: glue
+                  task: sentiment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the author express a positive or negative sentiment?"
+                        choices:
+                          - Positive: 1
+                            Negative: 0
+                          - In Favor: 1
+                            Against: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What sentiment does the author express?"
+                        choices:
+                          - Positive: 1
+                            Negative: 0
+                          - In Favor: 1
+                            Against: 0
+                  label_map:
+                    Negative: 0
+                    Positive: 1
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.AccuracyMetric
+                  split:
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {sentence}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # sentiment
+                  name: sentiment
+                  path: tweet_eval
+                  task: sentiment
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the author express a positive, negative, or neutral sentiment?"
+                        choices:
+                          - Positive: 2
+                            Negative: 0
+                            Neutral: 1
+                          - In Favor: 2
+                            Against: 0
+                            None: 1
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What sentiment does the author express?"
+                        choices:
+                          - Positive: 2
+                            Negative: 0
+                            Neutral: 1
+                          - In Favor: 2
+                            Against: 0
+                            None: 1
+                  label_map:
+                    Negative: 0
+                    Neutral: 1
+                    Positive: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 2, 0 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_abortion
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Abortion"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Abortion rights."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Abortion rights."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_atheism
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Atheism"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Atheism."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Atheism."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_climate
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Climate Change"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> Climate Change is a real, serious threat and needs to be addressed."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? Climate Change is a real, serious threat and needs to be addressed."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_feminist
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Feminism"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Feminism."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Feminism."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  name: stance_hillary
+                  path: tweet_eval
+                  task: stance
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON> Hillary Clinton"
+                        choices:
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON> I am in favor of Hillary Clinton."
+                        choices:
+                          - Entail: 2
+                            Contradict: 1
+                            Neutral: 0
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences? I am in favor of Hillary Clinton."
+                        choices:
+                          - Entailment: 2
+                            Contradiction: 1
+                            None: 0
+                          - Accept: 2
+                            Reject: 1
+                            Other: 0
+                          - Agree: 2
+                            Disagree: 1
+                            No Stance: 0
+                          - In Favor: 2
+                            Against: 1
+                            None: 0
+                  label_map:
+                    Against: 1
+                    In Favor: 2
+                    None: 0
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    test: test
+                    train: train
+                    val: validation
+                  template: "{prompt} <SEP> {choices} <SEP> {text}"
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: co_vax_lies
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/stance-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/stance-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/stance-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/vax-lies/covid-19/misinfo.json
+                  label_name: misinfo
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: hpv_vax_lies
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/stance-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/stance-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/stance-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/vax-lies/hpv/misinfo.json
+                  label_name: misinfo
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: co_vax_frames
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/co-vax-frames-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/co-vax-frames-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/co-vax-frames-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/co-vax-frames/covid19/frames-covid19.json
+                  label_name: labels
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: hpv_vax_frames
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    No Stance: 0
+                    Accept: 1
+                    Reject: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames-train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames-dev.jsonl
+                    test: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames-test.jsonl
+                    frames: /nas1-nfs1/data/maw150130/data/co-vax-frames/hpv/co-vax-frames.json
+                  label_name: labels
+                  location: local
+              - class_path: pytorch_gleam.qa.QATaskConfig
+                init_args:
+                  # stance
+                  path: covid_lies
+                  task: stance
+                  template: "{prompt} {frame} <SEP> {choices} <SEP> {text}"
+                  num_samples: 4
+                  prompts:
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What stance does the author hold towards the following<COLON>"
+                        choices:
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "Does the sentence entail or contradict the following<COLON>"
+                        choices:
+                          - Entail: 1
+                            Contradict: 2
+                            Neutral: 0
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                    - class_path: pytorch_gleam.qa.QATaskPrompt
+                      init_args:
+                        text: "What is the relationship between the following sentences?"
+                        choices:
+                          - Entailment: 1
+                            Contradiction: 2
+                            None: 0
+                          - Accept: 1
+                            Reject: 2
+                            Other: 0
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
+                          - In Favor: 1
+                            Against: 2
+                            None: 0
+                  label_map:
+                    na: 0
+                    pos: 1
+                    neg: 2
+                  metric:
+                    class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+                    init_args:
+                      mode: macro
+                      num_classes: 3
+                      pos_labels: [ 1, 2 ]
+                  split:
+                    train: /nas1-nfs1/data/maw150130/data/covid19-lies/normal_unique_split_1_train.jsonl
+                    val: /nas1-nfs1/data/maw150130/data/covid19-lies/normal_unique_split_1_eval.jsonl
+                  label_name: misconceptions
+                  location: local
