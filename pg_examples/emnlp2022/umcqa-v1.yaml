@@ -57,7 +57,7 @@ model:
                   split:
                     train: train
                     val: validation_matched
-                  template: "{prompt} {premise} <SEP> {choices} <SEP> {hypothesis}"
+                  template: "{prompt} {hypothesis} <SEP> {choices} <SEP> {premise}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # textual entailment
@@ -801,7 +801,7 @@ model:
                   location: local
 
 # TODO UPDATE to new checkpoint
-ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v1/lightning_logs/version_6/checkpoints/"
+#ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v1/lightning_logs/version_6/checkpoints/"
 trainer:
   accelerator: gpu
   devices: 1
@@ -893,7 +893,7 @@ data:
                   split:
                     train: train
                     val: validation_matched
-                  template: "{prompt} {premise} <SEP> {choices} <SEP> {hypothesis}"
+                  template: "{prompt} {hypothesis} <SEP> {choices} <SEP> {premise}"
               - class_path: pytorch_gleam.qa.QATaskConfig
                 init_args:
                   # textual entailment
