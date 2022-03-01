@@ -801,13 +801,14 @@ model:
                   location: local
 
 # TODO UPDATE to new checkpoint
-#ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/us-mc-v4/lightning_logs/version_0/checkpoints/"
+ckpt_path: "/shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v1/lightning_logs/version_6/checkpoints/"
 trainer:
   accelerator: gpu
   devices: 1
   default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/umcqa-v1
   max_epochs: 10
   accumulate_grad_batches: 8
+  # training batches
   val_check_interval: 50000
   deterministic: true
   num_sanity_val_steps: 0
@@ -821,7 +822,9 @@ trainer:
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
         save_top_k: -1
-        every_n_train_steps: 50000
+        # actual gradient steps
+        # 50000 / 8 (accumulate_grad_batches) = 6250
+        every_n_train_steps: 6250
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
       init_args:
         logging_interval: step
