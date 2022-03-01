@@ -793,7 +793,7 @@ model:
 
 trainer:
   accelerator: gpu
-  devices: 1
+  devices: [3]
   default_root_dir: /nas1-nfs1/data/maw150130/models/unified-qa/umcqa-v4
   # actual gradient steps
   max_steps: 100000
