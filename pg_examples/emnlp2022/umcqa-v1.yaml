@@ -813,24 +813,24 @@ trainer:
   deterministic: true
   num_sanity_val_steps: 0
   callbacks:
-    - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
-      init_args:
-        monitor: val_metric
-        patience: 3
-        mode: max
-        stopping_threshold: 1.0
-    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
-      init_args:
-        save_top_k: -1
-        # actual gradient steps
-        # 50000 / 8 (accumulate_grad_batches) = 6250
-        every_n_train_steps: 6250
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
       init_args:
         logging_interval: step
     - class_path: pytorch_lightning.callbacks.RichProgressBar
       init_args:
         leave: true
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        save_top_k: -1
+        # actual gradient steps
+        # 50000 / 8 (accumulate_grad_batches) = 6250
+        every_n_train_steps: 6250
+#    - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
+#      init_args:
+#        monitor: val_metric
+#        patience: 3
+#        mode: max
+#        stopping_threshold: 1.0
 
 data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
