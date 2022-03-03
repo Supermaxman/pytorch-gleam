@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Optional
 
 import numpy as np
@@ -39,16 +40,24 @@ class UnifiedQAForConditionalGeneration(BaseLanguageModelForSeq2SeqLM):
         # TODO this metric needs to be task-specific
         accuracy = labels.eq(preds).float().mean()
         results[f"{stage}_accuracy"] = accuracy
-
         task_metrics = self.qa_task.calculate_metrics(ex_ids, labels, preds)
         total_metrics = []
+        task_type_metrics = defaultdict(list)
         for task, metric in task_metrics.items():
+            ds = self.qa_task.datasets[task]
+            task_type = ds.task
             p_metric = metric[0]
             results[f"{stage}_{task}_metric"] = p_metric
+
+            task_type_metrics[task_type].append(p_metric)
             total_metrics.append(p_metric)
 
         avg_metric = np.mean(total_metrics)
         results[f"{stage}_metric"] = avg_metric
+
+        for task_type, t_metrics in task_type_metrics.items():
+            t_metric = np.mean(t_metrics)
+            results[f"{stage}_{task_type}_metric"] = t_metric
 
         # f1, p, r, cls_f1, cls_p, cls_r, cls_indices = self.metric(labels, preds)
         #
