@@ -149,23 +149,32 @@ class QATaskModule(nn.Module):
                 split=self.config.split[split],
                 cache_dir=data_path,
             )
+
+        perform_sampling = self.config.num_samples >= 1 and split == "train"
         for s_idx in range(self.config.num_samples):
             for ds_idx, ex in tqdm(enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"):
                 ex_label = ex["label"]
                 if ex_label < 0:
                     continue
-
-                # random prompt with aligned choices
-                prompt = random.choice(self.prompts)
+                if perform_sampling:
+                    # random prompt with aligned choices
+                    prompt = random.choice(self.prompts)
+                else:
+                    prompt = self.prompts[0]
 
                 inv_choices_map = {}
                 # pick a random choice for each label idx
                 for inv_idx, choice_list in prompt.inv_choice_lists.items():
-                    inv_choices_map[inv_idx] = random.choice(choice_list)
+                    if perform_sampling:
+                        idx_choices = random.choice(choice_list)
+                    else:
+                        idx_choices = choice_list[0]
+                    inv_choices_map[inv_idx] = idx_choices
 
                 choices = list(inv_choices_map.values())
-                # random order of choices
-                random.shuffle(choices)
+                if perform_sampling:
+                    # random order of choices
+                    random.shuffle(choices)
 
                 choices_text = " ".join(
                     [f"({o_letter}) {o_text}" for o_letter, o_text in zip(ascii_lowercase, choices)]
