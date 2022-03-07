@@ -83,7 +83,7 @@ model:
 trainer:
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/cvl-umcqa-v1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-qa/cvl-umcqa-v8
   max_epochs: 10
   accumulate_grad_batches: 4
   check_val_every_n_epoch: 1
