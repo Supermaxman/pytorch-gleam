@@ -557,15 +557,15 @@ model:
                       init_args:
                         text: "What stance does the author hold towards the following<COLON>"
                         choices:
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
                           - In Favor: 1
                             Against: 2
                             None: 0
                           - Accept: 1
                             Reject: 2
                             Other: 0
-                          - Agree: 1
-                            Disagree: 2
-                            No Stance: 0
                     - class_path: pytorch_gleam.qa.QATaskPrompt
                       init_args:
                         text: "Does the sentence entail or contradict the following<COLON>"
@@ -1330,15 +1330,15 @@ data:
                       init_args:
                         text: "What stance does the author hold towards the following<COLON>"
                         choices:
+                          - Agree: 1
+                            Disagree: 2
+                            No Stance: 0
                           - In Favor: 1
                             Against: 2
                             None: 0
                           - Accept: 1
                             Reject: 2
                             Other: 0
-                          - Agree: 1
-                            Disagree: 2
-                            No Stance: 0
                     - class_path: pytorch_gleam.qa.QATaskPrompt
                       init_args:
                         text: "Does the sentence entail or contradict the following<COLON>"
