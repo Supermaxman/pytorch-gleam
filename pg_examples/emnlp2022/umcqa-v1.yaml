@@ -840,8 +840,9 @@ data:
     max_label_seq_len: 6
     num_workers: 8
     pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/qa
-    train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
-    val_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+#    train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+#    val_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
+    test_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
     qa_task:
       class_path: pytorch_gleam.qa.MultiQATaskModule
       init_args:
