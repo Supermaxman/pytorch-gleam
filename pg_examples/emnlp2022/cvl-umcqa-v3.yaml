@@ -103,8 +103,8 @@ data:
   class_path: pytorch_gleam.data.datasets.UnifiedQADataModule
   init_args:
     batch_size: 8
-    max_seq_len: 156
-    max_label_seq_len: 4
+    max_seq_len: 148
+    max_label_seq_len: 8
     num_workers: 8
     pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/qa
     train_path: /shared/hltdir4/disk1/team/data/corpora/huggingface
