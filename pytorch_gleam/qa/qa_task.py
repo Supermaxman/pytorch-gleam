@@ -151,7 +151,8 @@ class QATaskModule(nn.Module):
             )
 
         perform_sampling = self.config.num_samples >= 1 and split == "train"
-        for s_idx in range(self.config.num_samples):
+        num_samples = self.config.num_samples if perform_sampling else 1
+        for s_idx in range(num_samples):
             for ds_idx, ex in tqdm(enumerate(ds), total=len(ds), desc=f"Loading {self.path} {split}"):
                 ex_label = ex["label"]
                 if ex_label < 0:
@@ -184,7 +185,7 @@ class QATaskModule(nn.Module):
                     "{choices}": choices_text,
                 }
                 idx = ex["idx"] if "idx" in ex else ds_idx
-                if self.config.num_samples > 1:
+                if num_samples > 1:
                     idx = f"{idx}-s{s_idx}"
                 for sub_key, key in self.data_keys:
                     if sub_key != "label" and sub_key != "idx":
