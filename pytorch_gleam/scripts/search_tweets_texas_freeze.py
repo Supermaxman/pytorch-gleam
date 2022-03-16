@@ -95,18 +95,18 @@ if __name__ == "__main__":
         "dallas",
         "houston",
         "austin",
-        "(san antonio)",
-        "(fort worth)",
-        "(el paso)",
+        '"san antonio"',
+        '"fort worth"',
+        '"el paso"',
         "arlington",
-        "(corpus christi)",
+        '"corpus christi"',
         "plano",
         "laredo",
         "lubbock",
         "irving",
         "garland",
         "amarillo",
-        "(grand prairie)",
+        '"grand prairie"',
         "mckinney",
         "frisco",
         "brownsville",
@@ -117,16 +117,16 @@ if __name__ == "__main__":
         "waco",
         "carrollton",
         "midland",
-        "(round rock)",
+        '"round rock"',
         "abilene",
         "pearland",
         "richardson",
         "odessa",
         "beaumont",
         "lewisville",
-        "(league city)",
-        "(wichita falls)",
-        "(san angelo)",
+        '"league city"',
+        '"wichita falls"',
+        '"san angelo"',
     ]
     texas_query = " OR ".join(texas_terms)
     # top 400 most common non-stopwords in texas geolocated tweets during freeze manually selected
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     texas_search_query = f"({texas_query}) ({freeze_query})"
 
     # either hashtag match or texas state / city match and freeze term match
-    default_search_query = f"({tag_search_query}) OR ({texas_search_query})"
+    default_search_query = f"{tag_search_query} OR ({texas_search_query})"
     # https://developer.twitter.com/en/use-cases/build-for-good/extreme-weather/texas-freeze
     # v1-3
     # search_terms = [
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     use_query = True
 
     if use_query:
-        search_terms.insert(0, f"({default_search_query})")
+        search_terms.insert(0, default_search_query)
 
     query = "query=" + " ".join(search_terms)
     print(query)
