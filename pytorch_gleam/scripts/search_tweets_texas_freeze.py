@@ -110,7 +110,6 @@ if __name__ == "__main__":
         "warm",
         "fire",
         "winter",
-        "rain",
         "storm",
         "outside",
         "electricity",
