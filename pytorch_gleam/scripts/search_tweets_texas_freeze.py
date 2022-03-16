@@ -114,7 +114,6 @@ if __name__ == "__main__":
         "outside",
         "electricity",
         "electric",
-        "hot",
         "food",
         "❄",
         "🥶",
