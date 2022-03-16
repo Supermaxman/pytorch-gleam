@@ -206,6 +206,8 @@ if __name__ == "__main__":
         search_terms.insert(0, f"({default_search_query})")
 
     query = "query=" + " ".join(search_terms)
+    print(query)
+    exit()
     max_results = "max_results=500"
     tweet_fields = (
         "tweet.fields="
