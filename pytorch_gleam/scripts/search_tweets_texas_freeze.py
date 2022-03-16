@@ -25,11 +25,13 @@ if __name__ == "__main__":
     # wait 5 seconds between queries
     q_delay = 5.0
 
-    output_path = "/users/max/data/corpora/texas-freeze/raw-v2"
+    output_path = "/users/max/data/corpora/texas-freeze/raw-v3"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
     endpoint_url = "https://api.twitter.com/2/tweets/search/all"
+    # consider hashtags like
+    # #TexasFreeze, #TexasSnow and #TexasPowerOutages
     freeze_terms = []
     default_search_query = " OR ".join(freeze_terms)
     # https://developer.twitter.com/en/use-cases/build-for-good/extreme-weather/texas-freeze
@@ -41,6 +43,8 @@ if __name__ == "__main__":
         "-is:nullcast",
         # not in v1
         "-is:quote",
+        # not in v2
+        "-is:reply",
         # Texas place
         "place:texas",
     ]
