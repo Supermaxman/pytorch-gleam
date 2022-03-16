@@ -47,13 +47,11 @@ if __name__ == "__main__":
         "#snowmageddon2021",
         "#ercot",
         "#winterstorm2021",
-        "#texasstrong",
         "#winterstorm",
         "#ercotfail",
         "#abbottfailedtexas",
         "#texaspowergrid",
         "#poweroutage",
-        "#texaswinter",
         "#texassnow2021",
         "#texassnow",
         "#texasisclosed",
@@ -64,12 +62,9 @@ if __name__ == "__main__":
         "#texasblizzard2021",
         "#staywarm",
         "#txblizzard",
-        "#nopower",
         "#dallasweather",
         "#houstonfreeze",
         "#texaspoweroutages",
-        "#power",
-        "#staysafe",
         "#prayfortexas",
         "#rollingblackouts",
         "#austinweather",
@@ -102,7 +97,6 @@ if __name__ == "__main__":
         "amarillo",
         "mckinney",
         "frisco",
-        "mesquite",
         "mcallen",
         "denton",
         "waco",
@@ -152,6 +146,10 @@ if __name__ == "__main__":
 
     # either hashtag match or texas state / city match and freeze term match
     default_search_query = f"{tag_search_query} OR ({texas_search_query})"
+
+    print(default_search_query)
+    print(len(default_search_query))
+
     default_search_query = quote(default_search_query)
     # https://developer.twitter.com/en/use-cases/build-for-good/extreme-weather/texas-freeze
     # v1-3
@@ -189,8 +187,6 @@ if __name__ == "__main__":
         search_terms.insert(0, f"({default_search_query})")
 
     query = "query=" + " ".join(search_terms)
-    print(query)
-    print(len(query))
     max_results = "max_results=500"
     tweet_fields = (
         "tweet.fields="
