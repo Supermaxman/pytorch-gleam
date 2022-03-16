@@ -76,16 +76,12 @@ if __name__ == "__main__":
         "#rollingblackouts",
         "#snowday2021",
         "#austinweather",
-        "#winterwonderland",
-        "#winterweather",
         "#icestorm",
-        "#texassnowday",
         "#texaslife",
         "#houstonpoweroutage",
         "#houstonweather",
         "#austinsnow",
         "#powergrid",
-        "#articblast",
         "#electricity",
     ]
     tag_search_query = " OR ".join(freeze_tags)
@@ -125,9 +121,6 @@ if __name__ == "__main__":
         "odessa",
         "beaumont",
         "lewisville",
-        '"league city"',
-        '"wichita falls"',
-        '"san angelo"',
     ]
     texas_query = " OR ".join(texas_terms)
     # top 400 most common non-stopwords in texas geolocated tweets during freeze manually selected
@@ -209,6 +202,7 @@ if __name__ == "__main__":
 
     query = "query=" + " ".join(search_terms)
     print(query)
+    print(len(query))
     max_results = "max_results=500"
     tweet_fields = (
         "tweet.fields="
