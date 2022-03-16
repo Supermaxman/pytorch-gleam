@@ -2,6 +2,7 @@ import json
 import os
 import time
 from datetime import date, timedelta
+from urllib.parse import quote
 
 import requests
 from tqdm import tqdm
@@ -170,6 +171,7 @@ if __name__ == "__main__":
 
     # either hashtag match or texas state / city match and freeze term match
     default_search_query = f"{tag_search_query} OR ({texas_search_query})"
+    default_search_query = quote(default_search_query)
     # https://developer.twitter.com/en/use-cases/build-for-good/extreme-weather/texas-freeze
     # v1-3
     # search_terms = [
@@ -203,7 +205,7 @@ if __name__ == "__main__":
     use_query = True
 
     if use_query:
-        search_terms.insert(0, default_search_query)
+        search_terms.insert(0, f"({default_search_query})")
 
     query = "query=" + " ".join(search_terms)
     print(query)
