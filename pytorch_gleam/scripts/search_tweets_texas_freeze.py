@@ -25,16 +25,167 @@ if __name__ == "__main__":
     # wait 5 seconds between queries
     q_delay = 5.0
 
-    output_path = "/users/max/data/corpora/texas-freeze/raw-v3"
+    output_path = "/users/max/data/corpora/texas-freeze/raw-v4"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
     endpoint_url = "https://api.twitter.com/2/tweets/search/all"
     # consider hashtags like
     # #TexasFreeze, #TexasSnow and #TexasPowerOutages
-    freeze_terms = []
-    default_search_query = " OR ".join(freeze_terms)
+    # v1-3
+    # freeze_terms = []
+    # v4
+    # top 300 most common hashtags in texas geolocated tweets during freeze manually selected
+    freeze_tags = [
+        "#texasfreeze",
+        "#texaswinterstorm2021",
+        "#texasblackout",
+        "#texaspoweroutage",
+        "#texasweather",
+        "#texaswinterstorm",
+        "#snowmageddon2021",
+        "#ercot",
+        "#winterstorm2021",
+        "#texasstrong",
+        "#winterstorm",
+        "#ercotfail",
+        "#abbottfailedtexas",
+        "#texaspowergrid",
+        "#poweroutage",
+        "#texaswinter",
+        "#texassnow2021",
+        "#texassnow",
+        "#texasisclosed",
+        "#snowpocalypse2021",
+        "#icestorm2021",
+        "#snowstorm2021",
+        "#freezing",
+        "#texasblizzard2021",
+        "#staywarm",
+        "#polarvortex",
+        "#txblizzard",
+        "#nopower",
+        "#dallasweather",
+        "#snowintexas",
+        "#houstonfreeze",
+        "#texaspoweroutages",
+        "#power",
+        "#staysafe",
+        "#prayfortexas",
+        "#rollingblackouts",
+        "#snowday2021",
+        "#austinweather",
+        "#winterwonderland",
+        "#winterweather",
+        "#icestorm",
+        "#texassnowday",
+        "#texaslife",
+        "#houstonpoweroutage",
+        "#houstonweather",
+        "#austinsnow",
+        "#powergrid",
+        "#articblast",
+        "#electricity",
+    ]
+    tag_search_query = " OR ".join(freeze_tags)
+
+    # texas + top 35 texas cities in pop size
+    texas_terms = [
+        "texas",
+        "dallas",
+        "houston",
+        "austin",
+        "(san antonio)",
+        "(fort worth)",
+        "(el paso)",
+        "arlington",
+        "(corpus christi)",
+        "plano",
+        "laredo",
+        "lubbock",
+        "irving",
+        "garland",
+        "amarillo",
+        "(grand prairie)",
+        "mckinney",
+        "frisco",
+        "brownsville",
+        "killeen",
+        "mesquite",
+        "mcallen",
+        "denton",
+        "waco",
+        "carrollton",
+        "midland",
+        "(round rock)",
+        "abilene",
+        "pearland",
+        "richardson",
+        "odessa",
+        "beaumont",
+        "lewisville",
+        "(league city)",
+        "(wichita falls)",
+        "(san angelo)",
+    ]
+    texas_query = " OR ".join(texas_terms)
+    # top 400 most common non-stopwords in texas geolocated tweets during freeze manually selected
+    freeze_terms = [
+        "freeze",
+        "freezing",
+        "froze",
+        "frozen",
+        "ice",
+        "degrees",
+        "degree",
+        "power",
+        "snow",
+        "cold",
+        "weather",
+        "water",
+        "warm",
+        "fire",
+        "winter",
+        "rain",
+        "storm",
+        "outside",
+        "electricity",
+        "electric",
+        "hot",
+        "food",
+        "❄",
+        "🥶",
+        "heat",
+        "wind",
+        "fire",
+        "emergency",
+        "blackout",
+        "energy",
+        "extreme",
+        "extremes",
+        "extremely",
+    ]
+    freeze_query = " OR ".join(freeze_terms)
+    texas_search_query = f"({texas_query}) ({freeze_query})"
+
+    # either hashtag match or texas state / city match and freeze term match
+    default_search_query = f"({tag_search_query}) OR ({texas_search_query})"
     # https://developer.twitter.com/en/use-cases/build-for-good/extreme-weather/texas-freeze
+    # v1-3
+    # search_terms = [
+    #     # in v1
+    #     # "has:geo",
+    #     "lang:en",
+    #     "-is:retweet",
+    #     "-is:nullcast",
+    #     # not in v1
+    #     "-is:quote",
+    #     # not in v2
+    #     "-is:reply",
+    #     # Texas place
+    #     "place:texas",
+    # ]
+    # v4
     search_terms = [
         # in v1
         # "has:geo",
@@ -45,10 +196,13 @@ if __name__ == "__main__":
         "-is:quote",
         # not in v2
         "-is:reply",
-        # Texas place
-        "place:texas",
+        # v1-3 Texas place
+        # "place:texas",
     ]
-    if len(default_search_query) > 0:
+    # v1-3 false, v4 true
+    use_query = True
+
+    if use_query:
         search_terms.insert(0, f"({default_search_query})")
 
     query = "query=" + " ".join(search_terms)
