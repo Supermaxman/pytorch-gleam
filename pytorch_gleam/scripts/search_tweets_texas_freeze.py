@@ -39,6 +39,8 @@ if __name__ == "__main__":
     # top 300 most common hashtags in texas geolocated tweets during freeze manually selected
     freeze_tags = [
         "#texasfreeze",
+        "#texassnow",
+        "#texaspoweroutages",
         "#texaswinterstorm2021",
         "#texasblackout",
         "#texaspoweroutage",
@@ -53,7 +55,6 @@ if __name__ == "__main__":
         "#texasblizzard2021",
         "#txblizzard",
         "#houstonfreeze",
-        "#texaspoweroutages",
         "#prayfortexas",
         "#rollingblackouts",
         "#houstonpoweroutage",
