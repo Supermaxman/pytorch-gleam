@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # wait 5 seconds between queries
     q_delay = 5.0
 
-    output_path = "/users/max/data/corpora/texas-freeze/raw-v1"
+    output_path = "/users/max/data/corpora/texas-freeze/raw-v2"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
@@ -34,10 +34,13 @@ if __name__ == "__main__":
     default_search_query = " OR ".join(freeze_terms)
     # https://developer.twitter.com/en/use-cases/build-for-good/extreme-weather/texas-freeze
     search_terms = [
-        "has:geo",
+        # in v1
+        # "has:geo",
         "lang:en",
         "-is:retweet",
         "-is:nullcast",
+        # not in v1
+        "-is:quote",
         # Texas place
         "place:texas",
     ]
