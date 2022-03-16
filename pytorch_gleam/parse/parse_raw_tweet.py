@@ -1,10 +1,10 @@
 import argparse
-import json
 import os
 from collections import defaultdict
 from multiprocessing import Pool
 from pprint import pprint
 
+import ujson as json
 from tqdm import tqdm
 
 
