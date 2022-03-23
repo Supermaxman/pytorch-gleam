@@ -20,12 +20,15 @@ def date_range(start_date, end_date):
 if __name__ == "__main__":
     # 2021-07-23 2021-07-24
     # start_date = date(2021, 7, 1)
-    start_date = date(2021, 7, 23)
+    # v7 2021-10-19
+    # start_date = date(2021, 7, 23)
+    start_date = date(2021, 10, 20)
     end_date = date(2022, 1, 1)
     # wait 5 seconds between queries
     q_delay = 5
 
-    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
+    # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
+    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v8"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
