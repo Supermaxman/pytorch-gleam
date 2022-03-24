@@ -31,6 +31,8 @@ def read_jsonl(path):
 def invert_errors(errors):
     inv = defaultdict(dict)
     for error in errors:
+        if "resource_id" not in error:
+            print(error)
         r_id = error["resource_id"]
         e_type = error["detail"].replace(f": [{r_id}].", "")
         inv[r_id][e_type] = error
