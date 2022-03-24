@@ -164,13 +164,12 @@ def main():
     path_counts = defaultdict(int)
     with open(args.output_path, "w") as f:
         for file, path in tqdm(files, total=len(files)):
-            for tweets in parse_tweet_file(file, args.retweets):
-                for tweet_id, tweet_json in tweets:
-                    if tweet_id in all_ids:
-                        continue
-                    f.write(tweet_json + "\n")
-                    all_ids.add(tweet_id)
-                    path_counts[path] += 1
+            for tweet_id, tweet_json in parse_tweet_file(file, args.retweets):
+                if tweet_id in all_ids:
+                    continue
+                f.write(tweet_json + "\n")
+                all_ids.add(tweet_id)
+                path_counts[path] += 1
 
     for path, count in path_counts.items():
         print(f"{path} - {count}")
