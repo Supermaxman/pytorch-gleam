@@ -149,16 +149,15 @@ def parse_tweet_file(args, chunk_size=500):
         for tweet in parse_historical_tweets(tweets, keep_retweets):
             json_data = json.dumps(tweet)
             parsed_tweets.append((tweet["id"], json_data, file_path, path))
-        yield parsed_tweets
+        return parsed_tweets
     elif file_path.endswith(".jsonl"):
-        for tweets in grouper(read_jsonl(file_path), chunk_size):
-            parsed_tweets = []
-            for tweet in tweets:
-                tweet = parse_stream_tweet(tweet, keep_retweets)
-                if tweet is not None:
-                    json_data = json.dumps(tweet)
-                    parsed_tweets.append((tweet["id"], json_data, file_path, path))
-            yield parsed_tweets
+        parsed_tweets = []
+        for tweet in read_jsonl(file_path):
+            tweet = parse_stream_tweet(tweet, keep_retweets)
+            if tweet is not None:
+                json_data = json.dumps(tweet)
+                parsed_tweets.append((tweet["id"], json_data, file_path, path))
+        return parsed_tweets
     else:
         raise ValueError(f"Unknown file format: {file_path}")
 
@@ -183,7 +182,7 @@ def main():
     path_counts = defaultdict(int)
     with open(args.output_path, "w") as f:
         with Pool(processes=args.processes) as p_parse:
-            for tweets in tqdm(p_parse.imap(parse_tweet_file, files), total=len(files)):
+            for tweets in tqdm(p_parse.imap_unordered(parse_tweet_file, files), total=len(files)):
                 for tweet_id, tweet_json, file_path, path in tweets:
                     if tweet_id in all_ids:
                         continue
