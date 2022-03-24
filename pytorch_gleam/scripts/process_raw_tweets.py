@@ -8,10 +8,24 @@ import ujson as json
 from tqdm import tqdm
 
 
-def read_file(file_path):
+def read_json(file_path):
     with open(file_path) as f:
         data = json.load(f)
     return data
+
+
+def read_jsonl(path):
+    examples = []
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    ex = json.loads(line)
+                    examples.append(ex)
+                except Exception as e:
+                    print(e)
+    return examples
 
 
 def invert_errors(errors):
@@ -78,8 +92,9 @@ def parse_tweet(tweet, inv_includes, inv_errors):
     return tweet, is_retweet
 
 
-def parse_tweets(tweets, keep_retweets: bool):
+def parse_historical_tweets(tweets, keep_retweets: bool):
     if "data" not in tweets:
+        print(f"Missing data: {tweets}")
         return
     t_data = tweets["data"]
     if "includes" not in tweets:
@@ -98,13 +113,43 @@ def parse_tweets(tweets, keep_retweets: bool):
             pprint(tweet)
 
 
+def parse_stream_tweet(tweet, keep_retweets: bool):
+    if "data" not in tweet:
+        return
+    t_data = tweet["data"]
+    if "includes" not in tweet:
+        tweet["includes"] = {}
+    if "errors" not in tweet:
+        tweet["errors"] = []
+    t_includes = invert_includes(tweet["includes"])
+    t_errors = invert_errors(tweet["errors"])
+    try:
+        tweet, is_retweet = parse_tweet(t_data, t_includes, t_errors)
+        if not is_retweet or (is_retweet and keep_retweets):
+            return tweet
+        return None
+    except Exception as e:
+        pprint(e)
+        pprint(tweet)
+
+
 def parse_tweet_file(args):
     file_path, keep_retweets = args
-    tweets = read_file(file_path)
     parsed_tweets = []
-    for tweet in parse_tweets(tweets, keep_retweets):
-        json_data = json.dumps(tweet)
-        parsed_tweets.append((tweet["id"], json_data))
+    if file_path.endswith(".json"):
+        tweets = read_json(file_path)
+        for tweet in parse_historical_tweets(tweets, keep_retweets):
+            json_data = json.dumps(tweet)
+            parsed_tweets.append((tweet["id"], json_data))
+    elif file_path.endswith(".jsonl"):
+        tweets = read_jsonl(file_path)
+        for tweet in tweets:
+            tweet = parse_stream_tweet(tweet, keep_retweets)
+            if tweet is not None:
+                json_data = json.dumps(tweet)
+                parsed_tweets.append((tweet["id"], json_data))
+    else:
+        raise ValueError(f"Unknown file format: {file_path}")
     return parsed_tweets
 
 
