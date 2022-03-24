@@ -40,7 +40,6 @@ def main():
         "vaccinate",
         "vaccinated",
         "vaccination",
-        "vaccinations",
     ]
 
     joint_terms = [f"({d} {v})" for d, v in itertools.product(disease_terms, vaccinate_terms)]
