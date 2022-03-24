@@ -15,17 +15,15 @@ def read_json(file_path):
 
 
 def read_jsonl(path):
-    examples = []
     with open(path, "r") as f:
         for line in f:
             line = line.strip()
             if line:
                 try:
                     ex = json.loads(line)
-                    examples.append(ex)
+                    yield ex
                 except Exception as e:
                     print(e)
-    return examples
 
 
 def invert_errors(errors):
@@ -134,23 +132,20 @@ def parse_stream_tweet(tweet, keep_retweets: bool):
 
 
 def parse_tweet_file(args):
-    file_path, keep_retweets = args
-    parsed_tweets = []
+    file_path, keep_retweets, t_path = args
     if file_path.endswith(".json"):
         tweets = read_json(file_path)
         for tweet in parse_historical_tweets(tweets, keep_retweets):
             json_data = json.dumps(tweet)
-            parsed_tweets.append((tweet["id"], json_data))
+            yield tweet["id"], json_data, t_path
     elif file_path.endswith(".jsonl"):
-        tweets = read_jsonl(file_path)
-        for tweet in tweets:
+        for tweet in read_jsonl(file_path):
             tweet = parse_stream_tweet(tweet, keep_retweets)
             if tweet is not None:
                 json_data = json.dumps(tweet)
-                parsed_tweets.append((tweet["id"], json_data))
+                yield tweet["id"], json_data, t_path
     else:
         raise ValueError(f"Unknown file format: {file_path}")
-    return parsed_tweets
 
 
 def main():
@@ -162,23 +157,27 @@ def main():
     parser.add_argument("-rt", "--retweets", action="store_true")
     args = parser.parse_args()
     all_ids = set()
+    files = []
+    for path in args.input_paths.split(","):
+        path_files = [
+            (os.path.join(path, x), args.retweets, path)
+            for x in os.listdir(path)
+            if (x.endswith(".json") or x.endswith(".jsonl"))
+        ]
+        files.extend(path_files)
+    path_counts = defaultdict(int)
     with open(args.output_path, "w") as f:
         with Pool(processes=args.processes) as p:
-            for path in args.input_paths.split(","):
-                path_files = [
-                    (os.path.join(path, x), args.retweets)
-                    for x in os.listdir(path)
-                    if (x.endswith(".json") or x.endswith(".jsonl"))
-                ]
-                path_tweets = 0
-                for tweets in tqdm(p.imap(parse_tweet_file, path_files), total=len(path_files)):
-                    for tweet_id, tweet_json in tweets:
-                        if tweet_id in all_ids:
-                            continue
-                        f.write(tweet_json + "\n")
-                        all_ids.add(tweet_id)
-                        path_tweets += 1
-                print(f"{path} tweets: {path_tweets}")
+            for tweets in tqdm(p.imap(parse_tweet_file, files), total=len(files)):
+                for tweet_id, tweet_json, tweet_path in tweets:
+                    if tweet_id in all_ids:
+                        continue
+                    f.write(tweet_json + "\n")
+                    all_ids.add(tweet_id)
+                    path_counts[tweet_path] += 1
+
+    for path, count in path_counts.items():
+        print(f"{path} - {count}")
 
 
 if __name__ == "__main__":
