@@ -120,7 +120,11 @@ def main():
     with open(args.output_path, "w") as f:
         with Pool(processes=args.processes) as p:
             for path in args.input_paths.split(","):
-                path_files = [(os.path.join(path, x), args.retweets) for x in os.listdir(path) if x.endswith(".json")]
+                path_files = [
+                    (os.path.join(path, x), args.retweets)
+                    for x in os.listdir(path)
+                    if (x.endswith(".json") or x.endswith(".jsonl"))
+                ]
                 path_tweets = 0
                 for tweets in tqdm(p.imap(parse_tweet_file, path_files), total=len(path_files)):
                     for tweet_id, tweet_json in tweets:
