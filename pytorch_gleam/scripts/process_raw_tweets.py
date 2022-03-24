@@ -63,6 +63,7 @@ def parse_tweet(tweet, inv_includes, inv_errors):
                     e["user"] = e_user
     if "referenced_tweets" not in tweet:
         tweet["referenced_tweets"] = []
+    is_retweet = False
     for ref_tweet in tweet["referenced_tweets"]:
         r_id = ref_tweet["id"]
         if r_id in inv_errors:
@@ -72,10 +73,12 @@ def parse_tweet(tweet, inv_includes, inv_errors):
         else:
             r_tweet = None
         ref_tweet["data"] = r_tweet
-    return tweet
+        if ref_tweet["type"] == "retweeted":
+            is_retweet = True
+    return tweet, is_retweet
 
 
-def parse_tweets(tweets):
+def parse_tweets(tweets, keep_retweets: bool):
     if "data" not in tweets:
         return
     t_data = tweets["data"]
@@ -87,35 +90,45 @@ def parse_tweets(tweets):
     t_errors = invert_errors(tweets["errors"])
     for tweet in t_data:
         try:
-            yield parse_tweet(tweet, t_includes, t_errors)
+            tweet, is_retweet = parse_tweet(tweet, t_includes, t_errors)
+            if not is_retweet or (is_retweet and keep_retweets):
+                yield tweet
         except Exception as e:
             pprint(e)
             pprint(tweet)
 
 
-def parse_tweet_file(file_path):
+def parse_tweet_file(file_path, keep_retweets):
     tweets = read_file(file_path)
     parsed_tweets = []
-    for tweet in parse_tweets(tweets):
+    for tweet in parse_tweets(tweets, keep_retweets):
         json_data = json.dumps(tweet)
-        parsed_tweets.append(json_data)
+        parsed_tweets.append((tweet["id"], json_data))
     return parsed_tweets
 
 
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--input_path", required=True)
+    parser.add_argument("-i", "--input_paths", required=True)
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-ps", "--processes", default=8)
+    parser.add_argument("-rt", "--retweets", action="store_true")
     args = parser.parse_args()
+    files = []
+    for path in args.input_path.split(","):
+        path_files = [(os.path.join(path, x), args.retweets) for x in os.listdir(path) if x.endswith(".json")]
+        files.extend(path_files)
 
-    files = [os.path.join(args.input_path, x) for x in os.listdir(args.input_path) if x.endswith(".json")]
+    all_ids = set()
     with open(args.output_path, "w") as f:
         with Pool(processes=args.processes) as p:
             for tweets in tqdm(p.imap(parse_tweet_file, files), total=len(files)):
-                for tweet in tweets:
-                    f.write(tweet + "\n")
+                for tweet_id, tweet_json in tweets:
+                    if tweet_id in all_ids:
+                        continue
+                    f.write(tweet_json + "\n")
+                    all_ids.add(tweet_id)
 
 
 if __name__ == "__main__":

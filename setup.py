@@ -113,7 +113,6 @@ setup(
             "gleam-rerank=pytorch_gleam.search.rerank:main",
             "gleam-rerank-format=pytorch_gleam.search.rerank_format:main",
             "gleam-tweet-to-jsonl=pytorch_gleam.search.tweet_to_jsonl:main",
-            "gleam-parse-raw-tweet=pytorch_gleam.parse.parse_raw_tweet:main",
             "gleam-search-candidates=pytorch_gleam.search.select_candidates:main",
             "gleam-train=pytorch_gleam.ex.train:main",
             "gleam-test=pytorch_gleam.ex.test:main",
