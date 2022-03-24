@@ -18,7 +18,7 @@ def date_range(start_date, end_date):
         yield start_date + timedelta(n), start_date + timedelta(n + 1)
 
 
-if __name__ == "__main__":
+def main():
     # https://www.weather.gov/hgx/2021ValentineStorm
     # https://www.weather.gov/images/hgx/events/ValentinesStorm_2021/Timeline.png
     start_date = date(2021, 2, 11)
@@ -246,3 +246,7 @@ if __name__ == "__main__":
 
         with open(completed_path, "w") as f:
             json.dump({"num_results": num_results, "num_pages": page_idx}, f)
+
+
+if __name__ == "__main__":
+    main()

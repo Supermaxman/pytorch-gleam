@@ -17,7 +17,7 @@ def date_range(start_date, end_date):
         yield start_date + timedelta(n), start_date + timedelta(n + 1)
 
 
-if __name__ == "__main__":
+def main():
     # 2021-07-23 2021-07-24
     # start_date = date(2021, 7, 1)
     # v7 2021-10-19
@@ -133,3 +133,7 @@ if __name__ == "__main__":
 
         with open(completed_path, "w") as f:
             json.dump({"num_results": num_results, "num_pages": page_idx}, f)
+
+
+if __name__ == "__main__":
+    main()

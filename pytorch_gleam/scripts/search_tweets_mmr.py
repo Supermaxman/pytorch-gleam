@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 import time
@@ -19,27 +20,39 @@ def date_range(start_date, end_date):
 
 def main():
     start_date = date(2008, 1, 1)
-    end_date = date(2021, 5, 1)
+    end_date = date(2022, 1, 1)
     # wait 5 seconds between queries
     q_delay = 5
 
-    output_path = "../data/raw-v1"
-    secrets_path = "../private/secrets.json"
+    # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
+    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v8"
+    secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
     endpoint_url = "https://api.twitter.com/2/tweets/search/all"
-    query = (
-        "query="
-        "(human papillomavirus vaccination) "
-        "OR (human papillomavirus vaccine) "
-        "OR gardasil "
-        "OR cervarix "
-        "OR (hpv vaccine) "
-        "OR (hpv vaccination) "
-        "OR (cervical vaccine) "
-        "OR (cervical vaccination) "
-        "lang:en"
-    )
+
+    vaccine_terms = ['"M-M-R II"', "ProQuad"]
+    disease_terms = ["mmrv", "measles", "varicella", "rubella", "mmr", "mumps"]
+    vaccinate_terms = [
+        "jab",
+        "jabbed",
+        "vax",
+        "vaxx",
+        "vaxxed",
+        "vaccine",
+        "vaccines",
+        "vaccinate",
+        "vaccinated",
+        "vaccination",
+        "vaccinations",
+    ]
+
+    joint_terms = [f"({d} {v})" for d, v in itertools.product(disease_terms, vaccinate_terms)]
+    joint_terms += vaccine_terms
+
+    search_query = " OR ".join(joint_terms)
+
+    query = f"query={search_query} lang:en -is:retweet"
     max_results = "max_results=500"
     tweet_fields = (
         "tweet.fields="
