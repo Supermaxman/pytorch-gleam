@@ -98,7 +98,8 @@ def parse_tweets(tweets, keep_retweets: bool):
             pprint(tweet)
 
 
-def parse_tweet_file(file_path, keep_retweets):
+def parse_tweet_file(args):
+    file_path, keep_retweets = args
     tweets = read_file(file_path)
     parsed_tweets = []
     for tweet in parse_tweets(tweets, keep_retweets):
