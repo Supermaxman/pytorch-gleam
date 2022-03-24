@@ -116,7 +116,7 @@ def main():
     parser.add_argument("-rt", "--retweets", action="store_true")
     args = parser.parse_args()
     files = []
-    for path in args.input_path.split(","):
+    for path in args.input_paths.split(","):
         path_files = [(os.path.join(path, x), args.retweets) for x in os.listdir(path) if x.endswith(".json")]
         files.extend(path_files)
 
