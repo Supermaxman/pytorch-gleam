@@ -36,7 +36,6 @@ def main():
         "jab",
         "jabbed",
         "vax",
-        "vaxx",
         "vaxxed",
         "vaccine",
         "vaccines",
