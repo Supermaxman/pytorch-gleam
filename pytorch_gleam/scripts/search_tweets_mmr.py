@@ -34,9 +34,7 @@ def main():
     disease_terms = ["mmrv", "measles", "varicella", "rubella", "mmr", "mumps"]
     vaccinate_terms = [
         "jab",
-        "jabbed",
         "vax",
-        "vaxxed",
         "vaccine",
         "vaccines",
         "vaccinate",
