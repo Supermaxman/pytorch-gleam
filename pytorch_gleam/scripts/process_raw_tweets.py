@@ -141,7 +141,7 @@ def grouper(iterable, n):
         yield chunk
 
 
-def parse_tweet_file(args, chunk_size=500):
+def parse_tweet_file(args):
     file_path, path, keep_retweets = args
     if file_path.endswith(".json"):
         tweets = read_json(file_path)
