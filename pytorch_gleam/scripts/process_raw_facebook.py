@@ -18,8 +18,8 @@ def get_overlap(s1, s2):
 def parse_status(post, min_length=40):
     # Status                   304224
     # post_type: status
-    # has a "message" that can be long
-    post["text"] = post["message"]
+    # has a "message" that can be long. message can be missing, not 100% sure when that happens though...
+    post["text"] = post.get("message", post.get("description", ""))
     if len(post["text"]) < min_length:
         return None
     return post
