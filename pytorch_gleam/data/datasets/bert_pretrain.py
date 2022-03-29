@@ -65,7 +65,7 @@ class BertPreDataset(Dataset):
         if isinstance(data_path, str):
             data_path = [data_path]
 
-        for stage, stage_path in enumerate(data_path):
+        for stage, stage_path in tqdm(enumerate(data_path), total=len(data_path)):
             documents = self.read_path(stage_path, stage)
             self.rng.shuffle(documents)
             examples = self.create_examples(documents)
@@ -79,7 +79,7 @@ class BertPreDataset(Dataset):
 
     def create_examples(self, documents):
         examples = []
-        with tqdm(total=self.dupe_factor * len(documents)) as progress:
+        with tqdm(total=self.dupe_factor * len(documents), leave=False) as progress:
             for _ in range(self.dupe_factor):
                 for document_index in range(len(documents)):
                     for instance in create_instances_from_document(

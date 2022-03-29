@@ -24,7 +24,7 @@ trainer:
     - class_path: pytorch_lightning.callbacks.RichProgressBar
       init_args:
         leave: true
-    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
         save_top_k: -1
@@ -44,6 +44,15 @@ data:
     num_workers: 8
     pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/pt
     train_path:
-      - /users/max/data/corpora/vaccine-lm/train.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/0.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/1.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/2.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/3.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/4.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/5.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/6.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/7.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/8.jsonl
+      - /users/max/data/corpora/vaccine-lm/train-v1/9.jsonl
     val_path:
-      - /users/max/data/corpora/vaccine-lm/test.jsonl
+      - /users/max/data/corpora/vaccine-lm/split-v1/train.jsonl

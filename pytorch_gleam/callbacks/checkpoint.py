@@ -53,3 +53,14 @@ class PreTrainedCheckpointCallback(Callback):
 
     def on_fit_start(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
         self._load_pre_checkpoint(trainer, pl_module)
+
+
+class LmCheckpointCallback(Callback):
+    def __init__(self):
+        super().__init__()
+
+    @rank_zero_only
+    def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
+        print("Saving language model...")
+        pl_module.to("cpu")
+        pl_module.lm.save_pretrained(trainer.default_root_dir)

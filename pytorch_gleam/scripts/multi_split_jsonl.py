@@ -35,7 +35,8 @@ def main():
     ex_generator = itertools.chain.from_iterable(read_jsonl(path) for path in input_paths.split(","))
 
     for i, ex in tqdm(enumerate(ex_generator), total=n):
-        ex_jsonl = json.dumps(ex) + "\n"
+        # only keep id and text for this splitting step
+        ex_jsonl = json.dumps({ex["id"], ex["text"]}) + "\n"
         ex_file_idx = i % num_files
         output_file = output_files[ex_file_idx]
         output_file.write(ex_jsonl)
