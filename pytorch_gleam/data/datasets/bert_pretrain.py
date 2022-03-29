@@ -54,11 +54,9 @@ class BertPreDataset(Dataset):
         self.examples = []
         self.vocab_words = None
         self.nlp = None
-        self.rng = None
         self.num_examples = 0
 
     def load(self, data_path):
-        self.rng = random.Random(torch.seed())
         self.nlp = build_spacy_model()
         self.vocab_words = list(self.tokenizer.vocab.keys())
 
@@ -67,14 +65,10 @@ class BertPreDataset(Dataset):
 
         for stage, stage_path in tqdm(enumerate(data_path), total=len(data_path)):
             documents = self.read_path(stage_path, stage)
-            self.rng.shuffle(documents)
             examples = self.create_examples(documents)
             self.examples.extend(examples)
-
-        self.rng.shuffle(self.examples)
         self.num_examples = len(self.examples)
         self.nlp = None
-        self.rng = None
         self.vocab_words = None
 
     def create_examples(self, documents):
@@ -90,7 +84,6 @@ class BertPreDataset(Dataset):
                         self.masked_lm_prob,
                         self.max_predictions_per_seq,
                         self.vocab_words,
-                        self.rng,
                         self.do_whole_word_mask,
                     ):
                         example = self.create_example(instance)
@@ -260,7 +253,6 @@ def create_instances_from_document(
     masked_lm_prob,
     max_predictions_per_seq,
     vocab_words,
-    rng,
     do_whole_word_mask,
 ):
     """Creates `TrainingInstance`s for a single document."""
@@ -277,8 +269,8 @@ def create_instances_from_document(
     # The `target_seq_length` is just a rough target however, whereas
     # `max_seq_length` is a hard limit.
     target_seq_length = max_num_tokens
-    if rng.random() < short_seq_prob:
-        target_seq_length = rng.randint(2, max_num_tokens)
+    if random.random() < short_seq_prob:
+        target_seq_length = random.randint(2, max_num_tokens)
 
     # We DON'T just concatenate all of the tokens from a document into a long
     # sequence and choose an arbitrary split point because this would make the
@@ -299,7 +291,7 @@ def create_instances_from_document(
                 # (first) sentence.
                 a_end = 1
                 if len(current_chunk) >= 2:
-                    a_end = rng.randint(1, len(current_chunk) - 1)
+                    a_end = random.randint(1, len(current_chunk) - 1)
 
                 tokens_a = []
                 for j in range(a_end):
@@ -308,7 +300,7 @@ def create_instances_from_document(
                 tokens_b = []
                 # Random next
                 is_random_next = False
-                if len(current_chunk) == 1 or rng.random() < 0.5:
+                if len(current_chunk) == 1 or random.random() < 0.5:
                     is_random_next = True
                     target_b_length = target_seq_length - len(tokens_a)
 
@@ -318,12 +310,12 @@ def create_instances_from_document(
                     # we're processing.
                     random_document_index = None
                     for _ in range(10):
-                        random_document_index = rng.randint(0, len(all_documents) - 1)
+                        random_document_index = random.randint(0, len(all_documents) - 1)
                         if random_document_index != document_index:
                             break
 
                     random_document = all_documents[random_document_index]
-                    random_start = rng.randint(0, len(random_document) - 1)
+                    random_start = random.randint(0, len(random_document) - 1)
                     for j in range(random_start, len(random_document)):
                         tokens_b.extend(random_document[j])
                         if len(tokens_b) >= target_b_length:
@@ -337,7 +329,7 @@ def create_instances_from_document(
                     is_random_next = False
                     for j in range(a_end, len(current_chunk)):
                         tokens_b.extend(current_chunk[j])
-                truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng)
+                truncate_seq_pair(tokens_a, tokens_b, max_num_tokens)
 
                 assert len(tokens_a) >= 1
                 assert len(tokens_b) >= 1
@@ -364,7 +356,6 @@ def create_instances_from_document(
                     masked_lm_prob,
                     max_predictions_per_seq,
                     vocab_words,
-                    rng,
                     do_whole_word_mask,
                 )
                 instance = {
@@ -391,7 +382,6 @@ def create_masked_lm_predictions(
     masked_lm_prob,
     max_predictions_per_seq,
     vocab_words,
-    rng,
     do_whole_word_mask,
 ):
     """Creates the predictions for the masked LM objective."""
@@ -414,7 +404,7 @@ def create_masked_lm_predictions(
         else:
             cand_indexes.append([i])
 
-    rng.shuffle(cand_indexes)
+    random.shuffle(cand_indexes)
 
     output_tokens = list(tokens)
 
@@ -441,15 +431,15 @@ def create_masked_lm_predictions(
 
             masked_token = None
             # 80% of the time, replace with [MASK]
-            if rng.random() < 0.8:
+            if random.random() < 0.8:
                 masked_token = "[MASK]"
             else:
                 # 10% of the time, keep original
-                if rng.random() < 0.5:
+                if random.random() < 0.5:
                     masked_token = tokens[index]
                 # 10% of the time, replace with random word
                 else:
-                    masked_token = vocab_words[rng.randint(0, len(vocab_words) - 1)]
+                    masked_token = vocab_words[random.randint(0, len(vocab_words) - 1)]
 
             output_tokens[index] = masked_token
             lm_instance = {"index": index, "label": tokens[index]}
@@ -466,7 +456,7 @@ def create_masked_lm_predictions(
     return output_tokens, masked_lm_positions, masked_lm_labels
 
 
-def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
+def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens):
     """Truncates a pair of sequences to a maximum sequence length."""
     while True:
         total_length = len(tokens_a) + len(tokens_b)
@@ -478,7 +468,7 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
 
         # We want to sometimes truncate from the front and sometimes from the
         # back to add more randomness and avoid biases.
-        if rng.random() < 0.5:
+        if random.random() < 0.5:
             del trunc_tokens[0]
         else:
             trunc_tokens.pop()
