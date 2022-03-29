@@ -122,11 +122,12 @@ class BertPreDataset(Dataset):
 
     def read_path(self, data_path, stage=0):
         documents = []
-        for doc in tqdm(
-            self.nlp.pipe(self.read_text(data_path), batch_size=128, n_process=-1),
+        for text in tqdm(
+            self.read_text(data_path),
             leave=True,
         ):
             document = []
+            doc = self.nlp(text)
             for s_idx, sent in enumerate(doc.sents):
                 tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
                 document.append(tokens)
