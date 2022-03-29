@@ -121,17 +121,22 @@ class BertPreDataset(Dataset):
 
         return example
 
-    def read_path(self, data_path, stage=0):
-        documents = []
-        for ex in tqdm(read_jsonl(data_path), leave=True):
+    def read_text(self, data_path):
+        for ex in read_jsonl(data_path):
             ex_text = ex["text"]
             ex_text = preprocess_tweet(ex_text, self.tokenizer_config)
-            doc = self.nlp(ex_text)
+            yield ex_text
+
+    def read_path(self, data_path, stage=0):
+        documents = []
+        for doc in tqdm(
+            self.nlp.pipe(self.read_text(data_path), batch_size=128, n_process=-1),
+            leave=True,
+        ):
             document = []
             for s_idx, sent in enumerate(doc.sents):
                 tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
                 document.append(tokens)
-
             documents.append(document)
         return documents
 
