@@ -51,7 +51,6 @@ class BertPreDataset(Dataset):
         self.masked_lm_prob = masked_lm_prob
         self.tokenizer_config = tokenizer_config
         self.tokenizer = tokenizer
-        self.documents = []
         self.examples = []
         self.vocab_words = None
         self.nlp = None
@@ -64,26 +63,27 @@ class BertPreDataset(Dataset):
         self.vocab_words = list(self.tokenizer.vocab.keys())
 
         if isinstance(data_path, str):
-            self.read_path(data_path)
-        else:
-            for stage, stage_path in enumerate(data_path):
-                self.read_path(stage_path, stage)
+            data_path = [data_path]
 
-        self.rng.shuffle(self.documents)
-        self.create_examples()
-        self.documents = None
+        for stage, stage_path in enumerate(data_path):
+            documents = self.read_path(stage_path, stage)
+            self.rng.shuffle(documents)
+            examples = self.create_examples(documents)
+            self.examples.extend(examples)
+
         self.rng.shuffle(self.examples)
         self.num_examples = len(self.examples)
         self.nlp = None
         self.rng = None
         self.vocab_words = None
 
-    def create_examples(self):
-        with tqdm(total=self.dupe_factor * len(self.documents)) as progress:
+    def create_examples(self, documents):
+        examples = []
+        with tqdm(total=self.dupe_factor * len(documents)) as progress:
             for _ in range(self.dupe_factor):
-                for document_index in range(len(self.documents)):
+                for document_index in range(len(documents)):
                     for instance in create_instances_from_document(
-                        self.documents,
+                        documents,
                         document_index,
                         self.max_seq_length,
                         self.short_seq_prob,
@@ -94,8 +94,9 @@ class BertPreDataset(Dataset):
                         self.do_whole_word_mask,
                     ):
                         example = self.create_example(instance)
-                        self.examples.append(example)
+                        examples.append(example)
                     progress.update(1)
+        return examples
 
     def create_example(self, instance):
         # tokens is a list of token strings, needs to be converted to ids
@@ -121,8 +122,9 @@ class BertPreDataset(Dataset):
         return example
 
     def read_path(self, data_path, stage=0):
+        documents = []
         for ex in read_jsonl(data_path):
-            ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
+            ex_text = ex["text"]
             ex_text = preprocess_tweet(ex_text, self.tokenizer_config)
             doc = self.nlp(ex_text)
             document = []
@@ -130,7 +132,8 @@ class BertPreDataset(Dataset):
                 tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
                 document.append(tokens)
 
-            self.documents.append(document)
+            documents.append(document)
+        return documents
 
     def __len__(self):
         return len(self.examples)

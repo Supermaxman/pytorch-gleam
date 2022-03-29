@@ -1,0 +1,49 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.BertPreTrainLanguageModel
+  init_args:
+    learning_rate: 2e-5
+    pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/vaccine-bert/vb-v1
+  #  batch_size=1024 for covid-twitter-bert
+  #  8 * 4 * 8 = 256
+  #  8 * 8 * 8 = 512
+  max_epochs: 1
+  accumulate_grad_batches: 4
+  val_check_interval: 50000
+  deterministic: true
+  num_sanity_val_steps: 1
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        save_top_k: -1
+        # actual gradient steps
+        # val_check_interval / accumulate_grad_batches
+        every_n_train_steps: 12500
+data:
+  class_path: pytorch_gleam.data.datasets.BertPreDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    masked_lm_prob: 0.15
+    short_seq_prob: 0.10
+    max_predictions_per_seq: 20
+    dupe_factor: 10
+    tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
+    num_workers: 8
+    pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/pt
+    train_path:
+      - /users/max/data/corpora/vaccine-lm/train.jsonl
+    val_path:
+      - /users/max/data/corpora/vaccine-lm/test.jsonl

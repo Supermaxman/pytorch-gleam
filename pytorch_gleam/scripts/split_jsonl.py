@@ -1,7 +1,7 @@
 import argparse
 import itertools
 import math
-import os.path
+import os
 import random
 
 import ujson as json
@@ -41,6 +41,9 @@ def main():
 
     assert 0.0 < ratio < 1.0
     assert output_a_name != output_b_name
+
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
     output_a_path = os.path.join(output_path, output_a_name)
     output_b_path = os.path.join(output_path, output_b_name)
