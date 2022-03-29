@@ -36,7 +36,7 @@ def main():
 
     for i, ex in tqdm(enumerate(ex_generator), total=n):
         # only keep id and text for this splitting step
-        ex_jsonl = json.dumps({ex["id"], ex["text"]}) + "\n"
+        ex_jsonl = json.dumps({"id": ex["id"], "text": ex["text"]}) + "\n"
         ex_file_idx = i % num_files
         output_file = output_files[ex_file_idx]
         output_file.write(ex_jsonl)
