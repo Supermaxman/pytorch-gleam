@@ -123,7 +123,7 @@ class BertPreDataset(Dataset):
 
     def read_path(self, data_path, stage=0):
         documents = []
-        for ex in read_jsonl(data_path):
+        for ex in tqdm(read_jsonl(data_path), leave=True):
             ex_text = ex["text"]
             ex_text = preprocess_tweet(ex_text, self.tokenizer_config)
             doc = self.nlp(ex_text)
