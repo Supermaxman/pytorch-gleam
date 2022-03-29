@@ -1,4 +1,5 @@
 import argparse
+import contextlib
 import itertools
 import os
 
@@ -31,18 +32,15 @@ def main():
 
     assert num_files > 0
 
-    output_files = [open(os.path.join(output_path, f"{i}.jsonl"), "w") for i in range(num_files)]
     ex_generator = itertools.chain.from_iterable(read_jsonl(path) for path in input_paths.split(","))
-
-    for i, ex in tqdm(enumerate(ex_generator), total=n):
-        # only keep id and text for this splitting step
-        ex_jsonl = json.dumps({"id": ex["id"], "text": ex["text"]}) + "\n"
-        ex_file_idx = i % num_files
-        output_file = output_files[ex_file_idx]
-        output_file.write(ex_jsonl)
-
-    for file in output_files:
-        file.close()
+    with contextlib.ExitStack() as stack:
+        files = [stack.enter_context(open(os.path.join(output_path, f"{i}.jsonl"), "w")) for i in range(num_files)]
+        for i, ex in tqdm(enumerate(ex_generator), total=n):
+            # only keep id and text for this splitting step
+            ex_jsonl = json.dumps({"id": ex["id"], "text": ex["text"]}) + "\n"
+            ex_file_idx = i % num_files
+            output_file = files[ex_file_idx]
+            output_file.write(ex_jsonl)
 
 
 if __name__ == "__main__":

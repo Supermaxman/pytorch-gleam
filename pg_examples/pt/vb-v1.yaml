@@ -55,4 +55,4 @@ data:
       - /users/max/data/corpora/vaccine-lm/train-v1/8.jsonl
       - /users/max/data/corpora/vaccine-lm/train-v1/9.jsonl
     val_path:
-      - /users/max/data/corpora/vaccine-lm/split-v1/train.jsonl
+      - /users/max/data/corpora/vaccine-lm/split-v1/test.jsonl
