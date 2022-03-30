@@ -13,7 +13,6 @@ class BertPreBatchCollator(BatchCollator):
         batch_size = len(examples)
         # "input_ids": input_ids,
         # "attention_mask": [1] * len(input_ids),
-        # "token_type_ids": list(instance["segment_ids"]),
         input_ids = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)
         attention_mask = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)
         token_type_ids = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)
@@ -25,8 +24,9 @@ class BertPreBatchCollator(BatchCollator):
         next_sentence_labels = torch.zeros([batch_size], dtype=torch.long)
         for ex_idx, ex in enumerate(examples):
             self.pad_and_apply(ex["input_ids"], input_ids, ex_idx)
-            self.pad_and_apply(ex["attention_mask"], attention_mask, ex_idx)
-            self.pad_and_apply(ex["token_type_ids"], token_type_ids, ex_idx)
+            attention_mask[ex_idx, : len(ex["input_ids"])] = 1
+            type_0_len, type_1_len = ex["segment_lengths"]
+            token_type_ids[ex_idx, type_0_len : type_0_len + type_1_len] = 1
             for s_idx, s_id in zip(ex["masked_lm_positions"], ex["masked_lm_ids"]):
                 masked_lm_labels[ex_idx, s_idx] = s_id
 

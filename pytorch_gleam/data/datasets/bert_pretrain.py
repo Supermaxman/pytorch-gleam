@@ -1,3 +1,4 @@
+import dataclasses
 import random
 from typing import List, Union
 
@@ -10,6 +11,16 @@ from tqdm import tqdm
 from pytorch_gleam.data.collators import BertPreBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
+
+
+@dataclasses.dataclass
+class BertPreTrainDataConfig:
+    masked_lm_prob: float = 0.15
+    short_seq_prob: float = 0.10
+    max_seq_length: int = 128
+    max_predictions_per_seq: int = 20
+    dupe_factor: int = 10
+    do_whole_word_mask: bool = True
 
 
 @Language.component("avoid_sentencizer_hashtags")
@@ -93,22 +104,20 @@ class BertPreDataset(Dataset):
 
     def create_example(self, instance):
         # tokens is a list of token strings, needs to be converted to ids
-        # segment_ids is list of ints of token_type_ids
+        # segment_lengths is list of ints of lengths of token_type_ids
         # is_random_next is bool label for seq pred task
         # masked_lm_positions is indices of [mask]
         # masked_lm_labels is token strings of [mask] indices
         input_ids = self.tokenizer.convert_tokens_to_ids(instance["tokens"])
         masked_lm_positions = list(instance["masked_lm_positions"])
         masked_lm_ids = self.tokenizer.convert_tokens_to_ids(instance["masked_lm_labels"])
-        masked_lm_weights = [1.0] * len(masked_lm_ids)
         next_sentence_label = 1 if instance["is_random_next"] else 0
         example = {
             "input_ids": input_ids,
-            "attention_mask": [1] * len(input_ids),
-            "token_type_ids": list(instance["segment_ids"]),
+            # "attention_mask": [1] * len(input_ids),
+            "segment_lengths": instance["segment_lengths"],
             "masked_lm_positions": masked_lm_positions,
             "masked_lm_ids": masked_lm_ids,
-            "masked_lm_weights": masked_lm_weights,
             "next_sentence_label": next_sentence_label,
         }
 
@@ -339,28 +348,29 @@ def create_instances_from_document(
                         tokens_b.extend(current_chunk[j])
                 truncate_seq_pair(tokens_a, tokens_b, max_num_tokens)
 
+                # this could lead to an infinite loop
                 # if it got so truncated or was so small then skip
-                if len(tokens_a) < 1 or len(tokens_b) < 1:
-                    continue
-                # assert len(tokens_a) >= 1
-                # assert len(tokens_b) >= 1
+                # if len(tokens_a) < 1 or len(tokens_b) < 1:
+                #     continue
+                # make sure tokens for sentences are non-zero
+                assert len(tokens_a) >= 1
+                assert len(tokens_b) >= 1
 
                 tokens = []
-                segment_ids = []
+                segment_lengths = []
                 tokens.append("[CLS]")
-                segment_ids.append(0)
                 for token in tokens_a:
                     tokens.append(token)
-                    segment_ids.append(0)
 
                 tokens.append("[SEP]")
-                segment_ids.append(0)
+                # [CLS] + tokens_a + [SEP] is seq 0
+                segment_lengths.append(len(tokens_a) + 2)
 
                 for token in tokens_b:
                     tokens.append(token)
-                    segment_ids.append(1)
                 tokens.append("[SEP]")
-                segment_ids.append(1)
+                # tokens_b + [SEP] is seq 1
+                segment_lengths.append(len(tokens_b) + 1)
 
                 (tokens, masked_lm_positions, masked_lm_labels,) = create_masked_lm_predictions(
                     tokens,
@@ -371,7 +381,7 @@ def create_instances_from_document(
                 )
                 instance = {
                     "tokens": tokens,
-                    "segment_ids": segment_ids,
+                    "segment_lengths": segment_lengths,
                     "is_random_next": is_random_next,
                     "masked_lm_positions": masked_lm_positions,
                     "masked_lm_labels": masked_lm_labels,
@@ -381,7 +391,7 @@ def create_instances_from_document(
             current_length = 0
         i += 1
     # tokens is a list of token strings, needs to be converted to ids
-    # segment_ids is list of ints of token_type_ids
+    # segment_lengths is list of lengths of token_type_ids
     # is_random_next is bool label for seq pred task
     # masked_lm_positions is indices of [mask]
     # masked_lm_labels is token strings of [mask] indices
@@ -475,7 +485,7 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens):
             break
 
         trunc_tokens = tokens_a if len(tokens_a) > len(tokens_b) else tokens_b
-        # assert len(trunc_tokens) >= 1
+        assert len(trunc_tokens) >= 1
 
         # We want to sometimes truncate from the front and sometimes from the
         # back to add more randomness and avoid biases.
