@@ -130,7 +130,13 @@ class BertPreDataset(Dataset):
             doc = self.nlp(text)
             for s_idx, sent in enumerate(doc.sents):
                 tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
+                # min token requirement
+                if len(tokens) < 4:
+                    continue
                 document.append(tokens)
+            # non-empty documents
+            if len(document) == 0:
+                continue
             documents.append(document)
         return documents
 
@@ -271,7 +277,8 @@ def create_instances_from_document(
     # `max_seq_length` is a hard limit.
     target_seq_length = max_num_tokens
     if random.random() < short_seq_prob:
-        target_seq_length = random.randint(2, max_num_tokens)
+        # target_seq_length = random.randint(2, max_num_tokens)
+        target_seq_length = random.randint(max(max_num_tokens // 4, 4), max_num_tokens)
 
     # We DON'T just concatenate all of the tokens from a document into a long
     # sequence and choose an arbitrary split point because this would make the
@@ -332,8 +339,11 @@ def create_instances_from_document(
                         tokens_b.extend(current_chunk[j])
                 truncate_seq_pair(tokens_a, tokens_b, max_num_tokens)
 
-                assert len(tokens_a) >= 1
-                assert len(tokens_b) >= 1
+                # if it got so truncated or was so small then skip
+                if len(tokens_a) < 1 or len(tokens_b) < 1:
+                    continue
+                # assert len(tokens_a) >= 1
+                # assert len(tokens_b) >= 1
 
                 tokens = []
                 segment_ids = []
@@ -445,7 +455,7 @@ def create_masked_lm_predictions(
             output_tokens[index] = masked_token
             lm_instance = {"index": index, "label": tokens[index]}
             masked_lms.append(lm_instance)
-    assert len(masked_lms) <= num_to_predict
+    # assert len(masked_lms) <= num_to_predict
     masked_lms = sorted(masked_lms, key=lambda x: x["index"])
 
     masked_lm_positions = []
@@ -465,7 +475,7 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens):
             break
 
         trunc_tokens = tokens_a if len(tokens_a) > len(tokens_b) else tokens_b
-        assert len(trunc_tokens) >= 1
+        # assert len(trunc_tokens) >= 1
 
         # We want to sometimes truncate from the front and sometimes from the
         # back to add more randomness and avoid biases.
