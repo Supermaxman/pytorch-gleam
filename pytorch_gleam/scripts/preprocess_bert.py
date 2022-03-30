@@ -300,11 +300,18 @@ def process_text(text):
 
 def create_examples(d_index):
     examples = []
-    for _ in range(data_config.dupe_factor):
-        for instance in create_instances_from_document(d_index):
-            example = create_example(instance)
-            examples.append(example)
+    for instance in create_instances_from_document(d_index):
+        example = create_example(instance)
+        examples.append(example)
     return examples
+
+
+def document_iterator():
+    for _ in range(data_config.dupe_factor):
+        doc_indices = list(range(len(documents)))
+        random.shuffle(doc_indices)
+        for i in doc_indices:
+            yield i
 
 
 def main():
@@ -341,7 +348,7 @@ def main():
 
     print("Processing documents...")
     with Pool(processes=8) as p:
-        for doc in tqdm(p.imap_unordered(process_text, read_text(input_path), chunksize=50), total=n):
+        for doc in tqdm(p.imap_unordered(process_text, read_text(input_path), chunksize=100), total=n):
             if doc is None:
                 continue
             documents.append(doc)
@@ -352,8 +359,8 @@ def main():
     with open(output_path, "w") as f:
         with Pool(processes=8) as p:
             for examples in tqdm(
-                p.imap_unordered(create_examples, range(len(documents)), chunksize=50),
-                total=len(documents),
+                p.imap_unordered(create_examples, document_iterator(), chunksize=100),
+                total=len(documents) * data_config.dupe_factor,
             ):
                 for ex in examples:
                     f.write(json.dumps(ex) + "\n")
