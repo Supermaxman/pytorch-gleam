@@ -1,5 +1,4 @@
 import argparse
-import itertools
 import random
 from multiprocessing import Pool
 
@@ -341,11 +340,8 @@ def main():
     vocab_words = list(tokenizer.vocab.keys())
 
     print("Processing documents...")
-    documents = []
     with Pool(processes=8) as p:
-        for doc in tqdm(
-            p.imap_unordered(process_text, itertools.islice(read_text(input_path), 10000), chunksize=50), total=n
-        ):
+        for doc in tqdm(p.imap_unordered(process_text, read_text(input_path), chunksize=50), total=n):
             if doc is None:
                 continue
             documents.append(doc)
