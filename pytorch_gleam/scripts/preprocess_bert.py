@@ -1,4 +1,5 @@
 import argparse
+import itertools
 import random
 from multiprocessing import Pool
 
@@ -61,24 +62,6 @@ def read_text(data_path):
         yield ex_text
 
 
-def read_path(data_path, n):
-    documents = []
-    for text in tqdm(read_text(data_path), leave=True, total=n):
-        document = []
-        doc = nlp(text)
-        for s_idx, sent in enumerate(doc.sents):
-            tokens = tokenizer.tokenize(sent.text, add_special_tokens=False)
-            # min token requirement
-            if len(tokens) < 4:
-                continue
-            document.append(tokens)
-        # non-empty documents
-        if len(document) == 0:
-            continue
-        documents.append(document)
-    return documents
-
-
 def create_instances_from_document(document, sample_docs):
     """Creates `TrainingInstance`s for a single document."""
 
@@ -105,6 +88,7 @@ def create_instances_from_document(document, sample_docs):
     instances = []
     current_chunk = []
     current_length = 0
+    current_sample_docs = list(sample_docs)
     i = 0
     while i < len(document):
         segment = document[i]
@@ -133,8 +117,10 @@ def create_instances_from_document(document, sample_docs):
                     # corpora. However, just to be careful, we try to make sure that
                     # the random document is not the same as the document
                     # we're processing.
-                    random_document_index = random.randint(0, len(sample_docs) - 1)
-                    random_document = sample_docs[random_document_index]
+                    if len(current_sample_docs) == 0:
+                        current_sample_docs = list(sample_docs)
+                    random_document = current_sample_docs.pop()
+
                     random_start = random.randint(0, len(random_document) - 1)
                     for j in range(random_start, len(random_document)):
                         tokens_b.extend(random_document[j])
@@ -322,7 +308,7 @@ def sample_documents(doc_idx, all_docs, num_samples):
     return samples
 
 
-def create_instances(args):
+def create_examples(args):
     doc, sample_docs = args
     examples = []
     for _ in range(data_config.dupe_factor):
@@ -332,9 +318,9 @@ def create_instances(args):
     return examples
 
 
-def doc_sample_iterator(documents):
+def doc_sample_iterator(documents, num_samples=50):
     for d_index, doc in enumerate(documents):
-        sample_docs = sample_documents(d_index, documents, num_samples=20)
+        sample_docs = sample_documents(d_index, documents, num_samples=num_samples)
         yield doc, sample_docs
 
 
@@ -372,24 +358,25 @@ def main():
     print("Processing documents...")
     documents = []
     with Pool(processes=8) as p:
-        for doc in tqdm(p.imap_unordered(process_text, read_text(input_path)), total=n):
+        for doc in tqdm(
+            p.imap_unordered(process_text, itertools.islice(read_text(input_path), 10000), chunksize=50), total=n
+        ):
             if doc is None:
                 continue
             documents.append(doc)
 
-    num_examples = data_config.dupe_factor * len(documents)
-
-    print(f"Processed documents: {num_examples:,}")
-
-    print("Processing instances...")
+    print(f"Processed documents: {len(documents):,}")
+    num_doc_examples = data_config.dupe_factor * len(documents)
+    print("Processing examples...")
     instance_count = 0
     with open(output_path, "w") as f:
         with Pool(processes=8) as p:
-            for instances in tqdm(
-                p.imap_unordered(create_instances, doc_sample_iterator(documents)), total=num_examples
+            for examples in tqdm(
+                p.imap_unordered(create_examples, doc_sample_iterator(documents, num_samples=50), chunksize=50),
+                total=num_doc_examples,
             ):
-                for instance in instances:
-                    f.write(json.dumps(instance) + "\n")
+                for ex in examples:
+                    f.write(json.dumps(ex) + "\n")
                     instance_count += 1
 
     print(f"Processed instances: {instance_count:,}")
