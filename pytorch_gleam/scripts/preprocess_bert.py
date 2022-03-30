@@ -31,6 +31,7 @@ tokenizer: BertTokenizer = None
 data_config: BertPreTrainDataConfig = None
 tokenizer_config: TweetPreprocessConfig = None
 vocab_words: list = []
+documents: list = []
 
 
 def create_example(instance):
@@ -62,9 +63,10 @@ def read_text(data_path):
         yield ex_text
 
 
-def create_instances_from_document(document, sample_docs):
+def create_instances_from_document(doc_index):
     """Creates `TrainingInstance`s for a single document."""
 
+    document = documents[doc_index]
     # Account for [CLS], [SEP], [SEP]
     max_num_tokens = data_config.max_seq_length - 3
 
@@ -88,7 +90,6 @@ def create_instances_from_document(document, sample_docs):
     instances = []
     current_chunk = []
     current_length = 0
-    current_sample_docs = list(sample_docs)
     i = 0
     while i < len(document):
         segment = document[i]
@@ -117,9 +118,10 @@ def create_instances_from_document(document, sample_docs):
                     # corpora. However, just to be careful, we try to make sure that
                     # the random document is not the same as the document
                     # we're processing.
-                    if len(current_sample_docs) == 0:
-                        current_sample_docs = list(sample_docs)
-                    random_document = current_sample_docs.pop()
+                    random_document_index = doc_index
+                    while random_document_index == doc_index:
+                        random_document_index = random.randint(0, len(documents) - 1)
+                    random_document = documents[random_document_index]
 
                     random_start = random.randint(0, len(random_document) - 1)
                     for j in range(random_start, len(random_document)):
@@ -297,31 +299,13 @@ def process_text(text):
     return document
 
 
-def sample_documents(doc_idx, all_docs, num_samples):
-    samples = []
-    for _ in range(num_samples):
-        random_document_index = doc_idx
-        while random_document_index == doc_idx:
-            random_document_index = random.randint(0, len(all_docs) - 1)
-        random_document = all_docs[random_document_index]
-        samples.append(random_document)
-    return samples
-
-
-def create_examples(args):
-    doc, sample_docs = args
+def create_examples(d_index):
     examples = []
     for _ in range(data_config.dupe_factor):
-        for instance in create_instances_from_document(doc, sample_docs):
+        for instance in create_instances_from_document(d_index):
             example = create_example(instance)
             examples.append(example)
     return examples
-
-
-def doc_sample_iterator(documents, num_samples=50):
-    for d_index, doc in enumerate(documents):
-        sample_docs = sample_documents(d_index, documents, num_samples=num_samples)
-        yield doc, sample_docs
 
 
 def main():
@@ -343,6 +327,7 @@ def main():
     global data_config
     global tokenizer
     global vocab_words
+    global documents
 
     # max_seq_len: 128
     # masked_lm_prob: 0.15
@@ -366,14 +351,13 @@ def main():
             documents.append(doc)
 
     print(f"Processed documents: {len(documents):,}")
-    num_doc_examples = data_config.dupe_factor * len(documents)
     print("Processing examples...")
     instance_count = 0
     with open(output_path, "w") as f:
         with Pool(processes=8) as p:
             for examples in tqdm(
-                p.imap_unordered(create_examples, doc_sample_iterator(documents, num_samples=50), chunksize=50),
-                total=num_doc_examples,
+                p.imap_unordered(create_examples, range(len(documents)), chunksize=50),
+                total=len(documents),
             ):
                 for ex in examples:
                     f.write(json.dumps(ex) + "\n")
