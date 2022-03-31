@@ -37,13 +37,11 @@ class BertPreDataModule(BaseDataModule):
 
         if self.train_path is not None:
             self.train_dataset = BaseIterableDataset(
-                num_examples=self.train_examples, batch_size=self.batch_size, worker_estimate=self.worker_estimate
+                num_examples=self.train_examples, worker_estimate=self.worker_estimate
             )
             self.train_dataset.load(self.train_path)
         if self.val_path is not None:
-            self.val_dataset = BaseIterableDataset(
-                num_examples=self.val_examples, batch_size=self.batch_size, worker_estimate=self.worker_estimate
-            )
+            self.val_dataset = BaseIterableDataset(num_examples=self.val_examples, worker_estimate=self.worker_estimate)
             self.val_dataset.load(self.val_path)
 
     def create_collator(self):

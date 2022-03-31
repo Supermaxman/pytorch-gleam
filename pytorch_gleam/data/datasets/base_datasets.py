@@ -163,29 +163,27 @@ def batch(iterable, n):
 # noinspection PyAbstractClass
 class BaseIterableDataset(IterableDataset):
     num_examples: int
-    batch_size: int
     worker_estimate: int
     data_paths: List[str]
 
     frequency: int = 0
     num_workers: int = 0
 
-    def __init__(self, num_examples: int, batch_size: int, worker_estimate: int):
+    def __init__(self, num_examples: int, worker_estimate: int):
         self.num_examples = num_examples
-        self.batch_size = batch_size
         self.worker_estimate = worker_estimate
         self.data_paths = []
 
     def __len__(self):
-        length = int(math.ceil((self.num_examples / self.worker_estimate) / self.batch_size))
+        length = int(math.ceil(self.num_examples / self.worker_estimate))
         return length
 
     def __iter__(self):
         assert (
             self.worker_estimate == self.num_workers
         ), f"Mismatch between estimated vs actual workers: {self.worker_estimate} vs {self.num_workers}"
-        for i_batch in batch(self.example_iterator(), self.batch_size):
-            yield i_batch
+        for ex in self.example_iterator():
+            yield ex
 
     def load(self, data_path):
         if isinstance(data_path, str):
