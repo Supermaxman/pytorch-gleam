@@ -10,9 +10,13 @@ class BertPreBatchCollator(BatchCollator):
     def __call__(self, examples: list) -> dict:
         print("START")
         print(len(examples))
+        input()
         print(examples[0])
+        input()
         print(examples)
+        input()
         print(len(examples[0]))
+        input()
         print("END")
         input()
         # if we do pre-batching in the dataset object then this is the pattern
