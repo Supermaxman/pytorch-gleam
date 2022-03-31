@@ -16,9 +16,9 @@ trainer:
   accumulate_grad_batches: 8
   # training batch steps, not gradient steps
   # (total training size  / (batch_size * num_devices)) / num_val_checks
-  # (619600000 / (8 * 4)) / 50 = 387250
-  val_check_interval: 387250
-  #  val_check_interval: 1.0
+  # (619600000 / (8 * 4)) / 20 =
+#  val_check_interval: 968125
+  val_check_interval: 0.05
   deterministic: true
   num_sanity_val_steps: 1
   callbacks:
@@ -35,8 +35,8 @@ trainer:
         # actual gradient steps
         # val_check_interval / accumulate_grad_batches
         # not sure if also divided by number of devices, so / num_devices also
-        # (619600000 / (8 * 4 * 8)) / 50 = 48406.25
-        every_n_train_steps: 48407
+        # (619600000 / (8 * 4 * 8)) / 20 = 121015.625
+        every_n_train_steps: 100000
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
