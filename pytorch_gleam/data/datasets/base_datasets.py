@@ -110,7 +110,8 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 ds,
                 num_workers=self.num_workers,
                 batch_size=self.batch_size,
-                shuffle=True,
+                # do not shuffle if we have an IterableDataset as it should already be shuffled
+                shuffle=not isinstance(ds, IterableDataset),
                 drop_last=True,
                 collate_fn=self.create_collator(),
                 worker_init_fn=ds.worker_init_fn,
