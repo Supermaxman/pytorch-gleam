@@ -8,6 +8,13 @@ class BertPreBatchCollator(BatchCollator):
         super().__init__(*args, **kwargs)
 
     def __call__(self, examples: list) -> dict:
+        print("START")
+        print(len(examples))
+        print(examples[0])
+        print(examples)
+        print(len(examples[0]))
+        print("END")
+        input()
         # if we do pre-batching in the dataset object then this is the pattern
         if isinstance(examples[0], list) and len(examples) == 1:
             examples = examples[0]
