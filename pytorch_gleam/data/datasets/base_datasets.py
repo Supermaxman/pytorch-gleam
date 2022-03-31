@@ -210,11 +210,17 @@ class BaseIterableDataset(IterableDataset):
 
     @staticmethod
     def worker_init_fn(_):
-        process_id = dist.get_rank()
-        num_processes = dist.get_world_size()
+        try:
+            process_id = dist.get_rank()
+            num_processes = dist.get_world_size()
+        except RuntimeError:
+            process_id = 0
+            num_processes = 1
+
         worker_info = torch.utils.data.get_worker_info()
         worker_id = worker_info.id
         num_workers = worker_info.num_workers
+
         dataset: BaseIterableDataset = worker_info.dataset
         dataset.frequency = (process_id * num_workers) + worker_id
         dataset.num_workers = num_processes * num_workers
