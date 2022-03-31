@@ -9,6 +9,7 @@ trainer:
   accelerator: gpu
   devices: [1, 2, 3, 5]
   default_root_dir: /nas1-nfs1/data/maw150130/models/pt/vb-v1
+  strategy: ddp
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
   max_epochs: 1
