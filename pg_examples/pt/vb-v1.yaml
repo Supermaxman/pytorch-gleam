@@ -7,15 +7,14 @@ model:
 
 trainer:
   accelerator: gpu
-  devices: 1
+  devices: [1, 2, 3, 5]
   default_root_dir: /nas1-nfs1/data/maw150130/models/pt/vb-v1
   #  batch_size=1024 for covid-twitter-bert
-  #  8 * 4 * 8 = 256
-  #  8 * 8 * 8 = 512
+  # 8 bs * 8 acc * 4 gpus = 256
   max_epochs: 1
   accumulate_grad_batches: 8
-#  val_check_interval: 50000
-  val_check_interval: 1.0
+  val_check_interval: 774560
+  #  val_check_interval: 1.0
   deterministic: true
   num_sanity_val_steps: 1
   callbacks:
@@ -31,14 +30,15 @@ trainer:
         save_top_k: -1
         # actual gradient steps
         # val_check_interval / accumulate_grad_batches
-        every_n_train_steps: 12500
+        # not sure if also divided by number of devices, so / num_devices also
+        every_n_train_steps: 24205
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
     batch_size: 8
     max_seq_len: 128
     num_workers: 1
-    worker_estimate: 1
+    worker_estimate: 4
     train_examples: 619600000
     val_examples: 6254166
     train_path:
