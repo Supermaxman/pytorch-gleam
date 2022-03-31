@@ -151,25 +151,6 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         return data_loaders
 
 
-def worker_init_fn(_):
-    try:
-        process_id = dist.get_rank()
-        num_processes = dist.get_world_size()
-    except RuntimeError as e:
-        print(e)
-        process_id = 0
-        num_processes = 1
-
-    worker_info = torch.utils.data.get_worker_info()
-    worker_id = worker_info.id
-    num_workers = worker_info.num_workers
-
-    dataset: BaseIterableDataset = worker_info.dataset
-    dataset.frequency = (process_id * num_workers) + worker_id
-    dataset.num_workers = num_processes * num_workers
-    print(f"INFO: WORKER_INIT: {dataset.frequency}/{dataset.num_workers}")
-
-
 # noinspection PyAbstractClass
 class BaseIterableDataset(IterableDataset):
     num_examples: int
@@ -189,11 +170,30 @@ class BaseIterableDataset(IterableDataset):
         return length
 
     def __iter__(self):
+        self.setup_worker()
         assert (
             self.worker_estimate == self.num_workers
         ), f"Mismatch between estimated vs actual workers: {self.worker_estimate} vs {self.num_workers}"
         for ex in self.example_iterator():
             yield ex
+
+    def setup_worker(self):
+        try:
+            process_id = dist.get_rank()
+            num_processes = dist.get_world_size()
+        except RuntimeError as e:
+            print(e)
+            process_id = 0
+            num_processes = 1
+
+        worker_info = torch.utils.data.get_worker_info()
+        worker_id = worker_info.id
+        num_workers = worker_info.num_workers
+
+        dataset: BaseIterableDataset = worker_info.dataset
+        dataset.frequency = (process_id * num_workers) + worker_id
+        dataset.num_workers = num_processes * num_workers
+        print(f"INFO: WORKER_INIT: {dataset.frequency}/{dataset.num_workers}")
 
     def load(self, data_path):
         if isinstance(data_path, str):
@@ -217,4 +217,4 @@ class BaseIterableDataset(IterableDataset):
         return ex_idx % self.num_workers == self.frequency
 
     def worker_init_fn(self, _):
-        return worker_init_fn(_)
+        pass
