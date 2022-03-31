@@ -14,7 +14,8 @@ trainer:
   #  8 * 8 * 8 = 512
   max_epochs: 1
   accumulate_grad_batches: 8
-  val_check_interval: 50000
+#  val_check_interval: 50000
+  val_check_interval: 1.0
   deterministic: true
   num_sanity_val_steps: 1
   callbacks:

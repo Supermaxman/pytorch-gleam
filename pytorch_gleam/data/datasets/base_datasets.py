@@ -1,6 +1,5 @@
 import base64
 import hashlib
-import itertools
 import math
 import os
 import pickle
@@ -150,15 +149,6 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         data_loaders = self.create_eval_data_loaders(data_sets)
         data_loaders = self.flatten_dataloaders(data_loaders)
         return data_loaders
-
-
-def batch(iterable, n):
-    try:
-        while True:
-            batch_iter = list(itertools.islice(iterable, n))
-            yield batch_iter
-    except StopIteration:
-        return
 
 
 # noinspection PyAbstractClass
