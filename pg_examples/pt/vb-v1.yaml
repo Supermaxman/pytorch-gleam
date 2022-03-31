@@ -8,12 +8,12 @@ model:
 trainer:
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/vaccine-bert/vb-v1
+  default_root_dir: /nas1-nfs1/data/maw150130/models/pt/vb-v1
   #  batch_size=1024 for covid-twitter-bert
   #  8 * 4 * 8 = 256
   #  8 * 8 * 8 = 512
   max_epochs: 1
-  accumulate_grad_batches: 4
+  accumulate_grad_batches: 8
   val_check_interval: 50000
   deterministic: true
   num_sanity_val_steps: 1
@@ -36,18 +36,20 @@ data:
   init_args:
     batch_size: 8
     max_seq_len: 128
-    num_workers: 8
-    pickle_path: /shared/hltdir4/disk1/team/data/corpora/pickle/pt
+    num_workers: 1
+    worker_estimate: 4
+    train_examples: 619600000
+    val_examples: 6254166
     train_path:
-      - /users/max/data/corpora/vaccine-lm/processed-v1/0.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/1.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/2.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/3.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/4.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/5.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/6.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/7.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/8.jsonl
-      - /users/max/data/corpora/vaccine-lm/processed-v1/9.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/0.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/1.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/2.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/3.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/4.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/5.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/6.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/7.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/8.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/9.jsonl
     val_path:
-      - /users/max/data/corpora/vaccine-lm/processed-v1/test.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v1/test.jsonl

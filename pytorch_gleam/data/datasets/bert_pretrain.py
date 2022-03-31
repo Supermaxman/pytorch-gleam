@@ -2,15 +2,8 @@ import dataclasses
 import random
 from typing import List, Union
 
-import torch
-from spacy.lang.en import English
-from spacy.language import Language
-from torch.utils.data import Dataset
-from tqdm import tqdm
-
 from pytorch_gleam.data.collators import BertPreBatchCollator
-from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
+from pytorch_gleam.data.datasets.base_datasets import BaseDataModule, BaseIterableDataset
 
 
 @dataclasses.dataclass
@@ -23,236 +16,35 @@ class BertPreTrainDataConfig:
     do_whole_word_mask: bool = True
 
 
-@Language.component("avoid_sentencizer_hashtags")
-def _avoid_sentence_boundary_on_hashtag(doc):
-    for token in doc[:-1]:
-        if token.text == "#":
-            doc[token.i + 1].is_sent_start = False
-    return doc
-
-
-# build spacy model
-def build_spacy_model():
-    nlp = English()
-    # sentencizer = nlp.create_pipe("sentencizer")
-    # nlp.add_pipe(sentencizer)
-    nlp.add_pipe("sentencizer")
-    nlp.add_pipe("avoid_sentencizer_hashtags")
-    return nlp
-
-
-class BertPreDataset(Dataset):
-    def __init__(
-        self,
-        tokenizer_config: TweetPreprocessConfig,
-        masked_lm_prob: float,
-        tokenizer,
-        short_seq_prob: float,
-        max_seq_length: int,
-        max_predictions_per_seq: int,
-        dupe_factor: int,
-        do_whole_word_mask: bool,
-    ):
-        super().__init__()
-        self.short_seq_prob = short_seq_prob
-        self.max_seq_length = max_seq_length
-        self.max_predictions_per_seq = max_predictions_per_seq
-        self.dupe_factor = dupe_factor
-        self.do_whole_word_mask = do_whole_word_mask
-        self.masked_lm_prob = masked_lm_prob
-        self.tokenizer_config = tokenizer_config
-        self.tokenizer = tokenizer
-        self.examples = []
-        self.vocab_words = None
-        self.nlp = None
-        self.num_examples = 0
-
-    def load(self, data_path):
-        self.nlp = build_spacy_model()
-        self.vocab_words = list(self.tokenizer.vocab.keys())
-
-        if isinstance(data_path, str):
-            data_path = [data_path]
-
-        for stage, stage_path in tqdm(enumerate(data_path), total=len(data_path)):
-            documents = self.read_path(stage_path, stage)
-            examples = self.create_examples(documents)
-            self.examples.extend(examples)
-        self.num_examples = len(self.examples)
-        self.nlp = None
-        self.vocab_words = None
-
-    def create_examples(self, documents):
-        examples = []
-        with tqdm(total=self.dupe_factor * len(documents), leave=False) as progress:
-            for _ in range(self.dupe_factor):
-                for document_index in range(len(documents)):
-                    for instance in create_instances_from_document(
-                        documents,
-                        document_index,
-                        self.max_seq_length,
-                        self.short_seq_prob,
-                        self.masked_lm_prob,
-                        self.max_predictions_per_seq,
-                        self.vocab_words,
-                        self.do_whole_word_mask,
-                    ):
-                        example = self.create_example(instance)
-                        examples.append(example)
-                    progress.update(1)
-        return examples
-
-    def create_example(self, instance):
-        # tokens is a list of token strings, needs to be converted to ids
-        # segment_lengths is list of ints of lengths of token_type_ids
-        # is_random_next is bool label for seq pred task
-        # masked_lm_positions is indices of [mask]
-        # masked_lm_labels is token strings of [mask] indices
-        input_ids = self.tokenizer.convert_tokens_to_ids(instance["tokens"])
-        masked_lm_positions = list(instance["masked_lm_positions"])
-        masked_lm_ids = self.tokenizer.convert_tokens_to_ids(instance["masked_lm_labels"])
-        next_sentence_label = 1 if instance["is_random_next"] else 0
-        example = {
-            "input_ids": input_ids,
-            # "attention_mask": [1] * len(input_ids),
-            "segment_lengths": instance["segment_lengths"],
-            "masked_lm_positions": masked_lm_positions,
-            "masked_lm_ids": masked_lm_ids,
-            "next_sentence_label": next_sentence_label,
-        }
-
-        return example
-
-    def read_text(self, data_path):
-        for ex in read_jsonl(data_path):
-            ex_text = ex["text"]
-            ex_text = preprocess_tweet(ex_text, self.tokenizer_config)
-            yield ex_text
-
-    def read_path(self, data_path, stage=0):
-        documents = []
-        for text in tqdm(
-            self.read_text(data_path),
-            leave=True,
-        ):
-            document = []
-            doc = self.nlp(text)
-            for s_idx, sent in enumerate(doc.sents):
-                tokens = self.tokenizer.tokenize(sent.text, add_special_tokens=False)
-                # min token requirement
-                if len(tokens) < 4:
-                    continue
-                document.append(tokens)
-            # non-empty documents
-            if len(document) == 0:
-                continue
-            documents.append(document)
-        return documents
-
-    def __len__(self):
-        return len(self.examples)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        example = self.examples[idx]
-
-        return example
-
-    def worker_init_fn(self, _):
-        pass
-
-
 class BertPreDataModule(BaseDataModule):
     def __init__(
         self,
-        bert_tokenizer_config: TweetPreprocessConfig = None,
-        masked_lm_prob: float = 0.15,
-        short_seq_prob: float = 0.10,
-        max_predictions_per_seq: int = 14,
-        dupe_factor: int = 10,
-        do_whole_word_mask: bool = True,
+        worker_estimate: int,
+        train_examples: int,
+        val_examples: int,
         train_path: Union[str, List[str]] = None,
         val_path: Union[str, List[str]] = None,
-        test_path: Union[str, List[str]] = None,
-        predict_path: Union[str, List[str]] = None,
-        pickle_path: str = None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        if bert_tokenizer_config is None:
-            bert_tokenizer_config = TweetPreprocessConfig()
-        self.short_seq_prob = short_seq_prob
-        self.max_predictions_per_seq = max_predictions_per_seq
-        self.dupe_factor = dupe_factor
-        self.do_whole_word_mask = do_whole_word_mask
+        self.worker_estimate = worker_estimate
+        self.train_examples = train_examples
+        self.val_examples = val_examples
 
-        self.bert_tokenizer_config = bert_tokenizer_config
-        self.masked_lm_prob = masked_lm_prob
         self.train_path = train_path
         self.val_path = val_path
-        self.test_path = test_path
-        self.predict_path = predict_path
-        self.pickle_path = pickle_path
 
         if self.train_path is not None:
-            self.train_dataset = self.load_or_create(
-                BertPreDataset,
-                self.train_path,
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-                pickle_path=self.pickle_path,
+            self.train_dataset = BaseIterableDataset(
+                num_examples=self.train_examples, batch_size=self.batch_size, worker_estimate=self.worker_estimate
             )
+            self.train_dataset.load(self.train_path)
         if self.val_path is not None:
-            self.val_dataset = self.load_or_create(
-                BertPreDataset,
-                self.val_path,
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-                pickle_path=self.pickle_path,
+            self.val_dataset = BaseIterableDataset(
+                num_examples=self.val_examples, batch_size=self.batch_size, worker_estimate=self.worker_estimate
             )
-        if self.test_path is not None:
-            self.test_dataset = self.load_or_create(
-                BertPreDataset,
-                self.test_path,
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-                pickle_path=self.pickle_path,
-            )
-        if self.predict_path is not None:
-            self.predict_dataset = self.load_or_create(
-                BertPreDataset,
-                self.predict_path,
-                tokenizer_config=self.bert_tokenizer_config,
-                masked_lm_prob=self.masked_lm_prob,
-                tokenizer=self.tokenizer,
-                short_seq_prob=self.short_seq_prob,
-                max_seq_length=self.max_seq_len,
-                max_predictions_per_seq=self.max_predictions_per_seq,
-                dupe_factor=self.dupe_factor,
-                do_whole_word_mask=self.do_whole_word_mask,
-                pickle_path=self.pickle_path,
-            )
+            self.val_dataset.load(self.val_path)
 
     def create_collator(self):
         return BertPreBatchCollator(

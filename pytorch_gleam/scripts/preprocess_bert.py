@@ -44,11 +44,15 @@ def create_example(instance):
     masked_lm_ids = tokenizer.convert_tokens_to_ids(instance["masked_lm_labels"])
     next_sentence_label = 1 if instance["is_random_next"] else 0
     example = {
+        # list of ints
         "input_ids": input_ids,
-        # "attention_mask": [1] * len(input_ids),
+        # list of two ints [x, y]
         "segment_lengths": instance["segment_lengths"],
+        # list of ints
         "masked_lm_positions": masked_lm_positions,
+        # list of ints
         "masked_lm_ids": masked_lm_ids,
+        # int
         "next_sentence_label": next_sentence_label,
     }
 

@@ -45,6 +45,7 @@ def worker_init_fn(_):
     print(f"INFO: WORKER_INIT: F_INFO: {dataset.frequency}/{dataset.num_workers}")
 
 
+# noinspection PyAbstractClass
 class MultiClassFrameEdgeMoralityIterableDataset(IterableDataset):
     def __init__(
         self,

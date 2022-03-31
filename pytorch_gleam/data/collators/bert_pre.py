@@ -8,6 +8,10 @@ class BertPreBatchCollator(BatchCollator):
         super().__init__(*args, **kwargs)
 
     def __call__(self, examples: list) -> dict:
+        # if we do pre-batching in the dataset object then this is the pattern
+        if isinstance(examples[0], list) and len(examples) == 1:
+            examples = examples[0]
+
         pad_seq_len = self._calculate_seq_padding(examples)
 
         batch_size = len(examples)

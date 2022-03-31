@@ -1,12 +1,17 @@
 import base64
 import hashlib
+import itertools
+import math
 import os
 import pickle
 from abc import ABC, abstractmethod
-from typing import Type
+from typing import List, Type
 
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader
+import torch
+import torch.distributed as dist
+import ujson as json
+from torch.utils.data import DataLoader, IterableDataset
 from transformers import AutoTokenizer
 
 
@@ -144,3 +149,70 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         data_loaders = self.create_eval_data_loaders(data_sets)
         data_loaders = self.flatten_dataloaders(data_loaders)
         return data_loaders
+
+
+def batch(iterable, n):
+    try:
+        while True:
+            batch_iter = list(itertools.islice(iterable, n))
+            yield batch_iter
+    except StopIteration:
+        return
+
+
+# noinspection PyAbstractClass
+class BaseIterableDataset(IterableDataset):
+    num_examples: int
+    batch_size: int
+    worker_estimate: int
+    data_paths: List[str]
+
+    frequency: int = 0
+    num_workers: int = 0
+
+    def __init__(self, num_examples: int, batch_size: int, worker_estimate: int):
+        self.num_examples = num_examples
+        self.batch_size = batch_size
+        self.worker_estimate = worker_estimate
+        self.data_paths = []
+
+    def __len__(self):
+        length = int(math.ceil((self.num_examples / self.worker_estimate) / self.batch_size))
+        return length
+
+    def __iter__(self):
+        for i_batch in batch(self.example_iterator(), self.batch_size):
+            yield i_batch
+
+    def load(self, data_path):
+        if isinstance(data_path, str):
+            data_path = [data_path]
+        self.data_paths = data_path
+
+    def example_iterator(self):
+        ex_idx = 0
+        for file_path in self.data_paths:
+            with open(file_path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        if self.check_example(ex_idx):
+                            ex = json.loads(line)
+                            yield ex
+                        ex_idx += 1
+
+    def check_example(self, ex_idx: int):
+        # check if an example should be returned by this worker or skipped due to frequency
+        return ex_idx % self.num_workers == self.frequency
+
+    @staticmethod
+    def worker_init_fn(_):
+        process_id = dist.get_rank()
+        num_processes = dist.get_world_size()
+        worker_info = torch.utils.data.get_worker_info()
+        worker_id = worker_info.id
+        num_workers = worker_info.num_workers
+        dataset: BaseIterableDataset = worker_info.dataset
+        dataset.frequency = (process_id * num_workers) + worker_id
+        dataset.num_workers = num_processes * num_workers
+        print(f"INFO: WORKER_INIT: {dataset.frequency}/{dataset.num_workers}")
