@@ -1,3 +1,5 @@
+from time import sleep
+
 import torch
 
 from pytorch_gleam.data.collators.base_collators import BatchCollator
@@ -9,16 +11,17 @@ class BertPreBatchCollator(BatchCollator):
 
     def __call__(self, examples: list) -> dict:
         print("START")
+        sleep(10)
         print(len(examples))
-        input()
+        sleep(10)
         print(examples[0])
-        input()
+        sleep(10)
         print(examples)
-        input()
+        sleep(10)
         print(len(examples[0]))
-        input()
+        sleep(10)
         print("END")
-        input()
+        sleep(10)
         # if we do pre-batching in the dataset object then this is the pattern
         if isinstance(examples[0], list) and len(examples) == 1:
             examples = examples[0]
