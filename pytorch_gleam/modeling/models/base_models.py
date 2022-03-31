@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, Type, Union
+from typing import Callable, Type, Union
 
 import pytorch_lightning as pl
 from transformers import (
@@ -83,13 +83,14 @@ class BasePreModel(pl.LightningModule, ABC):
             config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
             self.lm = self.pre_model_type.from_config(config)
 
-    def setup(self, stage: Optional[str] = None):
-        if stage == "fit":
-            total_devices = self.trainer.num_nodes * self.trainer.num_gpus
-            train_batches = len(self.train_dataloader()) // total_devices
-            # need to figure out how many batches will actually have gradient updates
-            train_batches = train_batches // self.trainer.accumulate_grad_batches
-            self.train_steps = self.trainer.max_epochs * train_batches
+    # TODO this does not work anymore
+    # def setup(self, stage: Optional[str] = None):
+    #     if stage == "fit":
+    #         total_devices = self.trainer.num_nodes * self.trainer.num_gpus
+    #         train_batches = len(self.train_dataloader()) // total_devices
+    #         # need to figure out how many batches will actually have gradient updates
+    #         train_batches = train_batches // self.trainer.accumulate_grad_batches
+    #         self.train_steps = self.trainer.max_epochs * train_batches
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)

@@ -181,6 +181,9 @@ class BaseIterableDataset(IterableDataset):
         return length
 
     def __iter__(self):
+        assert (
+            self.worker_estimate == self.num_workers
+        ), f"Mismatch between estimated vs actual workers: {self.worker_estimate} vs {self.num_workers}"
         for i_batch in batch(self.example_iterator(), self.batch_size):
             yield i_batch
 

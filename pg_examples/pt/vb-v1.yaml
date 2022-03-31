@@ -37,7 +37,7 @@ data:
     batch_size: 8
     max_seq_len: 128
     num_workers: 1
-    worker_estimate: 4
+    worker_estimate: 1
     train_examples: 619600000
     val_examples: 6254166
     train_path:
