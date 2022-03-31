@@ -151,6 +151,25 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         return data_loaders
 
 
+def worker_init_fn(_):
+    try:
+        process_id = dist.get_rank()
+        num_processes = dist.get_world_size()
+    except RuntimeError as e:
+        print(e)
+        process_id = 0
+        num_processes = 1
+
+    worker_info = torch.utils.data.get_worker_info()
+    worker_id = worker_info.id
+    num_workers = worker_info.num_workers
+
+    dataset: BaseIterableDataset = worker_info.dataset
+    dataset.frequency = (process_id * num_workers) + worker_id
+    dataset.num_workers = num_processes * num_workers
+    print(f"INFO: WORKER_INIT: {dataset.frequency}/{dataset.num_workers}")
+
+
 # noinspection PyAbstractClass
 class BaseIterableDataset(IterableDataset):
     num_examples: int
@@ -197,20 +216,5 @@ class BaseIterableDataset(IterableDataset):
         # check if an example should be returned by this worker or skipped due to frequency
         return ex_idx % self.num_workers == self.frequency
 
-    @staticmethod
-    def worker_init_fn(_):
-        try:
-            process_id = dist.get_rank()
-            num_processes = dist.get_world_size()
-        except RuntimeError:
-            process_id = 0
-            num_processes = 1
-
-        worker_info = torch.utils.data.get_worker_info()
-        worker_id = worker_info.id
-        num_workers = worker_info.num_workers
-
-        dataset: BaseIterableDataset = worker_info.dataset
-        dataset.frequency = (process_id * num_workers) + worker_id
-        dataset.num_workers = num_processes * num_workers
-        print(f"INFO: WORKER_INIT: {dataset.frequency}/{dataset.num_workers}")
+    def worker_init_fn(self, _):
+        return worker_init_fn(_)
