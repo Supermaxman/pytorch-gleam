@@ -7,8 +7,8 @@ model:
 
 trainer:
   accelerator: gpu
-  devices: [4, 5, 6, 7]
-  default_root_dir: /nas1-nfs1/data/maw150130/models/pt/vb-v1
+  devices: [1, 2, 3, 5, 6, 7]
+  default_root_dir: /nas1-nfs1/data/maw150130/models/pt/vb-v3
   strategy: ddp
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
@@ -43,7 +43,7 @@ data:
     batch_size: 8
     max_seq_len: 128
     num_workers: 1
-    worker_estimate: 4
+    worker_estimate: 6
     train_examples: 619600000
     val_examples: 6254166
     train_path:
