@@ -36,7 +36,7 @@ trainer:
         # val_check_interval / accumulate_grad_batches
         # not sure if also divided by number of devices, so / num_devices also
         # (619600000 / (8 * 4 * 8)) / 20 = 121015.625
-        every_n_train_steps: 100000
+        every_n_train_steps: 50000
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
