@@ -7,7 +7,7 @@ model:
 
 trainer:
   tpu_cores: 8
-  default_root_dir: /home/supermaxman1/artifacts/pt/vb-v2
+  default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v2
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
   max_epochs: 1
@@ -16,8 +16,9 @@ trainer:
   # (total training size  / (batch_size * num_devices)) / num_val_checks
   # (619600000 / (8 * 4)) / 20 =
 #  val_check_interval: 968125
-  val_check_interval: 0.05
-  deterministic: true
+  # (619600000 / (8 * 128)) = 605,079 total training steps, so run validation every 100k
+  val_check_interval: 100000
+#  deterministic: true
   num_sanity_val_steps: 0
   callbacks:
 #    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
@@ -33,7 +34,7 @@ trainer:
         # actual gradient steps
         # val_check_interval / accumulate_grad_batches
         # not sure if also divided by number of devices, so / num_devices also
-        # (619600000 / (8 * 4 * 8)) / 20 = 121015.625
+        # (619600000 / (8 * 128))
         every_n_train_steps: 100000
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
@@ -47,15 +48,15 @@ data:
     train_examples: 619600000
     val_examples: 6254166
     train_path:
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/0.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/1.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/2.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/3.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/4.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/5.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/6.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/7.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/8.jsonl
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/9.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/0.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/1.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/2.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/3.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/4.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/5.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/6.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/7.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/8.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/9.jsonl
     val_path:
-      - /home/supermaxman1/artifacts/vaccine-lm/processed-v1/test.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v1/test.jsonl
