@@ -199,6 +199,11 @@ class BaseIterableDataset(IterableDataset):
 
     @staticmethod
     def worker_init_fn(_):
+        worker_info = torch.utils.data.get_worker_info()
+        dataset: BaseIterableDataset = worker_info.dataset
+        worker_id = worker_info.id
+        num_workers = worker_info.num_workers
+
         try:
             process_id = dist.get_rank()
             num_processes = dist.get_world_size()
@@ -206,11 +211,15 @@ class BaseIterableDataset(IterableDataset):
             process_id = 0
             num_processes = 1
 
-        worker_info = torch.utils.data.get_worker_info()
-        worker_id = worker_info.id
-        num_workers = worker_info.num_workers
+        # noinspection PyBroadException
+        try:
+            import torch_xla.core.xla_model as xm
 
-        dataset: BaseIterableDataset = worker_info.dataset
+            process_id = xm.get_ordinal()
+            num_processes = xm.xrt_world_size()
+        except Exception:  # noqa: E722
+            pass
+
         dataset.frequency = (process_id * num_workers) + worker_id
         dataset.num_workers = num_processes * num_workers
         print(f"INFO: WORKER_INIT: {dataset.frequency}/{dataset.num_workers}")
