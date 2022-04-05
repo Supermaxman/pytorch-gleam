@@ -7,6 +7,8 @@ model:
 
 trainer:
   tpu_cores: 8
+  # TODO consider bfloat16 on TPUs
+  precision: 16
   default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v2
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
@@ -45,7 +47,7 @@ data:
     # might need to go back down to 64
     batch_size: 64
     max_seq_len: 128
-    num_workers: 4
+    num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
     worker_estimate: 8
     train_examples: 619600000
