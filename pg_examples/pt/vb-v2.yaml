@@ -44,8 +44,8 @@ data:
     # might need to go back down to 64
     batch_size: 64
     max_seq_len: 128
-    num_workers: 1
-    worker_estimate: 8
+    num_workers: 4
+    worker_estimate: 32
     train_examples: 619600000
     val_examples: 6254166
     train_path:
