@@ -32,7 +32,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         )
         labels = batch["masked_lm_labels"].view(-1)
         next_sentence_label = batch["next_sentence_labels"]
-        labels_mask = labels.neq(-100).float()
+        labels_mask = (~labels.eq(-100)).float()
         labels_count = labels_mask.sum()
 
         # TODO more metrics than just loss
