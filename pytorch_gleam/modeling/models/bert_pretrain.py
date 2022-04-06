@@ -12,7 +12,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.loss_func = nn.CrossEntropyLoss(reduction="none", ignore_index=None)
+        self.loss_func = nn.CrossEntropyLoss(reduction="none")
 
     def eval_epoch_end(self, outputs, stage):
         loss = torch.stack([x["loss"] for x in outputs], dim=0).mean().cpu()
@@ -34,6 +34,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         next_sentence_label = batch["next_sentence_labels"]
         labels_mask = (~labels.eq(-100)).float()
         labels_count = labels_mask.sum()
+        labels = labels * labels_mask.int()
 
         # TODO more metrics than just loss
         prediction_logits = outputs.prediction_logits
