@@ -34,7 +34,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         next_sentence_label = batch["next_sentence_labels"]
         labels_mask = (~labels.eq(-100)).float()
         labels_count = labels_mask.sum()
-        labels = labels * labels_mask.int()
+        labels = labels * labels_mask.long()
 
         # TODO more metrics than just loss
         prediction_logits = outputs.prediction_logits
