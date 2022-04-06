@@ -36,7 +36,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         # TODO more metrics than just loss
         prediction_logits = outputs.prediction_logits
         seq_relationship_logits = outputs.seq_relationship_logits
-        masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.config.vocab_size), labels.view(-1))
+        masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels.view(-1))
         next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
         masked_lm_loss = masked_lm_loss.mean()
         next_sentence_loss = next_sentence_loss.mean()
