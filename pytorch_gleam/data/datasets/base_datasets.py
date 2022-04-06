@@ -121,7 +121,8 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 # TODO maybe bad on ddp in general
                 persistent_workers=not self.use_tpus,
                 # *MIGHT*? causes memory leak on TPUs
-                pin_memory=True,
+                pin_memory=not self.use_tpus,
+                # pin_memory=True,
             )
             for ds in datasets
         ]

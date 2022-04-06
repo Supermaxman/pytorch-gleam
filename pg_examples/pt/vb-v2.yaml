@@ -37,7 +37,7 @@ trainer:
 #        refresh_rate: 100
     - class_path: pytorch_lightning.callbacks.TQDMProgressBar
       init_args:
-        refresh_rate: 20
+        refresh_rate: 1
     - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
 #    - class_path: pytorch_gleam.callbacks.XLAGraphMonitor
 #    - class_path: pytorch_lightning.callbacks.DeviceStatsMonitor
