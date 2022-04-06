@@ -1,8 +1,8 @@
 import torch
+import torch.nn as nn
+from transformers import AdamW
 
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
-
-# import torch.nn as nn
 
 
 # noinspection PyAbstractClass
@@ -14,12 +14,11 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
     ):
         super().__init__(*args, **kwargs)
         # self.loss_func = nn.CrossEntropyLoss(reduction="none")
+        self.loss_func = nn.CrossEntropyLoss()
 
     def eval_epoch_end(self, outputs, stage):
-        pass
-        # loss = torch.stack([x["loss"] for x in outputs], dim=0).mean().cpu()
-        # TODO TESTING
-        # self.log(f"{stage}_loss", loss)
+        loss = torch.stack([x["loss"] for x in outputs], dim=0).mean().cpu()
+        self.log(f"{stage}_loss", loss)
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
         result = self.predict_step(batch, batch_idx, dataloader_idx)
@@ -41,31 +40,32 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             # next_sentence_label=batch["next_sentence_labels"],
         )
         # labels = batch["masked_lm_labels"].view(-1)
-        # next_sentence_label = batch["next_sentence_labels"]
+        labels = batch["masked_lm_labels"]
+        next_sentence_label = batch["next_sentence_labels"]
         # labels_mask = (~labels.eq(-100)).float()
         # labels_count = labels_mask.sum()
         # labels = labels * labels_mask.long()
 
         # TODO more metrics than just loss
-        # prediction_logits = outputs.prediction_logits
+        prediction_logits = outputs.prediction_logits
         seq_relationship_logits = outputs.seq_relationship_logits
 
+        masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels.view(-1))
         # masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
 
-        # next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
+        next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
         # masked_lm_loss = (masked_lm_loss * labels_mask).sum() / labels_count
         # next_sentence_loss = next_sentence_loss.mean()
-        # total_loss = masked_lm_loss + next_sentence_loss
+        total_loss = masked_lm_loss + next_sentence_loss
         # total_loss = next_sentence_loss
-        # TODO this is incorrect, just doing it to test TPUs
-        total_loss = seq_relationship_logits.mean()
+        # this is incorrect, just doing it to test TPUs
+        # total_loss = seq_relationship_logits.mean()
         # total_loss = outputs.loss
         return total_loss
 
     def training_step(self, batch, batch_idx):
         loss = self(batch)
-        # TODO TESTING
-        # self.log("train_loss", loss)
+        self.log("train_loss", loss)
         result = {"loss": loss}
         return result
 
@@ -78,15 +78,14 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)
-        optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
-        # TODO testing
+        # optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
         # optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
-        # optimizer = AdamW(
-        #     params,
-        #     lr=self.learning_rate,
-        #     weight_decay=self.weight_decay,
-        #     correct_bias=False,
-        # )
+        optimizer = AdamW(
+            params,
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+            correct_bias=False,
+        )
         # scheduler = get_constant_schedule(optimizer)
         # opt_dict = {
         #     "optimizer": optimizer,

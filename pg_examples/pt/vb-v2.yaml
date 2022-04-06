@@ -6,16 +6,16 @@ model:
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
 
 trainer:
-  tpu_cores: 1
-#  tpu_cores: 8
+#  tpu_cores: 1
+  tpu_cores: 8
   # TODO consider bfloat16 on TPUs
-#  precision: 16
+  precision: 16
   default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v2
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
   max_epochs: 1
-#  accumulate_grad_batches: 2
-  accumulate_grad_batches: 1
+  accumulate_grad_batches: 2
+#  accumulate_grad_batches: 1
   # training batch steps, not gradient steps
   # (total training size  / (batch_size * num_devices)) / num_val_checks
   # (619600000 / (8 * 4)) / 20 =
@@ -50,13 +50,13 @@ data:
   init_args:
     use_tpus: true
     # might need to go back down to 64
-    batch_size: 8
-#    batch_size: 64
+#    batch_size: 8
+    batch_size: 64
     max_seq_len: 128
     num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
-#    worker_estimate: 8
-    worker_estimate: 1
+    worker_estimate: 8
+#    worker_estimate: 1
     train_examples: 619600000
     val_examples: 6254166
     train_path:
