@@ -12,7 +12,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.loss_func = nn.CrossEntropyLoss(reduction="none")
+        self.loss_func = nn.CrossEntropyLoss(reduction="none", ignore_index=None)
 
     def eval_epoch_end(self, outputs, stage):
         loss = torch.stack([x["loss"] for x in outputs], dim=0).mean().cpu()
@@ -30,15 +30,19 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             # labels=batch["masked_lm_labels"],
             # next_sentence_label=batch["next_sentence_labels"],
         )
-        labels = batch["masked_lm_labels"]
+        labels = batch["masked_lm_labels"].view(-1)
         next_sentence_label = batch["next_sentence_labels"]
+        labels_mask = labels.neq(-100).float()
+        labels_count = labels_mask.sum()
 
         # TODO more metrics than just loss
         prediction_logits = outputs.prediction_logits
         seq_relationship_logits = outputs.seq_relationship_logits
-        masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels.view(-1))
+
+        masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
+
         next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
-        masked_lm_loss = masked_lm_loss.mean()
+        masked_lm_loss = (masked_lm_loss * labels_mask) / labels_count
         next_sentence_loss = next_sentence_loss.mean()
         total_loss = masked_lm_loss + next_sentence_loss
 
