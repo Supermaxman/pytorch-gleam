@@ -42,7 +42,7 @@ trainer:
       init_args:
         leave: true
     - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
-#    - class_path: pytorch_gleam.callbacks.XLAGraphMonitor
+    - class_path: pytorch_gleam.callbacks.XLAGraphMonitor
 #    - class_path: pytorch_lightning.callbacks.DeviceStatsMonitor
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:

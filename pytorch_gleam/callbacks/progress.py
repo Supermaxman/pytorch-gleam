@@ -21,3 +21,6 @@ class TPURichProgressBar(RichProgressBar):
             self.progress.start()
             # progress has started
             self._progress_stopped = False
+
+    def _update_metrics(self, trainer, pl_module) -> None:
+        pass
