@@ -1,4 +1,5 @@
 import torch
+from transformers import AdamW
 
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
 
@@ -35,11 +36,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         return loss
 
     def training_step(self, batch, batch_idx):
-        print(batch["input_ids"].shape)
-        print(batch["masked_lm_labels"].shape)
-        print(batch["next_sentence_labels"].shape)
         loss = self(batch)
-        print(loss.shape)
         self.log("train_loss", loss)
         result = {"loss": loss}
         return result
@@ -53,7 +50,13 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)
-        optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
+        # optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
+        optimizer = AdamW(
+            params,
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+            correct_bias=False,
+        )
         # scheduler = get_constant_schedule(optimizer)
         # opt_dict = {
         #     "optimizer": optimizer,
