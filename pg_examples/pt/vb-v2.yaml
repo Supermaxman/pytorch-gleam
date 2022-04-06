@@ -9,7 +9,7 @@ trainer:
 #  tpu_cores: 1
   tpu_cores: 8
   # TODO consider bfloat16 on TPUs
-  precision: "bf16"
+#  precision: "bf16"
   default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v2
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
