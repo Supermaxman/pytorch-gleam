@@ -38,8 +38,8 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         seq_relationship_logits = outputs.seq_relationship_logits
         masked_lm_loss = self.loss_func(prediction_logits, labels)
         next_sentence_loss = self.loss_func(seq_relationship_logits, next_sentence_label)
-        masked_lm_loss = masked_lm_loss.sum()
-        next_sentence_loss = next_sentence_loss.sum()
+        masked_lm_loss = masked_lm_loss.mean()
+        next_sentence_loss = next_sentence_loss.mean()
         total_loss = masked_lm_loss + next_sentence_loss
 
         return total_loss
