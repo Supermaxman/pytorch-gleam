@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
-from transformers import AdamW
 
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
+
+# from transformers import AdamW
 
 
 # noinspection PyAbstractClass
@@ -80,15 +81,16 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         return results
 
     def configure_optimizers(self):
-        params = self._get_optimizer_params(self.weight_decay)
+        # params = self._get_optimizer_params(self.weight_decay)
         # optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
-        # optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
-        optimizer = AdamW(
-            params,
-            lr=self.learning_rate,
-            weight_decay=self.weight_decay,
-            correct_bias=False,
-        )
+        # TODO fix
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
+        # optimizer = AdamW(
+        #     params,
+        #     lr=self.learning_rate,
+        #     weight_decay=self.weight_decay,
+        #     correct_bias=False,
+        # )
         # scheduler = get_constant_schedule(optimizer)
         # opt_dict = {
         #     "optimizer": optimizer,
