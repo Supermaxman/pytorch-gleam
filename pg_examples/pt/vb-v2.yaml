@@ -26,6 +26,7 @@ trainer:
   log_every_n_steps: 200
   deterministic: true
   num_sanity_val_steps: 0
+  enable_progress_bar: false
   callbacks:
 #    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
 #      init_args:
@@ -34,9 +35,9 @@ trainer:
 #      init_args:
 #        leave: true
 #        refresh_rate: 100
-    - class_path: pytorch_lightning.callbacks.TQDMProgressBar
-      init_args:
-        refresh_rate: 100
+#    - class_path: pytorch_lightning.callbacks.TQDMProgressBar
+#      init_args:
+#        refresh_rate: 100
     - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
 #    - class_path: pytorch_gleam.callbacks.XLAGraphMonitor
 #    - class_path: pytorch_lightning.callbacks.DeviceStatsMonitor
