@@ -30,22 +30,23 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             # labels=batch["masked_lm_labels"],
             # next_sentence_label=batch["next_sentence_labels"],
         )
-        labels = batch["masked_lm_labels"].view(-1)
+        # labels = batch["masked_lm_labels"].view(-1)
         next_sentence_label = batch["next_sentence_labels"]
-        labels_mask = (~labels.eq(-100)).float()
-        labels_count = labels_mask.sum()
-        labels = labels * labels_mask.long()
+        # labels_mask = (~labels.eq(-100)).float()
+        # labels_count = labels_mask.sum()
+        # labels = labels * labels_mask.long()
 
         # TODO more metrics than just loss
-        prediction_logits = outputs.prediction_logits
+        # prediction_logits = outputs.prediction_logits
         seq_relationship_logits = outputs.seq_relationship_logits
 
-        masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
+        # masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
 
         next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
-        masked_lm_loss = (masked_lm_loss * labels_mask).sum() / labels_count
+        # masked_lm_loss = (masked_lm_loss * labels_mask).sum() / labels_count
         next_sentence_loss = next_sentence_loss.mean()
-        total_loss = masked_lm_loss + next_sentence_loss
+        # total_loss = masked_lm_loss + next_sentence_loss
+        total_loss = next_sentence_loss
 
         return total_loss
 
