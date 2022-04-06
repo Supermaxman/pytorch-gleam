@@ -30,9 +30,12 @@ trainer:
 #    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
 #      init_args:
 #        logging_interval: step
-    - class_path: pytorch_lightning.callbacks.RichProgressBar
+#    - class_path: pytorch_lightning.callbacks.RichProgressBar
+#      init_args:
+#        leave: true
+#        refresh_rate: 100
+    - class_path: pytorch_lightning.callbacks.TQDMProgressBar
       init_args:
-        leave: true
         refresh_rate: 100
     - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
 #    - class_path: pytorch_gleam.callbacks.XLAGraphMonitor
