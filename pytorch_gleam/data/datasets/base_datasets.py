@@ -97,6 +97,7 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 worker_init_fn=ds.worker_init_fn,
                 # ensures same samples because rng will get assigned during worker creation
                 persistent_workers=False,
+                # *MIGHT*? causes memory leak on TPUs
                 pin_memory=True,
             )
             for ds in datasets

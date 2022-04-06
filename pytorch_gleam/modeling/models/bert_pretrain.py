@@ -77,10 +77,10 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         return results
 
     def configure_optimizers(self):
-        # params = self._get_optimizer_params(self.weight_decay)
-        # optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
+        params = self._get_optimizer_params(self.weight_decay)
+        optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay)
         # TODO testing
-        optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
+        # optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate)
         # optimizer = AdamW(
         #     params,
         #     lr=self.learning_rate,
