@@ -24,12 +24,19 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         return result
 
     def forward(self, batch):
+        # outputs = self.lm(
+        #     input_ids=batch["input_ids"],
+        #     attention_mask=batch["attention_mask"],
+        #     token_type_ids=batch["token_type_ids"],
+        #     # labels=batch["masked_lm_labels"],
+        #     # next_sentence_label=batch["next_sentence_labels"],
+        # )
         outputs = self.lm(
             input_ids=batch["input_ids"],
             attention_mask=batch["attention_mask"],
             token_type_ids=batch["token_type_ids"],
-            # labels=batch["masked_lm_labels"],
-            # next_sentence_label=batch["next_sentence_labels"],
+            labels=batch["masked_lm_labels"],
+            next_sentence_label=batch["next_sentence_labels"],
         )
         # labels = batch["masked_lm_labels"].view(-1)
         # next_sentence_label = batch["next_sentence_labels"]
@@ -39,7 +46,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
 
         # TODO more metrics than just loss
         # prediction_logits = outputs.prediction_logits
-        seq_relationship_logits = outputs.seq_relationship_logits
+        # seq_relationship_logits = outputs.seq_relationship_logits
 
         # masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
 
@@ -49,7 +56,8 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         # total_loss = masked_lm_loss + next_sentence_loss
         # total_loss = next_sentence_loss
         # TODO this is incorrect, just doing it to test TPUs
-        total_loss = seq_relationship_logits.mean()
+        # total_loss = seq_relationship_logits.mean()
+        total_loss = outputs.loss
         return total_loss
 
     def training_step(self, batch, batch_idx):
