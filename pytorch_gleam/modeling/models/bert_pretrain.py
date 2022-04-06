@@ -42,7 +42,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
 
         next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
-        masked_lm_loss = (masked_lm_loss * labels_mask) / labels_count
+        masked_lm_loss = (masked_lm_loss * labels_mask).sum() / labels_count
         next_sentence_loss = next_sentence_loss.mean()
         total_loss = masked_lm_loss + next_sentence_loss
 
