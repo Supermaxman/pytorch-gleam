@@ -35,7 +35,11 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         return loss
 
     def training_step(self, batch, batch_idx):
+        print(batch["input_ids"].shape)
+        print(batch["masked_lm_labels"].shape)
+        print(batch["next_sentence_labels"].shape)
         loss = self(batch)
+        print(loss.shape)
         self.log("train_loss", loss)
         result = {"loss": loss}
         return result
