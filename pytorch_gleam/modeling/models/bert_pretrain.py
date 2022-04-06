@@ -1,7 +1,8 @@
 import torch
-import torch.nn as nn
 
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
+
+# import torch.nn as nn
 
 
 # noinspection PyAbstractClass
@@ -12,7 +13,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.loss_func = nn.CrossEntropyLoss(reduction="none")
+        # self.loss_func = nn.CrossEntropyLoss(reduction="none")
 
     def eval_epoch_end(self, outputs, stage):
         loss = torch.stack([x["loss"] for x in outputs], dim=0).mean().cpu()
@@ -31,7 +32,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             # next_sentence_label=batch["next_sentence_labels"],
         )
         # labels = batch["masked_lm_labels"].view(-1)
-        next_sentence_label = batch["next_sentence_labels"]
+        # next_sentence_label = batch["next_sentence_labels"]
         # labels_mask = (~labels.eq(-100)).float()
         # labels_count = labels_mask.sum()
         # labels = labels * labels_mask.long()
@@ -42,12 +43,13 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
 
         # masked_lm_loss = self.loss_func(prediction_logits.view(-1, self.lm.config.vocab_size), labels)
 
-        next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
+        # next_sentence_loss = self.loss_func(seq_relationship_logits.view(-1, 2), next_sentence_label.view(-1))
         # masked_lm_loss = (masked_lm_loss * labels_mask).sum() / labels_count
-        next_sentence_loss = next_sentence_loss.mean()
+        # next_sentence_loss = next_sentence_loss.mean()
         # total_loss = masked_lm_loss + next_sentence_loss
-        total_loss = next_sentence_loss
-
+        # total_loss = next_sentence_loss
+        # TODO this is incorrect, just doing it to test TPUs
+        total_loss = seq_relationship_logits.mean()
         return total_loss
 
     def training_step(self, batch, batch_idx):
