@@ -58,7 +58,7 @@ data:
     use_tpus: true
     # might need to go back down to 64
 #    batch_size: 8
-    batch_size: 8
+    batch_size: 64
     max_seq_len: 128
     num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
