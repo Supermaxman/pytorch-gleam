@@ -1,6 +1,5 @@
 import base64
 import hashlib
-import itertools
 import math
 import os
 import pickle
@@ -175,8 +174,7 @@ class BaseIterableDataset(IterableDataset):
         return length
 
     def __iter__(self):
-        # TODO remove after testing
-        for ex in itertools.islice(self.example_iterator(), 10000):
+        for ex in self.example_iterator():
             yield ex
 
     def load(self, data_path):
