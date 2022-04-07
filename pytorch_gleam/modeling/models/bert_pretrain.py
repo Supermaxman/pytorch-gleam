@@ -13,11 +13,11 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         super().__init__(*args, **kwargs)
 
     def eval_epoch_end(self, outputs, stage):
-        loss = torch.stack([x["loss"] for x in outputs], dim=0).mean()
-        self.log(f"{stage}_loss", loss)
+        pass
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
         result = self.predict_step(batch, batch_idx, dataloader_idx)
+        self.log("val_loss", result["loss"])
         return result
 
     def forward(self, batch):
@@ -40,7 +40,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         loss = self(batch)
         results = {
-            "loss": loss.detach(),
+            "loss": loss,
         }
         return results
 
