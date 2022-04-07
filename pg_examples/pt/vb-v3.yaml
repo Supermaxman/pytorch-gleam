@@ -10,8 +10,7 @@ trainer:
   default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v3
   max_epochs: 1
   accumulate_grad_batches: 1
-#  val_check_interval: 200000
-  val_check_interval: 100
+  val_check_interval: 200000
   log_every_n_steps: 200
   num_sanity_val_steps: 0
   callbacks:
@@ -22,14 +21,14 @@ trainer:
       init_args:
         save_top_k: -1
         # actual gradient steps
-        every_n_train_steps: 100
+        every_n_train_steps: 100000
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
     use_tpus: true
     batch_size: 64
     max_seq_len: 128
-    num_workers: 1
+    num_workers: 4
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
     worker_estimate: 8
     train_examples: 619600000
