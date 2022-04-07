@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import itertools
 import math
 import os
 import pickle
@@ -98,7 +99,9 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 # ensures same samples because rng will get assigned during worker creation
                 persistent_workers=False,
                 # *MIGHT*? causes memory leak on TPUs
-                pin_memory=True,
+                pin_memory=not self.use_tpus,
+                # TODO warn about this
+                drop_last=not self.use_tpus,
             )
             for ds in datasets
         ]
@@ -172,7 +175,8 @@ class BaseIterableDataset(IterableDataset):
         return length
 
     def __iter__(self):
-        for ex in self.example_iterator():
+        # TODO remove after testing
+        for ex in itertools.islice(self.example_iterator(), 2000):
             yield ex
 
     def load(self, data_path):

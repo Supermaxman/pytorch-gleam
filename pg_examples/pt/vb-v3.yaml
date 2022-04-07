@@ -11,9 +11,9 @@ trainer:
   max_epochs: 1
   accumulate_grad_batches: 1
 #  val_check_interval: 200000
-  val_check_interval: 100
+  val_check_interval: 5
   log_every_n_steps: 200
-  num_sanity_val_steps: 100
+  num_sanity_val_steps: 0
   callbacks:
     - class_path: pytorch_gleam.callbacks.TPURichProgressBar
       init_args:
