@@ -6,7 +6,6 @@ model:
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
 
 trainer:
-#  tpu_cores: 1
   tpu_cores: 8
   # TODO consider bfloat16 on TPUs
 #  precision: "bf16"
@@ -15,35 +14,15 @@ trainer:
   # 8 bs * 8 acc * 4 gpus = 256
   max_epochs: 1
   accumulate_grad_batches: 1
-#  accumulate_grad_batches: 1
-  # training batch steps, not gradient steps
-  # (total training size  / (batch_size * num_devices)) / num_val_checks
-  # (619600000 / (8 * 4)) / 20 =
-#  val_check_interval: 968125
-  # (619600000 / (8 * 128)) = 605,079 total training steps, so run validation every 100k
-  # or every 200k if using accumulate_grad_batches: 2
   val_check_interval: 200000
   log_every_n_steps: 200
-#  deterministic: true
   num_sanity_val_steps: 0
-#  enable_progress_bar: false
   callbacks:
-#    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
-#      init_args:
-#        logging_interval: step
-#    - class_path: pytorch_lightning.callbacks.RichProgressBar
-#      init_args:
-#        leave: true
-#        refresh_rate: 100
-#    - class_path: pytorch_lightning.callbacks.TQDMProgressBar
-#      init_args:
-#        refresh_rate: 20
     - class_path: pytorch_gleam.callbacks.TPURichProgressBar
       init_args:
         leave: true
 #    - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
 #    - class_path: pytorch_gleam.callbacks.XLAGraphMonitor
-#    - class_path: pytorch_lightning.callbacks.DeviceStatsMonitor
     - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
       init_args:
         save_top_k: -1
@@ -57,13 +36,11 @@ data:
   init_args:
     use_tpus: true
     # might need to go back down to 64
-#    batch_size: 8
     batch_size: 64
     max_seq_len: 128
     num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
     worker_estimate: 8
-#    worker_estimate: 1
     train_examples: 619600000
     val_examples: 6254166
     train_path:
