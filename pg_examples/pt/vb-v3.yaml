@@ -10,9 +10,10 @@ trainer:
   default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v3
   max_epochs: 1
   accumulate_grad_batches: 1
-  val_check_interval: 200000
+#  val_check_interval: 200000
+  val_check_interval: 100
   log_every_n_steps: 200
-  num_sanity_val_steps: 0
+  num_sanity_val_steps: 100
   callbacks:
     - class_path: pytorch_gleam.callbacks.TPURichProgressBar
       init_args:
@@ -28,7 +29,7 @@ data:
     use_tpus: true
     batch_size: 64
     max_seq_len: 128
-    num_workers: 4
+    num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
     worker_estimate: 8
     train_examples: 619600000
