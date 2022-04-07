@@ -25,7 +25,7 @@ trainer:
       init_args:
         save_top_k: -1
         # actual gradient steps
-        every_n_train_steps: 100000
+        every_n_train_steps: 50000
 data:
   class_path: pytorch_gleam.data.datasets.BertPreDataModule
   init_args:
