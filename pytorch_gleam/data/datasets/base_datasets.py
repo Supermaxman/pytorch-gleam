@@ -176,7 +176,7 @@ class BaseIterableDataset(IterableDataset):
 
     def __iter__(self):
         # TODO remove after testing
-        for ex in itertools.islice(self.example_iterator(), 2000):
+        for ex in itertools.islice(self.example_iterator(), 10000):
             yield ex
 
     def load(self, data_path):
