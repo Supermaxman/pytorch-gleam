@@ -3,7 +3,7 @@ model:
   class_path: pytorch_gleam.modeling.models.BertPreTrainLanguageModel
   init_args:
     optimizer: adafactor
-    learning_rate: 1e-2
+    learning_rate: 1e-3
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
 
 trainer:
