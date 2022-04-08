@@ -11,8 +11,9 @@ trainer:
   #  batch_size=1024 for covid-twitter-bert
   # 8 bs * 8 acc * 4 gpus = 256
   max_epochs: 1
-  accumulate_grad_batches: 1
-  val_check_interval: 200000
+  accumulate_grad_batches: 2
+#  val_check_interval: 200000
+  val_check_interval: 400000
   log_every_n_steps: 200
   num_sanity_val_steps: 0
   callbacks:
@@ -34,8 +35,8 @@ data:
   init_args:
     use_tpus: true
     # might need to go back down to 64
-    batch_size: 128
-    max_seq_len: 96
+    batch_size: 64
+    max_seq_len: 128
     num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
     worker_estimate: 8

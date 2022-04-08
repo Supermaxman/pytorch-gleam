@@ -28,8 +28,7 @@ class BertPreBatchCollator(BatchCollator):
             type_0_len, type_1_len = ex["segment_lengths"]
             token_type_ids[ex_idx, type_0_len : type_0_len + type_1_len] = 1
             for s_idx, s_id in zip(ex["masked_lm_positions"], ex["masked_lm_ids"]):
-                if s_idx < pad_seq_len:
-                    masked_lm_labels[ex_idx, s_idx] = s_id
+                masked_lm_labels[ex_idx, s_idx] = s_id
 
             next_sentence_labels[ex_idx] = ex["next_sentence_label"]
 
