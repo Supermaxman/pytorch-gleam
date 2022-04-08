@@ -1,4 +1,5 @@
-import torch
+from torch.optim import AdamW
+from transformers import Adafactor
 
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
 
@@ -7,9 +8,11 @@ from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTra
 class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
     def __init__(
         self,
+        optimizer: str = "adamw",
         *args,
         **kwargs,
     ):
+        self.optimizer = optimizer.lower()
         super().__init__(*args, **kwargs)
 
     def eval_epoch_end(self, outputs, stage):
@@ -45,5 +48,17 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         return results
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=0.0)
+        params = self.parameters()
+        if self.optimizer == "adamw":
+            optimizer = AdamW(params, lr=self.learning_rate, weight_decay=0.0)
+        elif self.optimizer == "adafactor":
+            optimizer = Adafactor(
+                params,
+                scale_parameter=False,
+                relative_step=False,
+                warmup_init=False,
+                lr=self.learning_rate,
+            )
+        else:
+            raise ValueError(f"Unknown optimizer: {self.optimizer}")
         return optimizer
