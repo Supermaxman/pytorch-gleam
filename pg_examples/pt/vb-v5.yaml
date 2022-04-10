@@ -35,7 +35,8 @@ data:
   init_args:
     use_tpus: true
     # might need to go back down to 64
-    batch_size: 128
+    # 960 (went OOM at 128)
+    batch_size: 120
     max_seq_len: 128
     num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
