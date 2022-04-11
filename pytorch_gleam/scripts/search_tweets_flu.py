@@ -1,4 +1,3 @@
-import itertools
 import json
 import os
 import time
@@ -60,8 +59,6 @@ def main():
     ]
     vaccinate_query = " OR ".join(vaccinate_terms)
 
-    joint_terms = [f"({d} {v})" for d, v in itertools.product(disease_terms, vaccinate_terms)]
-    joint_terms += vaccine_terms
     # vaccine OR (disease and vaccinate)
     search_query = f"{vaccine_query} OR (({disease_query}) ({vaccinate_query}))"
 
