@@ -16,7 +16,6 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         **kwargs,
     ):
         self.optimizer = optimizer.lower()
-        # self.weight_decay = 0.01
         self.warmup_steps = warmup_steps
         self.train_steps = train_steps
         super().__init__(*args, **kwargs)
@@ -72,6 +71,7 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
             scheduler = BertLR(
                 opt,
                 num_warmup_steps=self.warmup_steps,
+                # TODO use self.trainer.estimated_stepping_batches, but not stable yet
                 num_training_steps=self.train_steps,
             )
             optimizer = {
