@@ -64,6 +64,11 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
                 warmup_init=False,
                 lr=self.learning_rate,
             )
+        elif self.optimizer == "bert_decay":
+            params = self._get_optimizer_params(self.weight_decay)
+            optimizer = AdamW(
+                params, lr=self.learning_rate, weight_decay=self.weight_decay, betas=(0.9, 0.999), eps=1e-6
+            )
         elif self.optimizer == "bert":
             params = self._get_optimizer_params(self.weight_decay)
             opt = AdamW(params, lr=self.learning_rate, weight_decay=self.weight_decay, betas=(0.9, 0.999), eps=1e-6)
