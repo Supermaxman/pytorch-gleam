@@ -22,13 +22,15 @@ def main():
     # start_date = date(2021, 7, 1)
     # v7 2021-10-19
     # start_date = date(2021, 7, 23)
-    start_date = date(2021, 10, 20)
-    end_date = date(2022, 1, 1)
+    # start_date = date(2021, 10, 20)
+    # 2020-12-18
+    start_date = date(2019, 12, 18)
+    end_date = date(2020, 12, 18)
     # wait 5 seconds between queries
     q_delay = 5
 
     # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
-    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v8"
+    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v0"
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
@@ -61,7 +63,7 @@ def main():
     vaccine_query = " OR ".join(vaccine_terms)
     default_search_query = f"({covid_query}) ({vaccine_query})"
 
-    query = "query=" f"{default_search_query} " "lang:en -is:retweet"
+    query = f"query={default_search_query} lang:en -is:retweet"
     max_results = "max_results=500"
     tweet_fields = (
         "tweet.fields="
