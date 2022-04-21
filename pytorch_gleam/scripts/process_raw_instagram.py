@@ -84,10 +84,21 @@ def parse_youtube(post, min_length=40):
     return post
 
 
+def parse_album(post, min_length=40):
+    # post_type: album
+    # description if long enough
+    text = post.get("description", "")
+    post["text"] = text
+    if len(post["text"]) < min_length:
+        return None
+    return post
+
+
 post_type_parse = {
     "status": parse_status,
     "link": parse_link,
     "photo": parse_photo,
+    "album": parse_album,
     "video": parse_video,
     "native_video": parse_video,
     "live_video_complete": parse_video,
@@ -96,7 +107,7 @@ post_type_parse = {
 
 
 def parse_post(post):
-    """Parse a Facebook post.
+    """Parse a Instagram post.
 
     Returns `None` if post does not match correct post_type or content requirements, such as minimum length.
     """
