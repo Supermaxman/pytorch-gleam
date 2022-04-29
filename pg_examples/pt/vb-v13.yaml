@@ -1,0 +1,56 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.BertPreTrainLanguageModel
+  init_args:
+    learning_rate: 1e-5
+    weight_decay: 0.01
+    optimizer: bert_decay
+    pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+
+trainer:
+  tpu_cores: 8
+  default_root_dir: /home/maxwell_weinzierl/vax-bucket/models/pt/vb-v13
+  #  batch_size=1024 for covid-twitter-bert
+  # 8 bs * 8 acc * 4 gpus = 256
+  max_epochs: 1
+  accumulate_grad_batches: 1
+  val_check_interval: 800000
+  log_every_n_steps: 200
+  num_sanity_val_steps: 0
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.TPURichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        save_top_k: -1
+        # actual gradient steps
+        # val_check_interval / accumulate_grad_batches
+        # not sure if also divided by number of devices, so / num_devices also
+        # (619600000 / (8 * 128))
+        every_n_train_steps: 200000
+data:
+  class_path: pytorch_gleam.data.datasets.BertPreDataModule
+  init_args:
+    use_tpus: true
+    # might need to go back down to 64
+    batch_size: 8
+    max_seq_len: 128
+    num_workers: 1
+    # number of dataset splits, usually corresponds to number of processes / gpus / tpus
+    worker_estimate: 8
+    train_examples: 74624434
+    val_examples: 7534380
+    train_path:
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-0.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-1.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-2.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-3.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-4.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-5.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-6.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-7.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-8.jsonl
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-9.jsonl
+    val_path:
+      - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/test-0.jsonl
