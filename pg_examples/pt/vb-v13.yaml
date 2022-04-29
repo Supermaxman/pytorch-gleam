@@ -39,7 +39,7 @@ data:
     num_workers: 1
     # number of dataset splits, usually corresponds to number of processes / gpus / tpus
     worker_estimate: 8
-    train_examples: 74624434
+    train_examples: 746244340
     val_examples: 7534380
     train_path:
       - /home/maxwell_weinzierl/vax-bucket/vaccine-lm/processed-v2/train-0.jsonl
