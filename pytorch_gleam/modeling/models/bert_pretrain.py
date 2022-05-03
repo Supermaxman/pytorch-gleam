@@ -1,6 +1,6 @@
+import torch_optimizer as optim
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LambdaLR
-from transformers import Adafactor
 
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModelForPreTraining
 
@@ -57,11 +57,20 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         if self.optimizer == "adamw":
             optimizer = AdamW(params, lr=self.learning_rate, weight_decay=0.0)
         elif self.optimizer == "adafactor":
-            optimizer = Adafactor(
+            params = self._get_optimizer_params(self.weight_decay)
+            optimizer = optim.Adafactor(
                 params,
                 scale_parameter=False,
                 relative_step=False,
                 warmup_init=False,
+                weight_decay=self.weight_decay,
+                lr=self.learning_rate,
+            )
+        elif self.optimizer == "lamb":
+            params = self._get_optimizer_params(self.weight_decay)
+            optimizer = optim.Lamb(
+                params,
+                weight_decay=self.weight_decay,
                 lr=self.learning_rate,
             )
         elif self.optimizer == "bert_decay":
