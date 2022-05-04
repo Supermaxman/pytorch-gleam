@@ -1,6 +1,6 @@
 torch>=1.9.*
 pytorch-lightning>=1.5.10
-transformers>=4.10.*
+transformers>=4.18.*
 scikit-learn>=0.24.*
 filelock>=3.4.*
 spacy>=3.0.*
