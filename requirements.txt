@@ -17,4 +17,3 @@ docstring_parser>=0.13
 networkx>=2.6.3
 unidecode
 py_lex
-torch_optimizer>=0.3.*

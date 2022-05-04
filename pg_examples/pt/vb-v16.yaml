@@ -1,0 +1,61 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.BertPreTrainLanguageModel
+  init_args:
+    learning_rate: 2e-5
+    pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+
+trainer:
+  accelerator: gpu
+  devices: [4, 5, 6, 7]
+  default_root_dir: /nas1-nfs1/data/maw150130/models/pt/vb-v16
+  strategy: ddp
+  #  batch_size=1024 for covid-twitter-bert
+  # 8 bs * 8 acc * 4 gpus = 256
+  max_epochs: 1
+  accumulate_grad_batches: 8
+  # training batch steps, not gradient steps
+  # (total training size  / (batch_size * num_devices)) / num_val_checks
+  # (619600000 / (8 * 4)) / 20 =
+#  val_check_interval: 968125
+  val_check_interval: 0.05
+  deterministic: true
+  num_sanity_val_steps: 1
+  callbacks:
+#    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+#      init_args:
+#        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.LmCheckpointCallback
+    - class_path: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+      init_args:
+        save_top_k: -1
+        # actual gradient steps
+        # val_check_interval / accumulate_grad_batches
+        # not sure if also divided by number of devices, so / num_devices also
+        # (619600000 / (8 * 4 * 8)) / 20 = 121015.625
+        every_n_train_steps: 50000
+data:
+  class_path: pytorch_gleam.data.datasets.BertPreDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    num_workers: 1
+    worker_estimate: 4
+    train_examples: 746244340
+    val_examples: 7534380
+    train_path:
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-0.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-1.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-2.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-3.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-4.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-5.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-6.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-7.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-8.jsonl
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/train-9.jsonl
+    val_path:
+      - /nas1-nfs1/data/maw150130/data/vaccine-lm/processed-v2/test-0.jsonl

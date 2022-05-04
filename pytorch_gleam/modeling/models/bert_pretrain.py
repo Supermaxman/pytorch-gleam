@@ -1,4 +1,3 @@
-import torch_optimizer as optim
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LambdaLR
 
@@ -56,23 +55,6 @@ class BertPreTrainLanguageModel(BaseLanguageModelForPreTraining):
         params = self.parameters()
         if self.optimizer == "adamw":
             optimizer = AdamW(params, lr=self.learning_rate, weight_decay=0.0)
-        elif self.optimizer == "adafactor":
-            params = self._get_optimizer_params(self.weight_decay)
-            optimizer = optim.Adafactor(
-                params,
-                scale_parameter=False,
-                relative_step=False,
-                warmup_init=False,
-                weight_decay=self.weight_decay,
-                lr=self.learning_rate,
-            )
-        elif self.optimizer == "lamb":
-            params = self._get_optimizer_params(self.weight_decay)
-            optimizer = optim.Lamb(
-                params,
-                weight_decay=self.weight_decay,
-                lr=self.learning_rate,
-            )
         elif self.optimizer == "bert_decay":
             params = self._get_optimizer_params(self.weight_decay)
             optimizer = AdamW(
