@@ -133,6 +133,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
+                preprocess_config=preprocess_config,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameDataset(
@@ -141,6 +142,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
+                preprocess_config=preprocess_config,
             )
         if self.test_path is not None:
             self.test_dataset = MultiClassFrameDataset(
@@ -149,6 +151,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
+                preprocess_config=preprocess_config,
             )
         if self.predict_path is not None:
             self.predict_dataset = MultiClassFrameDataset(
@@ -157,6 +160,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
+                preprocess_config=preprocess_config,
             )
 
     def create_collator(self):
