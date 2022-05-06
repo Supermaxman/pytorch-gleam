@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Callable, Type, Union
 
 import pytorch_lightning as pl
+from torch.optim.lr_scheduler import LambdaLR
 from transformers import (
     AdamW,
     AutoConfig,
@@ -10,7 +11,6 @@ from transformers import (
     AutoModelForSeq2SeqLM,
     AutoModelForSequenceClassification,
     BertForPreTraining,
-    get_linear_schedule_with_warmup,
 )
 
 
@@ -75,22 +75,12 @@ class BasePreModel(pl.LightningModule, ABC):
         self.weight_decay = weight_decay
         self.lr_warm_up = lr_warm_up
         # assigned later when training starts
-        self.train_steps = 0
         self.torch_cache_dir = torch_cache_dir
         if load_pre_model:
             self.lm = self.pre_model_type.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
         else:
             config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
             self.lm = self.pre_model_type.from_config(config)
-
-    # TODO this does not work anymore
-    # def setup(self, stage: Optional[str] = None):
-    #     if stage == "fit":
-    #         total_devices = self.trainer.num_nodes * self.trainer.num_gpus
-    #         train_batches = len(self.train_dataloader()) // total_devices
-    #         # need to figure out how many batches will actually have gradient updates
-    #         train_batches = train_batches // self.trainer.accumulate_grad_batches
-    #         self.train_steps = self.trainer.max_epochs * train_batches
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)
@@ -100,12 +90,28 @@ class BasePreModel(pl.LightningModule, ABC):
             weight_decay=self.weight_decay,
             correct_bias=False,
         )
-        scheduler = get_linear_schedule_with_warmup(
+        scheduler = WarmupLR(
             optimizer,
-            num_warmup_steps=self.lr_warm_up * self.train_steps,
-            num_training_steps=self.train_steps,
+            num_warmup_steps=self.warmup_steps,
+            num_training_steps=self.trainer.estimated_stepping_batches,
         )
-        return [optimizer], [scheduler]
+        optimizer_dict = {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                # REQUIRED: The scheduler instance
+                "scheduler": scheduler,
+                # The unit of the scheduler's step size, could also be 'step'.
+                # 'epoch' updates the scheduler on epoch end whereas 'step'
+                # updates it after a optimizer update.
+                "interval": "step",
+                # How many epochs/steps should pass between calls to
+                # `scheduler.step()`. 1 corresponds to updating the learning
+                # rate after every epoch/step.
+                "frequency": 1,
+            },
+        }
+
+        return optimizer_dict
 
     def _get_optimizer_params(self, weight_decay):
         param_optimizer = list(self.named_parameters())
@@ -411,3 +417,19 @@ class BaseLanguageModelForPreTraining(BasePreModel, ABC):
         )
 
         return optimizer
+
+
+class WarmupLR(LambdaLR):
+    def __init__(self, optimizer, num_warmup_steps: int, num_training_steps: int, last_epoch=-1):
+        self.num_warmup_steps = num_warmup_steps
+        self.num_training_steps = num_training_steps
+        super().__init__(optimizer=optimizer, lr_lambda=self.lr_lambda, last_epoch=last_epoch)
+
+    def lr_lambda(self, current_step: int):
+        if current_step < self.num_warmup_steps:
+            return float(current_step) / float(max(1, self.num_warmup_steps))
+        return max(
+            0.0,
+            float(self.num_training_steps - current_step)
+            / float(max(1, self.num_training_steps - self.num_warmup_steps)),
+        )
