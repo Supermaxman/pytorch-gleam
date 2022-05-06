@@ -20,10 +20,15 @@ def main():
     output_path = args.output_path
     prefix_count = args.prefix_count
 
+    print("Loading config...")
     config = BertConfig.from_pretrained(pre_model_name)
+    print("Loading tokenizer...")
     tokenizer = BertTokenizer.from_pretrained(pre_model_name)
 
+    print("Loading model...")
     model = BertModel(config)
+
+    print("Loading checkpoint...")
     checkpoint = torch.load(checkpoint_path, map_location="cpu")
     weights = {".".join(k.split(".")[prefix_count:]): v for k, v in checkpoint["state_dict"].items()}
     keys = model.load_state_dict(weights, strict=False)
@@ -37,6 +42,7 @@ def main():
         for key in keys.unexpected_keys:
             print(f"  {key}")
 
+    print("Saving model...")
     model_path = os.path.join(output_path, model_name)
 
     tokenizer.save_pretrained(model_path)
