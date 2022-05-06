@@ -25,7 +25,7 @@ trainer:
   check_val_every_n_epoch: 1
   deterministic: true
   num_sanity_val_steps: 1
-  checkpoint_callback: false
+  enable_checkpointing: false
   callbacks:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
       init_args:
