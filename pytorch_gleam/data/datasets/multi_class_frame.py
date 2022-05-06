@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 
 from pytorch_gleam.data.collators import MultiClassFrameBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
+from pytorch_gleam.data.twitter import preprocess_tweet, TweetPreprocessConfig
 
 
 def read_jsonl(path):
@@ -27,12 +28,14 @@ class MultiClassFrameDataset(Dataset):
         label_name: str,
         tokenizer,
         label_map: Dict[str, int],
+        preprocess_config: TweetPreprocessConfig,
     ):
         super().__init__()
         self.frame_path = frame_path
         self.tokenizer = tokenizer
         self.label_name = label_name
         self.label_map = label_map
+        self.preprocess_config = preprocess_config
 
         self.examples = []
         if isinstance(self.frame_path, str):
@@ -47,6 +50,9 @@ class MultiClassFrameDataset(Dataset):
                     assert f_id not in self.frames, f"Duplicate frames: {f_id}"
                     self.frames[f_id] = f
 
+        for f_id, frame in self.frames.items():
+            frame["text"] = preprocess_tweet(frame["text"], self.preprocess_config)
+
         if isinstance(data_path, str):
             self.read_path(data_path)
         else:
@@ -58,6 +64,8 @@ class MultiClassFrameDataset(Dataset):
             ex_id = ex["id"]
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
+            ex_text = preprocess_tweet(ex_text, self.preprocess_config)
+
             for f_id, f_label in ex[self.label_name].items():
                 frame = self.frames[f_id]
                 frame_text = frame["text"]
@@ -101,10 +109,14 @@ class MultiClassFrameDataModule(BaseDataModule):
         val_path: Union[str, List[str]] = None,
         test_path: Union[str, List[str]] = None,
         predict_path: Union[str, List[str]] = None,
+        preprocess_config: TweetPreprocessConfig = None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        if preprocess_config is None:
+            preprocess_config = TweetPreprocessConfig()
+        self.preprocess_config = preprocess_config
         self.label_map = label_map
 
         self.label_name = label_name
