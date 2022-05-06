@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from typing import Callable, Type, Union
 
 import pytorch_lightning as pl
+import torch
 from torch.optim.lr_scheduler import LambdaLR
 from transformers import (
-    AdamW,
     AutoConfig,
     AutoModel,
     AutoModelForMaskedLM,
@@ -85,11 +85,10 @@ class BasePreModel(pl.LightningModule, ABC):
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)
-        optimizer = AdamW(
+        optimizer = torch.optim.AdamW(
             params,
             lr=self.learning_rate,
             weight_decay=self.weight_decay,
-            correct_bias=False,
         )
         scheduler = WarmupLR(
             optimizer,
@@ -410,11 +409,10 @@ class BaseLanguageModelForPreTraining(BasePreModel, ABC):
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)
-        optimizer = AdamW(
+        optimizer = torch.optim.AdamW(
             params,
             lr=self.learning_rate,
             weight_decay=self.weight_decay,
-            correct_bias=False,
         )
 
         return optimizer
