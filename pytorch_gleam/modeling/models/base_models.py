@@ -1,3 +1,4 @@
+import math
 from abc import ABC, abstractmethod
 from typing import Callable, Type, Union
 
@@ -92,7 +93,7 @@ class BasePreModel(pl.LightningModule, ABC):
         )
         scheduler = WarmupLR(
             optimizer,
-            num_warmup_steps=self.warmup_steps,
+            num_warmup_steps=int(math.ceil(self.lr_warm_up * self.trainer.estimated_stepping_batches)),
             num_training_steps=self.trainer.estimated_stepping_batches,
         )
         optimizer_dict = {
