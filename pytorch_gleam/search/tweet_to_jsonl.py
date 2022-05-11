@@ -1,7 +1,7 @@
 import argparse
-import json
 from collections import defaultdict
 
+import ujson as json
 from tqdm import tqdm
 
 
@@ -124,7 +124,7 @@ def create_jsonl_doc(tweet):
         tweet = parse_tweets(tweet)
     tweet_id = tweet["id"]
     tweet_text = get_tweet_text(tweet)
-    doc = {"id": tweet_id, "contents": tweet_text, "tweet": tweet}
+    doc = {"id": tweet_id, "contents": tweet_text}
     return doc
 
 
@@ -135,11 +135,8 @@ def main():
 
     args = parser.parse_args()
 
-    print("Loading tweets...")
-    tweets = read_jsonl(args.input_path)
-
     print("Writing jsonl tweets...")
-    write_jsonl(tqdm((create_jsonl_doc(tweet) for tweet in tweets)), args.output_path)
+    write_jsonl(tqdm((create_jsonl_doc(tweet) for tweet in read_jsonl(args.input_path))), args.output_path)
 
     print("Done!")
 
