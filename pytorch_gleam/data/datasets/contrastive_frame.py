@@ -55,17 +55,20 @@ class ContrastiveFrameDataset(Dataset):
                 self.read_path(stage_path, stage)
 
     def read_path(self, data_path, stage=0):
+        examples = []
         for ex in read_jsonl(data_path):
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
             ex_text = preprocess_tweet(ex_text, self.preprocess_config)
             ex["text"] = ex_text
-            self.examples.append(ex)
             ex_frames = ex[self.label_name]
+            examples.append(ex)
+            ex_pos_f_ids = []
             for f_id, frame in self.frames.items():
                 if f_id in ex_frames:
                     f_label = ex_frames[f_id]
                     if f_label != "Not Relevant":
+                        ex_pos_f_ids.append(f_id)
                         self.pos_examples[f_id].append(ex)
                     else:
                         self.hard_negatives[f_id].append(ex)
@@ -73,6 +76,18 @@ class ContrastiveFrameDataset(Dataset):
                 else:
                     self.soft_negatives[f_id].append(ex)
                     self.neg_examples[f_id].append(ex)
+            ex["ex_pos_f_ids"] = ex_pos_f_ids
+
+        for ex in examples:
+            anchor_f_ids = []
+            for f_id in ex["ex_pos_f_ids"]:
+                # need at least one other positive example for one f_id for each example,
+                # otherwise no anchor and positive possible
+                if len(self.pos_examples[f_id]) > 1:
+                    anchor_f_ids.append(f_id)
+            ex["anchor_f_ids"] = anchor_f_ids
+            if len(anchor_f_ids) > 0:
+                self.examples.append(ex)
 
     def __len__(self):
         return len(self.examples)
@@ -82,9 +97,10 @@ class ContrastiveFrameDataset(Dataset):
             idx = idx.tolist()
 
         anchor = self.examples[idx]
-        pos = self.sample(anchor, self.pos_examples)
+        # TODO allow for multiple positive and negative samples?
+        pos, f_id = self.sample_positive(anchor)
         # TODO consider proportion of hard and soft negatives
-        neg = self.sample(anchor, self.neg_examples)
+        neg = self.sample_negative(f_id)
 
         pos_pair = self.create_pair_example(anchor, pos)
         neg_pair = self.create_pair_example(anchor, neg)
@@ -106,33 +122,39 @@ class ContrastiveFrameDataset(Dataset):
             example["token_type_ids"] = token_data["token_type_ids"]
         return example
 
-    @staticmethod
-    def sample(anchor, examples):
+    def sample_positive(self, anchor):
         anchor_id = anchor["id"]
+        anchor_f_ids = anchor["anchor_f_ids"]
         ex = None
         ex_id = anchor_id
-        f_ids = list(examples.keys())
+        f_id = None
 
         while ex_id == anchor_id:
+            # pick random framing
             f_idx = torch.randint(
-                high=len(f_ids),
+                high=len(anchor_f_ids),
                 size=[1],
             ).tolist()[0]
-            f_id = f_ids[f_idx]
-            f_examples = examples[f_id]
+            f_id = anchor_f_ids[f_idx]
+            f_examples = self.pos_examples[f_id]
             ex_idx = torch.randint(
                 high=len(f_examples),
                 size=[1],
             ).tolist()[0]
             ex = f_examples[ex_idx]
             ex_id = ex["id"]
+        return ex, f_id
+
+    def sample_negative(self, f_id):
+        f_examples = self.neg_examples[f_id]
+        ex_idx = torch.randint(
+            high=len(f_examples),
+            size=[1],
+        ).tolist()[0]
+        ex = f_examples[ex_idx]
         return ex
 
-    def sample_negative(self, anchor):
-        ...
-
     def worker_init_fn(self, _):
-        # TODO determine if workers need special seeds
         pass
 
 
