@@ -1,5 +1,6 @@
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule, BaseIterableDataset
 from pytorch_gleam.data.datasets.bert_pretrain import BertPreDataModule, BertPreTrainDataConfig
+from pytorch_gleam.data.datasets.contrastive_frame import ContrastiveFrameDataModule
 from pytorch_gleam.data.datasets.kbi_misinfo_stance import KbiMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.multi_class_frame import MultiClassFrameDataModule
 from pytorch_gleam.data.datasets.multi_class_frame_edge import MultiClassFrameEdgeDataModule

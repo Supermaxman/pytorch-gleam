@@ -1,4 +1,5 @@
 torch>=1.9.*
+torchmetrics>=0.8.*
 pytorch-lightning>=1.5.10
 transformers>=4.18.*
 scikit-learn>=0.24.*
