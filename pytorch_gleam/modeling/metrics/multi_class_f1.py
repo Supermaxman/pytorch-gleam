@@ -16,11 +16,8 @@ class F1PRMultiClassMetric(Metric):
         self.pos_labels = pos_labels
 
     def forward(self, labels, predictions):
-        labels = labels.numpy()
-        predictions = predictions.numpy()
-        print(labels)
-        print(predictions)
-        print(self.pos_labels)
+        # labels = labels.numpy()
+        # predictions = predictions.numpy()
         cls_precision, cls_recall, cls_f1, cls_sup = precision_recall_fscore_support(
             labels, predictions, average=None, labels=self.pos_labels, zero_division=0
         )

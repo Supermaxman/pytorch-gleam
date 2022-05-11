@@ -78,11 +78,11 @@ class ContrastiveFrameLanguageModel(BaseLanguageModel):
         pos_scores = scores[:, :pos_samples]
         neg_scores = scores[:, pos_samples:]
 
-        labels = torch.cat([torch.ones_like(pos_scores).int(), torch.zeros_like(neg_scores).int()], dim=0)
+        labels = torch.cat([torch.ones_like(pos_scores).long(), torch.zeros_like(neg_scores).long()], dim=0)
         # flip sign of energies
         scores = -torch.cat([pos_scores, neg_scores], dim=0)
-        correct = pos_scores.lt(neg_scores).int()
-        self.metric(correct, torch.ones_like(correct).int())
+        correct = pos_scores.lt(neg_scores).long()
+        self.metric(correct, torch.ones_like(correct).long())
         loss = self.loss(pos_scores, neg_scores)
         results = {
             "ids": batch["ids"],
@@ -134,7 +134,7 @@ class ContrastiveFrameLanguageModel(BaseLanguageModel):
         lm_output = contextualized_embeddings[:, 0]
         lm_output = self.f_dropout(lm_output)
         scores = self.score_layer(lm_output)
-        scores = scores.view(batch_size, num_sequences, scores.shape[-1])
+        scores = scores.view(batch_size, num_sequences)
         return scores
 
     @staticmethod
