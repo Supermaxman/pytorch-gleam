@@ -7,14 +7,14 @@ model:
     loss:
       class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
       init_args:
-        margin: 4.0
+        margin: 1.0
 
 trainer:
   accelerator: gpu
   devices: 1
   default_root_dir: /users/max/data/models/ct/ct-v6
-  max_epochs: 40
-  accumulate_grad_batches: 2
+  max_epochs: 20
+  accumulate_grad_batches: 1
   check_val_every_n_epoch: 1
   deterministic: true
   num_sanity_val_steps: 1
