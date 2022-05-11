@@ -29,7 +29,7 @@ class ContrastiveFrameLanguageModel(BaseLanguageModel):
         neg_scores = scores[:, pos_samples:]
 
         correct = pos_scores.lt(neg_scores).float()
-        self.metric(correct, torch.ones_like(correct))
+        self.metric(correct, torch.ones_like(correct).int())
         loss = self.loss(pos_scores, neg_scores)
         self.log("val_loss", loss.mean())
 
