@@ -12,6 +12,10 @@ class ContrastiveLoss(nn.Module, ABC):
     def forward(self, pos_scores, neg_scores):
         pass
 
+    def calculate_scores(self, pos_scores, neg_scores):
+        scores = torch.cat([pos_scores, neg_scores], dim=0)
+        return scores
+
 
 class MarginContrastiveLoss(ContrastiveLoss):
     def __init__(self, margin: float):
@@ -19,8 +23,40 @@ class MarginContrastiveLoss(ContrastiveLoss):
         self.margin = margin
 
     def forward(self, pos_scores, neg_scores):
-        # [bsize, 1]
-        # [bsize, 1]
-        # TODO double check margin loss
         loss = torch.relu(pos_scores - neg_scores + self.margin)
+        return loss
+
+    def calculate_scores(self, pos_scores, neg_scores):
+        scores = super().calculate_scores(pos_scores, neg_scores)
+        return -scores
+
+
+class MarginSigmoidContrastiveLoss(MarginContrastiveLoss):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def forward(self, pos_scores, neg_scores):
+        pos_scores = torch.sigmoid(pos_scores)
+        neg_scores = torch.sigmoid(neg_scores)
+        loss = torch.relu(pos_scores - neg_scores + self.margin)
+        return loss
+
+    def calculate_scores(self, pos_scores, neg_scores):
+        scores = super().calculate_scores(pos_scores, neg_scores)
+        scores = 1.0 - torch.sigmoid(scores)
+        return scores
+
+
+class ProbContrastiveLoss(ContrastiveLoss):
+    def __init__(self):
+        super().__init__()
+        self.criterion = torch.nn.BCEWithLogitsLoss(reduction="none")
+
+    def forward(self, pos_scores, neg_scores):
+        pos_bce = self.criterion(pos_scores, torch.ones_like(pos_scores))
+        neg_bce = self.criterion(neg_scores, torch.zeros_like(neg_scores))
+
+        # minimize positive bce while maximizing negative bce
+        loss = pos_bce + neg_bce
+
         return loss
