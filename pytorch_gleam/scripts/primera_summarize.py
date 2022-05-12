@@ -22,7 +22,7 @@ def preprocess_example(example, preprocess_config):
     return ex
 
 
-def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_len=1024, **generate_args):
+def run_model(example, device, model, tokenizer, max_input_len=4096, **generate_args):
     doc_sep_token_id = tokenizer.convert_tokens_to_ids("<doc-sep>")
     # we will tokenize a single example document,
     # and we will move these tensors to the GPU device:
@@ -52,10 +52,6 @@ def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_
         input_ids=input_ids,
         global_attention_mask=global_attention_mask,
         use_cache=True,
-        max_length=max_output_len,
-        min_length=0,
-        length_penalty=1.0,
-        no_repeat_ngram_size=3,
         **generate_args,
     )[:, 1:]
     # converts token ids back to strings for multiple summaries
@@ -109,7 +105,10 @@ def main():
             model,
             tokenizer,
             max_input_len=1024,
-            max_output_len=64,
+            max_length=32,
+            min_length=5,
+            length_penalty=2.0,
+            no_repeat_ngram_size=3,
             num_beams=10,
             num_return_sequences=1,
             early_stopping=True,
