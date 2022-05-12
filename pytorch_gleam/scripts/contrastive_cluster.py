@@ -16,8 +16,8 @@ def main():
     parser.add_argument("-p", "--predictions_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-s", "--seed", type=int, default=0)
-    parser.add_argument("-t", "--threshold", type=float, default=2.0)
-    parser.add_argument("-c", "--clustering", default="average")
+    parser.add_argument("-t", "--threshold", type=float, default=4.0)
+    parser.add_argument("-c", "--clustering", default="complete")
     args = parser.parse_args()
 
     threshold = args.threshold
