@@ -13,7 +13,7 @@ def preprocess_example(example, preprocess_config):
     ex_id = example["id"]
     for doc in example["docs"]:
         doc_txt = preprocess_tweet(doc["text"], preprocess_config)
-        doc_txt.replace("user", " ").replace("url", " ").replace("\n ", " ")
+        doc_txt.replace("twitteruser", " ").replace("twitterurl", " ").replace("\n ", " ")
         doc_txt = " ".join(doc_txt.split())
         all_docs.append(doc_txt)
 
@@ -21,7 +21,6 @@ def preprocess_example(example, preprocess_config):
     return ex
 
 
-# Re-run this cell when you swap models
 def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_len=1024, **generate_args):
     doc_sep_token_id = tokenizer.convert_tokens_to_ids("<doc-sep>")
     # we will tokenize a single example document,
@@ -66,7 +65,7 @@ def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_path", required=True)
-    parser.add_argument("-m", "--model_name", default="allenai/PRIMERA-multinews")
+    parser.add_argument("-m", "--model_name", default="allenai/PRIMERA")
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-s", "--seed", type=int, default=0)
     args = parser.parse_args()
