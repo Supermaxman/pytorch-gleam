@@ -80,6 +80,10 @@ def main():
 
         sorted_clusters = {}
         for c_id, c_exs in clusters.items():
+            if len(c_exs) == 1:
+                sorted_clusters[c_id] = c_exs
+                continue
+
             ex_dists = defaultdict(list)
             for a_ex, b_ex in itertools.combinations(c_exs, 2):
                 a_id = a_ex["id"]
