@@ -169,3 +169,9 @@ def read_jsonl(path):
             if line:
                 ex = json.loads(line)
                 yield ex
+
+
+def write_jsonl(path, data):
+    with open(path, "w") as f:
+        for ex in data:
+            f.write(json.dumps(ex) + "\n")
