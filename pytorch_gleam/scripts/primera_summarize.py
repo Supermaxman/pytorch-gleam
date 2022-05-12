@@ -100,17 +100,23 @@ def main():
     else:
         print(f"  {device}")
 
+    print("Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    print("Loading model config...")
     config = LongformerEncoderDecoderConfig.from_pretrained(model_name)
+    print("Loading model...")
     model = LongformerEncoderDecoderForConditionalGeneration.from_pretrained(model_name, config=config)
 
+    print(f"Loading model on {device}...")
     # move model to GPU device
     model.to(device)
     # turn on EVAL mode so drop-out layers do not randomize outputs
     model.eval()
 
+    print("Loading data...")
     examples = [preprocess_example(ex, preprocess_config) for ex in read_jsonl(input_path)]
     results = []
+    print("Running model on data...")
     for ex in tqdm(examples):
         summaries = run_model(
             ex,
@@ -128,7 +134,10 @@ def main():
         summary = summaries[0]
         result = {"ids": ex_id, "summary": summary}
         results.append(result)
+    print("Saving results...")
     write_jsonl(output_path, results)
+
+    print("Done!")
 
 
 if __name__ == "__main__":

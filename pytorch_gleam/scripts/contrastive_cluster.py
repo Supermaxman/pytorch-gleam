@@ -23,7 +23,7 @@ def main():
     threshold = args.threshold
     clustering = args.clustering
     input_path = args.input_path
-    predictions_path = args.pred_path
+    predictions_path = args.predictions_path
     output_path = args.output_path
     seed = args.seed
 
