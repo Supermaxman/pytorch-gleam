@@ -105,7 +105,7 @@ def main():
             model,
             tokenizer,
             max_input_len=1024,
-            max_length=32,
+            max_length=64,
             min_length=5,
             length_penalty=1.0,
             no_repeat_ngram_size=3,

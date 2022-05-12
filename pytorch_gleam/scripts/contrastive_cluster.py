@@ -73,13 +73,37 @@ def main():
         labels = cluster.labels_
 
         clusters = defaultdict(list)
-        for idx, label in enumerate(labels):
+        for idx, c_id in enumerate(labels):
             ex_id = q_idx_ex[idx]
             ex = examples[ex_id]
-            clusters[label].append(ex)
+            clusters[c_id].append(ex)
+
+        sorted_clusters = {}
+        for c_id, c_exs in clusters.items():
+            ex_dists = defaultdict(list)
+            for a_ex, b_ex in itertools.combinations(c_exs, 2):
+                a_id = a_ex["id"]
+                b_id = b_ex["id"]
+                a_b_key = a_id, b_id
+                b_a_key = b_id, a_id
+                if a_b_key in dists:
+                    d = dists[a_b_key]
+                else:
+                    d = dists[b_a_key]
+                ex_dists[a_id].append(d)
+                ex_dists[b_id].append(d)
+
+            ex_ordering = {}
+            for ex_id, ex_ds in ex_dists.items():
+                ex_avg_d = np.mean(ex_ds)
+                ex_ordering[ex_id] = float(ex_avg_d)
+            # sort lowest to highest average distance to other examples in cluster
+            sorted_clusters[c_id] = sorted(c_exs, key=lambda ex: ex_ordering[ex["id"]])
 
         clusters = {
-            f"{q_id}-C{k}": v for k, v in sorted(clusters.items(), key=lambda x: len(x[1]), reverse=True) if len(v) > 1
+            f"{q_id}-C{k}": v
+            for k, v in sorted(sorted_clusters.items(), key=lambda x: len(x[1]), reverse=True)
+            if len(v) > 1
         }
         c_list = [{"id": k, "docs": v} for k, v in clusters.items()]
         outputs.extend(c_list)
