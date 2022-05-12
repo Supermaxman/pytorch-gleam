@@ -2,10 +2,8 @@ import argparse
 
 import pytorch_lightning as pl
 import torch
-from longformer import LongformerEncoderDecoderConfig, LongformerEncoderDecoderForConditionalGeneration
-from longformer.sliding_chunks import pad_to_window_size
 from tqdm import tqdm
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, LEDForConditionalGeneration
 
 from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig, write_jsonl
 
@@ -15,6 +13,8 @@ def preprocess_example(example, preprocess_config):
     ex_id = example["id"]
     for doc in example["docs"]:
         doc_txt = preprocess_tweet(doc["text"], preprocess_config)
+        doc_txt.replace("user", " ").replace("url", " ").replace("\n ", " ")
+        doc_txt = " ".join(doc_txt.split())
         all_docs.append(doc_txt)
 
     ex = {"ids": ex_id, "documents": all_docs}
@@ -23,8 +23,7 @@ def preprocess_example(example, preprocess_config):
 
 # Re-run this cell when you swap models
 def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_len=1024, **generate_args):
-    docsep_token_id = tokenizer.additional_special_tokens_ids[0]
-    pad_token_id = tokenizer.pad_token_id
+    doc_sep_token_id = tokenizer.convert_tokens_to_ids("<doc-sep>")
     # we will tokenize a single example document,
     # and we will move these tensors to the GPU device:
     input_ids = []
@@ -36,34 +35,22 @@ def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_
                 max_length=max_input_len // len(example["documents"]),
             )[1:-1]
         )
-        input_ids.append(docsep_token_id)
+        input_ids.append(doc_sep_token_id)
 
     input_ids = [tokenizer.bos_token_id] + input_ids + [tokenizer.eos_token_id]
 
     input_ids = torch.tensor([input_ids]).to(device)
 
-    attention_mask = torch.ones(input_ids.shape, dtype=torch.long, device=input_ids.device)
-    attention_mask[input_ids == pad_token_id] = 0
-    # global attention on one token for all model params to be used,
-    # which is important for gradient checkpointing to work
-    attention_mask[:, 0] = 2
-    attention_mask[input_ids == docsep_token_id] = 2
-    # attention_mode == "sliding_chunks":
-    half_padding_mod = model.config.attention_window[0]
+    global_attention_mask = torch.zeros_like(input_ids).to(input_ids.device)
+    global_attention_mask[:, 0] = 1
+    global_attention_mask[input_ids == doc_sep_token_id] = 1
 
-    input_ids, attention_mask = pad_to_window_size(
-        # ideally, should be moved inside the LongformerModel
-        input_ids,
-        attention_mask,
-        half_padding_mod,
-        pad_token_id,
-    )
     # the outputs will contain decoded token ids
     # based on the estimated most likely summary sequence
     # using various decoding options
     multi_summary_ids = model.generate(
         input_ids=input_ids,
-        attention_mask=attention_mask,
+        global_attention_mask=global_attention_mask,
         use_cache=True,
         max_length=max_output_len,
         min_length=0,
@@ -79,7 +66,7 @@ def run_model(example, device, model, tokenizer, max_input_len=4096, max_output_
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_path", required=True)
-    parser.add_argument("-m", "--model_name", default="/users/max/data/models/PRIMER_multixscience")
+    parser.add_argument("-m", "--model_name", default="allenai/PRIMERA-multinews")
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-s", "--seed", type=int, default=0)
     args = parser.parse_args()
@@ -102,10 +89,8 @@ def main():
 
     print("Loading tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    print("Loading model config...")
-    config = LongformerEncoderDecoderConfig.from_pretrained(model_name)
     print("Loading model...")
-    model = LongformerEncoderDecoderForConditionalGeneration.from_pretrained(model_name, config=config)
+    model = LEDForConditionalGeneration.from_pretrained(model_name)
 
     print(f"Loading model on {device}...")
     # move model to GPU device
@@ -124,7 +109,7 @@ def main():
             model,
             tokenizer,
             max_input_len=1024,
-            max_output_len=128,
+            max_output_len=64,
             num_beams=10,
             num_return_sequences=1,
             early_stopping=True,
