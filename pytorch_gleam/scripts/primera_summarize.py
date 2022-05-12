@@ -13,7 +13,8 @@ def preprocess_example(example, preprocess_config):
     ex_id = example["id"]
     for doc in example["docs"]:
         doc_txt = preprocess_tweet(doc["text"], preprocess_config)
-        doc_txt.replace("twitteruser", " ").replace("twitterurl", " ").replace("\n ", " ")
+        doc_txt = doc_txt.replace("\n ", " ").replace(" via ", " ")
+        doc_txt = doc_txt.replace("twitteruser", " ").replace("twitterurl", " ")
         doc_txt = " ".join(doc_txt.split())
         all_docs.append(doc_txt)
 
