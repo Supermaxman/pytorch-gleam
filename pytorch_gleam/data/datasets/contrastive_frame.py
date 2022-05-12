@@ -1,3 +1,4 @@
+import itertools
 from collections import defaultdict
 from typing import Any, Dict, List, Union
 
@@ -158,11 +159,79 @@ class ContrastiveFrameDataset(Dataset):
         pass
 
 
+class ContrastiveQuestionDataset(Dataset):
+    examples: List[Dict[Any, Union[Any, Dict]]]
+
+    def __init__(
+        self,
+        data_path: Union[str, List[str]],
+        label_name: str,
+        tokenizer,
+        preprocess_config: TweetPreprocessConfig,
+    ):
+        super().__init__()
+        self.tokenizer = tokenizer
+        self.label_name = label_name
+        self.preprocess_config = preprocess_config
+
+        self.examples = []
+
+        if isinstance(data_path, str):
+            self.read_path(data_path)
+        else:
+            for stage, stage_path in enumerate(data_path):
+                self.read_path(stage_path, stage)
+
+    def read_path(self, data_path, stage=0):
+        question_examples = defaultdict(list)
+        for ex in read_jsonl(data_path):
+            ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
+            ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
+            ex_text = preprocess_tweet(ex_text, self.preprocess_config)
+            ex["text"] = ex_text
+            ex_questions = ex[self.label_name]
+            for q_id, q_info in ex_questions.items():
+                question_examples[q_id].append(ex)
+
+        for q_id, q_examples in question_examples.items():
+            for anchor, other in itertools.combinations(q_examples, 2):
+                ex_pair = self.create_pair_example(anchor, other)
+                example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
+                self.examples.append(example)
+
+    def __len__(self):
+        return len(self.examples)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        example = self.examples[idx]
+
+        return example
+
+    def create_pair_example(self, anchor, other):
+        anchor_id = anchor["id"]
+        other_id = other["id"]
+        token_data = self.tokenizer(anchor["text"], other["text"])
+        example = {
+            "ids": f"{anchor_id}|{other_id}",
+            "input_ids": token_data["input_ids"],
+            "attention_mask": token_data["attention_mask"],
+        }
+        if "token_type_ids" in token_data:
+            example["token_type_ids"] = token_data["token_type_ids"]
+        return example
+
+    def worker_init_fn(self, _):
+        pass
+
+
 class ContrastiveFrameDataModule(BaseDataModule):
     def __init__(
         self,
         label_name: str,
-        frame_path: Union[str, List[str]],
+        frame_path: Union[str, List[str]] = None,
         train_path: Union[str, List[str]] = None,
         val_path: Union[str, List[str]] = None,
         test_path: Union[str, List[str]] = None,
@@ -208,10 +277,9 @@ class ContrastiveFrameDataModule(BaseDataModule):
                 preprocess_config=preprocess_config,
             )
         if self.predict_path is not None:
-            self.predict_dataset = ContrastiveFrameDataset(
+            self.predict_dataset = ContrastiveQuestionDataset(
                 tokenizer=self.tokenizer,
                 data_path=self.predict_path,
-                frame_path=self.frame_path,
                 label_name=self.label_name,
                 preprocess_config=preprocess_config,
             )

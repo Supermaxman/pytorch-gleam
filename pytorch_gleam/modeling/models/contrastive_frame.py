@@ -108,10 +108,12 @@ class ContrastiveFrameLanguageModel(BaseLanguageModel):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         scores = self(batch)
-
+        scores = self.loss.calculate_scores(scores)
+        # [bsize, num_sequences] -> [bsize * num_sequences]
+        # but with num_sequences = 1 this just removes an empty dimension
+        scores = torch.squeeze(scores, dim=-1)
         results = {
             "ids": batch["ids"],
-            "p_ids": batch["p_ids"],
             "scores": scores,
         }
         return results

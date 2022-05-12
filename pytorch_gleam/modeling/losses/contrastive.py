@@ -12,7 +12,9 @@ class ContrastiveLoss(nn.Module, ABC):
     def forward(self, pos_scores, neg_scores):
         pass
 
-    def calculate_scores(self, pos_scores, neg_scores):
+    def calculate_scores(self, pos_scores, neg_scores=None):
+        if neg_scores is None:
+            return pos_scores
         scores = torch.cat([pos_scores, neg_scores], dim=0)
         return scores
 
@@ -26,7 +28,7 @@ class MarginContrastiveLoss(ContrastiveLoss):
         loss = torch.relu(pos_scores - neg_scores + self.margin)
         return loss
 
-    def calculate_scores(self, pos_scores, neg_scores):
+    def calculate_scores(self, pos_scores, neg_scores=None):
         scores = super().calculate_scores(pos_scores, neg_scores)
         return -scores
 
@@ -41,7 +43,7 @@ class MarginSigmoidContrastiveLoss(MarginContrastiveLoss):
         loss = torch.relu(pos_scores - neg_scores + self.margin)
         return loss
 
-    def calculate_scores(self, pos_scores, neg_scores):
+    def calculate_scores(self, pos_scores, neg_scores=None):
         scores = super().calculate_scores(pos_scores, neg_scores)
         scores = 1.0 - torch.sigmoid(scores)
         return scores
