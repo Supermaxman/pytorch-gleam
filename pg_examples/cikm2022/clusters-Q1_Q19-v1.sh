@@ -49,3 +49,24 @@ python pytorch_gleam/scripts/contrastive_question_cluster.py \
 ;python pytorch_gleam/scripts/contrastive_question_framing.py \
 	-i /users/max/data/models/ct/ct-v11/predictions/question-clusters-Q1_Q19.jsonl \
 	-o /users/max/data/models/ct/ct-v11/predictions/question-cluster-framings-Q1_Q19.jsonl
+
+
+
+
+gleam predict \
+	--config pg_examples/cikm2022/ct-v11-pred.yaml \
+	--trainer.callbacks=TPURichProgressBar \
+	--trainer.callbacks=FitCheckpointCallback \
+	--trainer.callbacks=JsonlWriter \
+	--trainer.callbacks.output_path=/users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19 \
+	--data.init_args.label_name=questions \
+	--data.init_args.frame_path=/shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json \
+	--data.init_args.predict_path=/users/max/data/models/ct/ct-v11/predictions/question-cluster-framings-Q1_Q19.jsonl \
+	--data.init_args.predict_mode=frames
+
+
+python pytorch_gleam/scripts/contrastive_compare_framing.py \
+	-i /users/max/data/models/ct/ct-v11/predictions/question-cluster-framings-Q1_Q19.jsonl \
+	-f /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json \
+	-p /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/predictions.jsonl \
+	-o /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/question-cluster-framings-compare.jsonl
