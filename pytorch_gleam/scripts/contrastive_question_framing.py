@@ -15,7 +15,7 @@ def parse_text(ex_text, preprocess_config):
 def preprocess_example(example, preprocess_config):
     ex_id = example["id"]
     # sorted
-    all_docs = list(sorted(example["docs"], key=lambda x: len(parse_text(x["text"], preprocess_config)), reverse=True))
+    all_docs = list(sorted(example["docs"], key=lambda x: len(parse_text(x["text"], preprocess_config))))
     doc = all_docs[0]
     doc_txt = parse_text(doc["text"], preprocess_config)
     ex = {"id": ex_id, "text": doc_txt, "docs": all_docs, "size": sum([len(c["docs"]) for c in example["docs"]])}
