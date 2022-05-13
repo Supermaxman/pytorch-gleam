@@ -168,11 +168,13 @@ class ContrastiveQuestionDataset(Dataset):
         label_name: str,
         tokenizer,
         preprocess_config: TweetPreprocessConfig,
+        predict_mode: str = "same",
     ):
         super().__init__()
         self.tokenizer = tokenizer
         self.label_name = label_name
         self.preprocess_config = preprocess_config
+        self.predict_mode = predict_mode
 
         self.examples = []
 
@@ -184,6 +186,7 @@ class ContrastiveQuestionDataset(Dataset):
 
     def read_path(self, data_path, stage=0):
         question_examples = defaultdict(list)
+        all_examples = []
         for ex in read_jsonl(data_path):
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
@@ -192,12 +195,25 @@ class ContrastiveQuestionDataset(Dataset):
             ex_questions = ex[self.label_name]
             for q_id, q_info in ex_questions.items():
                 question_examples[q_id].append(ex)
-
-        for q_id, q_examples in question_examples.items():
-            for anchor, other in itertools.combinations(q_examples, 2):
+            all_examples.append(ex)
+        if self.predict_mode == "same":
+            for q_id, q_examples in question_examples.items():
+                for anchor, other in itertools.combinations(q_examples, 2):
+                    ex_pair = self.create_pair_example(anchor, other)
+                    example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
+                    self.examples.append(example)
+        elif self.predict_mode == "other":
+            for anchor, other in itertools.combinations(all_examples, 2):
+                anchor_qs = set(list(anchor[self.label_name].keys()))
+                other_qs = set(list(other[self.label_name].keys()))
+                # if both from the same question then skip
+                if len(anchor_qs.intersection(other_qs)) > 0:
+                    continue
                 ex_pair = self.create_pair_example(anchor, other)
                 example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
                 self.examples.append(example)
+        else:
+            raise ValueError(f"Unknown predict mode: {self.predict_mode}")
 
     def __len__(self):
         return len(self.examples)
@@ -236,6 +252,7 @@ class ContrastiveFrameDataModule(BaseDataModule):
         val_path: Union[str, List[str]] = None,
         test_path: Union[str, List[str]] = None,
         predict_path: Union[str, List[str]] = None,
+        predict_mode: str = "same",
         preprocess_config: TweetPreprocessConfig = None,
         *args,
         **kwargs,
@@ -246,6 +263,7 @@ class ContrastiveFrameDataModule(BaseDataModule):
         self.preprocess_config = preprocess_config
 
         self.label_name = label_name
+        self.predict_mode = predict_mode
         self.frame_path = frame_path
         self.train_path = train_path
         self.val_path = val_path
@@ -282,6 +300,7 @@ class ContrastiveFrameDataModule(BaseDataModule):
                 data_path=self.predict_path,
                 label_name=self.label_name,
                 preprocess_config=preprocess_config,
+                predict_mode=self.predict_mode,
             )
 
     def create_collator(self):

@@ -99,7 +99,8 @@ def main():
 
             ex_ordering = {}
             for ex_id, ex_ds in ex_dists.items():
-                ex_avg_d = np.mean(ex_ds)
+                # complete clustering
+                ex_avg_d = np.max(ex_ds)
                 ex_ordering[ex_id] = float(ex_avg_d)
             # sort lowest to highest average distance to other examples in cluster
             sorted_clusters[c_id] = sorted(c_exs, key=lambda ex: ex_ordering[ex["id"]])
