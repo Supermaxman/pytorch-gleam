@@ -4,8 +4,10 @@ import os
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities import rank_zero_only
+from pytorch_lightning.utilities.cli import CALLBACK_REGISTRY
 
 
+@CALLBACK_REGISTRY
 class JsonSaveResultsCallback(Callback):
     def __init__(self):
         super().__init__()

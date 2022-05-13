@@ -8,8 +8,10 @@ import torch
 import torch.distributed as dist
 import ujson as json
 from pytorch_lightning.callbacks import BasePredictionWriter
+from pytorch_lightning.utilities.cli import CALLBACK_REGISTRY
 
 
+@CALLBACK_REGISTRY
 class JsonlWriter(BasePredictionWriter):
     def __init__(self, write_interval: str = "batch", output_path: str = None):
         super().__init__(write_interval)
