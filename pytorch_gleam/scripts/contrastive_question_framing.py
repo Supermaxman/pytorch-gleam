@@ -5,8 +5,6 @@ from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPrepro
 
 def preprocess_example(example, preprocess_config):
     ex_id = example["id"]
-    # {q_id}-C{k}
-    q_id, c_id = ex_id.split("-")
     # sorted
     doc = example["docs"][0]
     doc_txt = preprocess_tweet(doc["text"], preprocess_config)
@@ -14,14 +12,7 @@ def preprocess_example(example, preprocess_config):
     doc_txt = doc_txt.replace("twitteruser", " ").replace("twitterurl", " ")
     # TODO filter out hashtags?
     doc_txt = " ".join(doc_txt.split())
-    ex = {
-        "id": ex_id,
-        "text": doc_txt,
-        # question
-        "questions": {q_id: {}},
-        "docs": example["docs"],
-        "size": len(example["docs"]),
-    }
+    ex = {"id": ex_id, "text": doc_txt, "docs": example["docs"], "size": sum([len(c["docs"]) for c in example["docs"]])}
     return ex
 
 

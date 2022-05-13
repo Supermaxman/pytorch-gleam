@@ -1,0 +1,38 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.ContrastiveFrameLanguageModel
+  init_args:
+    learning_rate: 1e-5
+    lr_warm_up: 0.025
+    pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+    loss:
+      class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
+      init_args:
+        margin: 2.0
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /users/max/data/models/ct/ct-v11
+  max_epochs: 1
+  deterministic: true
+  enable_checkpointing: false
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.TPURichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_gleam.callbacks.JsonlWriter
+      init_args:
+        output_path: /users/max/data/models/ct/ct-v11/predictions-all-Q1_Q19
+
+data:
+  class_path: pytorch_gleam.data.datasets.ContrastiveFrameDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    label_name: questions
+    tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
+    num_workers: 8
+    predict_path: /users/max/data/models/ct/ct-v11/predictions/cluster-framings-Q1_Q19.jsonl
+    predict_mode: all
