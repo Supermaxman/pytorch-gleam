@@ -16,6 +16,8 @@ class JsonlWriter(BasePredictionWriter):
     def __init__(self, write_interval: str = "batch", output_path: str = None):
         super().__init__(write_interval)
         self.output_path = output_path
+        self.first_write = False
+        self.file = None
 
     def _write(self, trainer, prediction):
         if self.output_path is None:
@@ -43,9 +45,10 @@ class JsonlWriter(BasePredictionWriter):
                     ex_value = ex_value.tolist()
                 rows[ex_idx][key] = ex_value
         rows = rows.values()
-        with open(pred_file, "a") as f:
-            for row in rows:
-                f.write(json.dumps(row) + "\n")
+        if self.file is None:
+            self.file = open(pred_file, "w")
+        for row in rows:
+            self.file.write(json.dumps(row) + "\n")
 
     def write_on_batch_end(
         self,
@@ -68,6 +71,10 @@ class JsonlWriter(BasePredictionWriter):
     ):
         for prediction in predictions:
             self._write(trainer, prediction)
+
+    def on_predict_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+        if self.file is not None:
+            self.file.close()
 
 
 def read_jsonl(path):
