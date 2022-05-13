@@ -9,6 +9,7 @@ def main():
         run=True,
         subclass_mode_model=True,
         subclass_mode_data=True,
+        auto_registry=True,
     )
 
 

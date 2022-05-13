@@ -7,12 +7,12 @@ import pytorch_lightning as pl
 import torch
 import torch.distributed as dist
 import ujson as json
-from pytorch_lightning.callbacks import BasePredictionWriter, Callback
+from pytorch_lightning.callbacks import BasePredictionWriter
 from pytorch_lightning.utilities.cli import CALLBACK_REGISTRY
 
 
 @CALLBACK_REGISTRY
-class JsonlWriter(Callback, BasePredictionWriter):
+class JsonlWriter(BasePredictionWriter):
     def __init__(self, write_interval: str = "batch", output_path: str = None):
         super().__init__(write_interval)
         self.output_path = output_path
