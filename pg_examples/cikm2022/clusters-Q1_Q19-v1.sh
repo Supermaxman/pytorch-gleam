@@ -1,7 +1,5 @@
 #!/usr/bin/bash
 
-# TODO take cmd input
-#gleam predict --config pg_examples/cikm2022/ct-v11-pred-v1.yaml
 gleam predict \
 	--config pg_examples/cikm2022/ct-v11-pred.yaml \
 	--trainer.callbacks=TPURichProgressBar \
@@ -28,8 +26,6 @@ python pytorch_gleam/scripts/contrastive_cluster.py \
 	-i /users/max/data/models/ct/ct-v11/predictions/clusters-Q1_Q19.jsonl \
 	-o /users/max/data/models/ct/ct-v11/predictions/cluster-framings-Q1_Q19.jsonl
 
-# TODO take cmd input
-#gleam predict --config pg_examples/cikm2022/ct-v11-pred-v3.yaml
 gleam predict \
 	--config pg_examples/cikm2022/ct-v11-pred.yaml \
 	--trainer.callbacks=TPURichProgressBar \
