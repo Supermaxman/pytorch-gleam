@@ -6,7 +6,7 @@ from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPrepro
 def preprocess_example(example, preprocess_config):
     ex_id = example["id"]
     # sorted
-    all_docs = list(sorted(example["docs"], key=lambda x: x["size"]))
+    all_docs = list(sorted(example["docs"], key=lambda x: x["size"], reverse=True))
     doc = all_docs[0]
     doc_txt = preprocess_tweet(doc["text"], preprocess_config)
     doc_txt = doc_txt.replace("\n ", " ").replace(" via ", " ")
