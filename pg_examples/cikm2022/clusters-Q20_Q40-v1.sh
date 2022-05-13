@@ -2,6 +2,7 @@
 
 
 input_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_20_40.json
+frame_path=/shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json
 
 prediction_name=Q20_Q40-v1
 model_name=ct-v11
@@ -9,6 +10,7 @@ save_path=/users/max/data/models/ct
 model_path=${save_path}/${model_name}
 cluster_pred_path=${model_path}/predictions-same-${prediction_name}
 frame_pred_path=${model_path}/predictions-other-${prediction_name}
+frame_compare_path=${model_path}/predictions-frames-${prediction_name}
 
 
 gleam predict \
@@ -53,3 +55,23 @@ python pytorch_gleam/scripts/contrastive_question_cluster.py \
 ;python pytorch_gleam/scripts/contrastive_question_framing.py \
 	-i ${frame_pred_path}/question-clusters.jsonl \
 	-o ${frame_pred_path}/question-cluster-framings.jsonl
+
+
+
+gleam predict \
+	--config pg_examples/cikm2022/ct-v11-pred.yaml \
+	--trainer.callbacks=TPURichProgressBar \
+	--trainer.callbacks=FitCheckpointCallback \
+	--trainer.callbacks=JsonlWriter \
+	--trainer.callbacks.output_path=${frame_compare_path} \
+	--data.init_args.label_name=questions \
+	--data.init_args.frame_path=${frame_path} \
+	--data.init_args.predict_path=${frame_pred_path}/question-cluster-framings.jsonl \
+	--data.init_args.predict_mode=frames
+
+
+python pytorch_gleam/scripts/contrastive_compare_framing.py \
+	-i ${frame_pred_path}/question-cluster-framings.jsonl \
+	-f ${frame_path} \
+	-p ${frame_compare_path}/predictions.jsonl \
+	-o ${frame_compare_path}/question-cluster-framings-compare.jsonl

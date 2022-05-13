@@ -166,6 +166,7 @@ class ContrastiveQuestionDataset(Dataset):
     def __init__(
         self,
         data_path: Union[str, List[str]],
+        frame_path: Union[str, List[str]],
         label_name: str,
         tokenizer,
         preprocess_config: TweetPreprocessConfig,
@@ -176,7 +177,23 @@ class ContrastiveQuestionDataset(Dataset):
         self.label_name = label_name
         self.preprocess_config = preprocess_config
         self.predict_mode = predict_mode
+        self.frame_path = frame_path
+        self.frames = {}
+        if self.predict_mode == "frames":
+            assert self.frame_path is not None
 
+            if isinstance(self.frame_path, str):
+                with open(self.frame_path) as f:
+                    self.frames = json.load(f)
+            else:
+                for f_stage, f_path in enumerate(self.frame_path):
+                    with open(f_path) as f:
+                        s_frames = json.load(f)
+                    for f_id, f in s_frames.items():
+                        assert f_id not in self.frames, f"Duplicate frames: {f_id}"
+                        self.frames[f_id] = f
+            for f_id, frame in self.frames.items():
+                frame["text"] = preprocess_tweet(frame["text"], self.preprocess_config)
         self.examples = []
 
         if isinstance(data_path, str):
@@ -193,9 +210,10 @@ class ContrastiveQuestionDataset(Dataset):
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
             ex_text = preprocess_tweet(ex_text, self.preprocess_config)
             ex["text"] = ex_text
-            ex_questions = ex[self.label_name]
-            for q_id, q_info in ex_questions.items():
-                question_examples[q_id].append(ex)
+            if self.predict_mode == "same":
+                ex_questions = ex[self.label_name]
+                for q_id, q_info in ex_questions.items():
+                    question_examples[q_id].append(ex)
             all_examples.append(ex)
         if self.predict_mode == "same":
             for q_id, q_examples in question_examples.items():
@@ -214,6 +232,13 @@ class ContrastiveQuestionDataset(Dataset):
                 ex_pair = self.create_pair_example(anchor, other)
                 example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
                 self.examples.append(example)
+        elif self.predict_mode == "frames":
+            for anchor in all_examples:
+                for f_id, frame in self.frames.items():
+                    other = {"id": f_id, "text": frame["text"]}
+                    ex_pair = self.create_pair_example(anchor, other)
+                    example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
+                    self.examples.append(example)
         else:
             raise ValueError(f"Unknown predict mode: {self.predict_mode}")
 
@@ -301,6 +326,7 @@ class ContrastiveFrameDataModule(BaseDataModule):
             self.predict_dataset = ContrastiveQuestionDataset(
                 tokenizer=self.tokenizer,
                 data_path=self.predict_path,
+                frame_path=self.frame_path,
                 label_name=self.label_name,
                 preprocess_config=preprocess_config,
                 predict_mode=self.predict_mode,
