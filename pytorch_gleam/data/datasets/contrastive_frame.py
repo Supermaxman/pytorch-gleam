@@ -203,13 +203,14 @@ class ContrastiveQuestionDataset(Dataset):
                     ex_pair = self.create_pair_example(anchor, other)
                     example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
                     self.examples.append(example)
-        elif self.predict_mode == "other":
+        elif self.predict_mode == "other" or self.predict_mode == "all":
             for anchor, other in itertools.combinations(all_examples, 2):
-                anchor_qs = set(list(anchor[self.label_name].keys()))
-                other_qs = set(list(other[self.label_name].keys()))
-                # if both from the same question then skip
-                if len(anchor_qs.intersection(other_qs)) > 0:
-                    continue
+                if self.predict_mode == "other":
+                    anchor_qs = set(list(anchor[self.label_name].keys()))
+                    other_qs = set(list(other[self.label_name].keys()))
+                    # if both from the same question then skip
+                    if len(anchor_qs.intersection(other_qs)) > 0:
+                        continue
                 ex_pair = self.create_pair_example(anchor, other)
                 example = {"ids": ex_pair["ids"], "pos_examples": [ex_pair], "neg_examples": []}
                 self.examples.append(example)

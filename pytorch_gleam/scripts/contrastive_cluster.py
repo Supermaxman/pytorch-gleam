@@ -17,6 +17,7 @@ def main():
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-s", "--seed", type=int, default=0)
     parser.add_argument("-t", "--threshold", type=float, default=4.0)
+    parser.add_argument("-m", "--min_cluster_size", type=int, default=2)
     parser.add_argument("-c", "--clustering", default="complete")
     args = parser.parse_args()
 
@@ -25,6 +26,7 @@ def main():
     input_path = args.input_path
     predictions_path = args.predictions_path
     output_path = args.output_path
+    min_cluster_size = args.min_cluster_size
     seed = args.seed
 
     pl.seed_everything(seed)
@@ -108,7 +110,7 @@ def main():
         clusters = {
             f"{q_id}-C{k}": v
             for k, v in sorted(sorted_clusters.items(), key=lambda x: len(x[1]), reverse=True)
-            if len(v) > 1
+            if len(v) >= min_cluster_size
         }
         c_list = [{"id": k, "docs": v} for k, v in clusters.items()]
         outputs.extend(c_list)
