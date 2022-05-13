@@ -15,7 +15,7 @@ def preprocess_example(example, preprocess_config):
     # TODO filter out hashtags?
     doc_txt = " ".join(doc_txt.split())
     ex = {
-        "ids": ex_id,
+        "id": ex_id,
         "text": doc_txt,
         # question
         "questions": {q_id: {}},
