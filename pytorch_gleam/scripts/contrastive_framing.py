@@ -32,7 +32,7 @@ def main():
     input_path = args.input_path
     output_path = args.output_path
 
-    preprocess_config = TweetPreprocessConfig()
+    preprocess_config = TweetPreprocessConfig(replace_multiple_usernames=False, replace_multiple_urls=False)
 
     print("Loading data...")
     results = [preprocess_example(ex, preprocess_config) for ex in read_jsonl(input_path)]
