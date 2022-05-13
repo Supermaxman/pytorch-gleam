@@ -17,15 +17,15 @@ trainer:
   max_epochs: 1
   deterministic: true
   enable_checkpointing: false
-#  callbacks:
-#    - class_path: pytorch_gleam.callbacks.TPURichProgressBar
-#      init_args:
-#        leave: true
-#    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
-#data:
-#  class_path: pytorch_gleam.data.datasets.ContrastiveFrameDataModule
-#  init_args:
-#    batch_size: 8
-#    max_seq_len: 128
-#    tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
-#    num_workers: 8
+  callbacks:
+    - class_path: pytorch_gleam.callbacks.TPURichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+data:
+  class_path: pytorch_gleam.data.datasets.ContrastiveFrameDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
+    num_workers: 8

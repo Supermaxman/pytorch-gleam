@@ -4,18 +4,13 @@
 #gleam predict --config pg_examples/cikm2022/ct-v11-pred-v1.yaml
 gleam predict \
 	--config pg_examples/cikm2022/ct-v11-pred.yaml \
-	--trainer.callbacks=TPURichProgressBar \
-	--trainer.callbacks=FitCheckpointCallback \
 	--trainer.callbacks=JsonlWriter \
 	--trainer.callbacks.output_path=/users/max/data/models/ct/ct-v11/predictions-same-Q1_Q19 \
 	--data.ContrastiveFrameDataModule \
-	--data.label_name=candidates \
-	--data.predict_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_19.json \
-	--data.predict_mode=same \
-	--data.batch_size=8 \
-	--data.max_seq_len=128 \
-	--data.tokenizer_name=digitalepidemiologylab/covid-twitter-bert-v2 \
-	--data.num_workers=8
+	--data.init_args.label_name=candidates \
+	--data.init_args.predict_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_19.json \
+	--data.init_args.predict_mode=same
+
 
 python pytorch_gleam/scripts/contrastive_cluster.py \
 	-i /shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_19.json \
