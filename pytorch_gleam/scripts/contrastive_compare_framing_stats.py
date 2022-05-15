@@ -28,7 +28,7 @@ def main():
     print(f'True discovered framings: {num_true_found_framings}/{num_total_found_framings} ({100*percent_true_found_framings:.0f}%)')
 
     found_known_framings = set()
-    for row in df.iterrows():
+    for idx, row in df.iterrows():
         if row['Same'] == 1:
             found_known_framings.add(row['closest_framing'])
 
