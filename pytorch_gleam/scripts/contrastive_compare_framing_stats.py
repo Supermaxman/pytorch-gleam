@@ -15,7 +15,8 @@ def main():
     print("Loading data...")
     with open(frame_path) as f:
         frames = json.load(f)
-    num_frames = len(frames)
+    num_total_known_framings = len(frames)
+    known_framing_ids = set(frames.keys())
 
     df = pd.read_excel(input_path, index_col=0)
     is_same = df['Same']
@@ -26,6 +27,14 @@ def main():
     percent_true_found_framings = num_true_found_framings / num_total_found_framings
     print(f'True discovered framings: {num_true_found_framings}/{num_total_found_framings} ({100*percent_true_found_framings:.0f}%)')
 
+    found_known_framings = set()
+    for row in df.iterrows():
+        if row['Same'] == 1:
+            found_known_framings.add(row['closest_framing'])
+
+    num_found_known_framings = len(found_known_framings)
+    percent_found_known_framings = num_found_known_framings / num_total_known_framings
+    print(f'Known framings re-discovered: {num_found_known_framings}/{num_total_known_framings} ({100*percent_found_known_framings:.0f}%)')
 
 
 

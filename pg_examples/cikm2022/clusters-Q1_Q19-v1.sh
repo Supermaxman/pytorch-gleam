@@ -77,4 +77,5 @@ python pytorch_gleam/scripts/contrastive_compare_framing_manual.py \
 
 
 python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
+	-f /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json \
   -i /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/ct-v11-Q1_Q19-labeled.xlsx
