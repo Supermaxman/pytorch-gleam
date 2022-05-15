@@ -7,7 +7,7 @@ import ujson as json
 from pytorch_lightning.utilities.cli import DATAMODULE_REGISTRY
 from torch.utils.data import Dataset
 
-from pytorch_gleam.data.collators import ContrastiveFrameBatchCollator
+from pytorch_gleam.data.collators import ContrastiveFrameBatchCollator, ContrastiveEmbFrameBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 
@@ -158,6 +158,40 @@ class ContrastiveFrameDataset(Dataset):
 
     def worker_init_fn(self, _):
         pass
+
+
+class ContrastiveEmbFrameDataset(ContrastiveFrameDataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        anchor = self.examples[idx]
+        pos, f_id = self.sample_positive(anchor)
+        neg = self.sample_negative(f_id)
+
+        example = {
+            "ids": anchor["id"],
+            "anchor_example": self.create_example(anchor),
+            "pos_examples": [self.create_example(pos)],
+            "neg_examples": [self.create_example(neg)]
+        }
+
+        return example
+
+    def create_example(self, anchor):
+        anchor_id = anchor["id"]
+        token_data = self.tokenizer(anchor["text"])
+        example = {
+            "ids": f"{anchor_id}",
+            "input_ids": token_data["input_ids"],
+            "attention_mask": token_data["attention_mask"],
+        }
+        if "token_type_ids" in token_data:
+            example["token_type_ids"] = token_data["token_type_ids"]
+        return example
 
 
 class ContrastiveQuestionDataset(Dataset):
@@ -334,6 +368,76 @@ class ContrastiveFrameDataModule(BaseDataModule):
 
     def create_collator(self):
         return ContrastiveFrameBatchCollator(
+            max_seq_len=self.max_seq_len,
+            use_tpus=self.use_tpus,
+        )
+
+
+@DATAMODULE_REGISTRY
+class ContrastiveEmbFrameDataModule(BaseDataModule):
+    def __init__(
+        self,
+        label_name: str,
+        frame_path: Union[str, List[str]] = None,
+        train_path: Union[str, List[str]] = None,
+        val_path: Union[str, List[str]] = None,
+        test_path: Union[str, List[str]] = None,
+        predict_path: Union[str, List[str]] = None,
+        predict_mode: str = "same",
+        preprocess_config: TweetPreprocessConfig = None,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        if preprocess_config is None:
+            preprocess_config = TweetPreprocessConfig()
+        self.preprocess_config = preprocess_config
+
+        self.label_name = label_name
+        self.predict_mode = predict_mode
+        self.frame_path = frame_path
+        self.train_path = train_path
+        self.val_path = val_path
+        self.test_path = test_path
+        self.predict_path = predict_path
+
+        if self.train_path is not None:
+            self.train_dataset = ContrastiveEmbFrameDataset(
+                tokenizer=self.tokenizer,
+                data_path=self.train_path,
+                frame_path=self.frame_path,
+                label_name=self.label_name,
+                preprocess_config=preprocess_config,
+            )
+        if self.val_path is not None:
+            self.val_dataset = ContrastiveEmbFrameDataset(
+                tokenizer=self.tokenizer,
+                data_path=self.val_path,
+                frame_path=self.frame_path,
+                label_name=self.label_name,
+                preprocess_config=preprocess_config,
+            )
+        if self.test_path is not None:
+            self.test_dataset = ContrastiveEmbFrameDataset(
+                tokenizer=self.tokenizer,
+                data_path=self.test_path,
+                frame_path=self.frame_path,
+                label_name=self.label_name,
+                preprocess_config=preprocess_config,
+            )
+        if self.predict_path is not None:
+            raise NotImplementedError()
+            # self.predict_dataset = ContrastiveEmbQuestionDataset(
+            #     tokenizer=self.tokenizer,
+            #     data_path=self.predict_path,
+            #     frame_path=self.frame_path,
+            #     label_name=self.label_name,
+            #     preprocess_config=preprocess_config,
+            #     predict_mode=self.predict_mode,
+            # )
+
+    def create_collator(self):
+        return ContrastiveEmbFrameBatchCollator(
             max_seq_len=self.max_seq_len,
             use_tpus=self.use_tpus,
         )

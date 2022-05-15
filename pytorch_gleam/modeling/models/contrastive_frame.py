@@ -141,3 +141,41 @@ class ContrastiveFrameLanguageModel(BaseLanguageModel):
     @staticmethod
     def flatten(multi_list):
         return [item for sub_list in multi_list for item in sub_list]
+
+
+class ContrastiveEmbFrameLanguageModel(ContrastiveFrameLanguageModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def mean_pooling(token_embeddings, attention_mask):
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+    def forward(self, batch):
+        batch_size, num_sequences, pad_seq_len = batch["input_ids"].shape
+
+        input_ids = batch["input_ids"].view(batch_size * num_sequences, pad_seq_len)
+        attention_mask = batch["attention_mask"].view(batch_size * num_sequences, pad_seq_len)
+        if "token_type_ids" in batch:
+            token_type_ids = batch["token_type_ids"].view(batch_size * num_sequences, pad_seq_len)
+        else:
+            token_type_ids = None
+        # [batch_size * num_sequences, seq_len, hidden_size]
+        contextualized_embeddings = self.lm_step(
+            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
+        )
+        embeddings = self.mean_pooling(contextualized_embeddings, attention_mask)
+        embeddings = embeddings.view(batch_size, num_sequences, embeddings.shape[-1])
+
+        pos_samples = batch["pos_samples"]
+        anchor_embs = embeddings[:, :1]
+        pos_embs = embeddings[:, 1:1+pos_samples]
+        neg_embs = embeddings[:, 1+pos_samples:]
+        # [bsize, 1, emb_size] - [bsize, pos_samples, emb_size] -> [bsize, pos_samples]
+        pos_scores = torch.norm(anchor_embs - pos_embs, p=2, dim=-1)
+        # [bsize, 1, emb_size] - [bsize, neg_samples, emb_size] -> [bsize, neg_samples]
+        neg_scores = torch.norm(anchor_embs - neg_embs, p=2, dim=-1)
+        # [bsize, pos_samples + neg_samples]
+        scores = torch.cat([pos_scores, neg_scores], dim=1)
+        return scores
