@@ -4,7 +4,7 @@
 input_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_19.json
 
 prediction_name=Q1_Q19-v2
-model_name=ct-v11
+model_name=ct-v19
 save_path=/users/max/data/models/ct
 model_path=${save_path}/${model_name}
 cluster_pred_path=${model_path}/predictions-same-${prediction_name}

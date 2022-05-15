@@ -3,24 +3,24 @@ model:
   class_path: pytorch_gleam.modeling.models.ContrastiveFrameLanguageModel
   init_args:
     learning_rate: 1e-5
-    lr_warm_up: 0.025
+    lr_warm_up: 0.01
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
     loss:
       class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
       init_args:
-        margin: 2.0
+        margin: 1.0
 
 trainer:
   accelerator: gpu
   devices: 1
-  default_root_dir: /users/max/data/models/ct/ct-v11
+  default_root_dir: /users/max/data/models/ct/ct-v19
   max_epochs: 1
   deterministic: true
   enable_checkpointing: false
 data:
   class_path: pytorch_gleam.data.datasets.ContrastiveFrameDataModule
   init_args:
-    batch_size: 8
+    batch_size: 16
     max_seq_len: 128
     tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
     num_workers: 8
