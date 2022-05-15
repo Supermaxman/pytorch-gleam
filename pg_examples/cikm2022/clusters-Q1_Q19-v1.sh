@@ -70,3 +70,11 @@ python pytorch_gleam/scripts/contrastive_compare_framing.py \
 	-f /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json \
 	-p /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/predictions.jsonl \
 	-o /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/question-cluster-framings-compare.jsonl
+
+python pytorch_gleam/scripts/contrastive_compare_framing_manual.py \
+  -i /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/question-cluster-framings-compare.jsonl \
+  -o /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/ct-v11-Q1_Q19.xlsx
+
+
+python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
+  -i /users/max/data/models/ct/ct-v11/predictions-frames-Q1_Q19/ct-v11-Q1_Q19-labeled.xlsx
