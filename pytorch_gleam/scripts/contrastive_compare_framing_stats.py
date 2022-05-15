@@ -56,6 +56,7 @@ def main():
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
     k_recall = num_found_known_framings / num_total_known_framings
+    n_precision = num_found_unknown_framings / (num_found_unknown_framings + num_found_non_framings)
 
     f1 = (2.0 * precision * recall) / (precision + recall)
 
@@ -68,6 +69,7 @@ def main():
         'Precision': round(100*precision, 1),
         'Recall': round(100*recall, 1),
         'Known-Recall': round(100*k_recall, 1),
+        'New-Precision': round(100*n_precision, 1)
     }
 
     c_txt = '\t'.join([k for k in results.keys()])
