@@ -4,7 +4,7 @@
 input_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_19.json
 frame_path=/shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json
 
-prediction_name=Q1_Q19-v2
+prediction_name=Q1_Q19-v4
 model_name=ct-v11
 save_path=/users/max/data/models/ct
 model_path=${save_path}/${model_name}
@@ -31,7 +31,7 @@ python pytorch_gleam/scripts/contrastive_cluster.py \
 	-o ${cluster_pred_path}/clusters.jsonl \
 	--threshold 12.0 \
 	--min_cluster_size 2 \
-	--clustering single \
+	--clustering complete \
 ;python pytorch_gleam/scripts/contrastive_framing.py \
 	-i ${cluster_pred_path}/clusters.jsonl \
 	-o ${cluster_pred_path}/cluster-framings.jsonl
@@ -51,9 +51,10 @@ python pytorch_gleam/scripts/contrastive_question_cluster.py \
 	-p ${frame_pred_path}/predictions.jsonl \
 	-o ${frame_pred_path}/question-clusters.jsonl \
 	--threshold 12.0 \
-	--clustering single \
+	--clustering complete \
 ;python pytorch_gleam/scripts/contrastive_question_framing.py \
 	-i ${frame_pred_path}/question-clusters.jsonl \
+	-s sim \
 	-o ${frame_pred_path}/question-cluster-framings.jsonl
 
 

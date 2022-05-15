@@ -100,9 +100,9 @@ def main():
     examples = [preprocess_example(ex, preprocess_config) for ex in read_jsonl(input_path)]
     results = []
     print("Running model on data...")
-    for example in tqdm(examples):
+    for ex in tqdm(examples):
         summaries = run_model(
-            example,
+            ex,
             device,
             model,
             tokenizer,
@@ -115,19 +115,10 @@ def main():
             num_return_sequences=1,
             early_stopping=True,
         )
-        ex_id = example["id"]
+        ex_id = ex["id"]
 
         summary = summaries[0]
-        q_id, c_id = ex_id.split("-")
-        ex = {
-            "id": ex_id,
-            "text": summary,
-            # question
-            "questions": {q_id: {}},
-            "docs": example["docs"],
-            "size": len(example["docs"]),
-        }
-
+        ex = {"id": ex_id, "text": summary, "docs": ex['docs'], "size": sum([len(c["docs"]) for c in ex["docs"]])}
         results.append(ex)
     print("Saving results...")
     write_jsonl(output_path, results)
