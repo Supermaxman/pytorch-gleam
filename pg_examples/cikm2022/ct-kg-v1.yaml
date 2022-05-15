@@ -5,7 +5,6 @@ model:
     learning_rate: 1e-5
     lr_warm_up: 0.025
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
-    update_threshold: true
     loss:
       class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
       init_args:
