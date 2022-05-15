@@ -32,7 +32,7 @@ def main():
     found_non_framings= set()
     for idx, row in df.iterrows():
         if row['Same'] == 1:
-            found_known_framings.add(idx)
+            found_known_framings.add(row['closest_framing'])
         elif row['Framing'] == 1:
             found_unknown_framings.add(idx)
         else:
