@@ -75,3 +75,14 @@ python pytorch_gleam/scripts/contrastive_compare_framing.py \
 	-f ${frame_path} \
 	-p ${frame_compare_path}/predictions.jsonl \
 	-o ${frame_compare_path}/question-cluster-framings-compare.jsonl
+
+
+python pytorch_gleam/scripts/contrastive_compare_framing_manual.py \
+  -i ${frame_compare_path}/question-cluster-framings-compare.jsonl \
+  -o ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
+
+
+python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
+	-f ${frame_path} \
+  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
+

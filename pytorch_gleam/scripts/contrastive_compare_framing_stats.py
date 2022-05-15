@@ -63,9 +63,9 @@ def main():
 
     f1 = (2.0 * precision * recall) / (precision + recall)
 
-    print(f'Precision:  {100*precision:.2f}')
-    print(f'Recall:     {100*recall:.2f}')
-    print(f'F1-Score:   {100*f1:.2f}')
+    print(f'Precision:  {100*precision:.1f}')
+    print(f'Recall:     {100*recall:.1f}')
+    print(f'F1-Score:   {100*f1:.1f}')
 
 
 if __name__ == "__main__":
