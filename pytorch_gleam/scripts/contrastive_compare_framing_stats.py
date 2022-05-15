@@ -51,9 +51,21 @@ def main():
     print(f'Unknown framings judged as discovered: {num_found_unknown_framings}')
 
     print(f'Total framings discovered distribution: ')
-    print(f'Known framings judged as re-discovered: {num_found_known_framings}/{num_total_found_framings} ({100*percent_found_known_framings_of_total_found:.0f}%)')
-    print(f'Unknown framings judged as discovered: {num_found_unknown_framings}/{num_total_found_framings} ({100*percent_unknown_found_known_framings_of_total_found:.0f}%)')
-    print(f'Non framings judged: {num_found_non_framings}/{num_total_found_framings} ({100*percent_found_non_framings:.0f}%)')
+    print(f'  Known framings judged as re-discovered: {num_found_known_framings}/{num_total_found_framings} ({100*percent_found_known_framings_of_total_found:.0f}%)')
+    print(f'  Unknown framings judged as discovered: {num_found_unknown_framings}/{num_total_found_framings} ({100*percent_unknown_found_known_framings_of_total_found:.0f}%)')
+    print(f'  Non framings judged: {num_found_non_framings}/{num_total_found_framings} ({100*percent_found_non_framings:.0f}%)')
+
+    tp = num_found_known_framings + num_found_unknown_framings
+    fp = num_found_non_framings
+    fn = num_total_known_framings - num_found_known_framings
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+
+    f1 = (2.0 * precision * recall) / (precision + recall)
+
+    print(f'Precision:  {100*precision:.2f}')
+    print(f'Recall:     {100*recall:.2f}')
+    print(f'F1-Score:   {100*f1:.2f}')
 
 
 if __name__ == "__main__":
