@@ -5,6 +5,7 @@ model:
     learning_rate: 1e-5
     lr_warm_up: 0.025
     pre_model_name: sentence-transformers/all-mpnet-base-v2
+    update_threshold: true
     loss:
       class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
       init_args:
@@ -27,7 +28,7 @@ trainer:
     - class_path: pytorch_gleam.callbacks.TPURichProgressBar
       init_args:
         leave: true
-    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+#    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
 data:
   class_path: pytorch_gleam.data.datasets.ContrastiveEmbFrameDataModule
   init_args:
