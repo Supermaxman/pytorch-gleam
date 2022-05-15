@@ -25,17 +25,32 @@ def main():
     num_true_found_framings = df['Framing'].sum()
     num_total_found_framings = len(df)
     percent_true_found_framings = num_true_found_framings / num_total_found_framings
-    print(f'True discovered framings: {num_true_found_framings}/{num_total_found_framings} ({100*percent_true_found_framings:.0f}%)')
+    print(f'Total judged discovered framings: {num_true_found_framings}/{num_total_found_framings} ({100*percent_true_found_framings:.0f}%)')
 
     found_known_framings = set()
+    found_unknown_framings = set()
+    found_non_framings= set()
     for idx, row in df.iterrows():
         if row['Same'] == 1:
-            found_known_framings.add(row['closest_framing'])
-
+            found_known_framings.add(idx)
+        elif row['Framing'] == 1:
+            found_unknown_framings.add(idx)
+        else:
+            found_non_framings.add(idx)
     num_found_known_framings = len(found_known_framings)
     percent_found_known_framings = num_found_known_framings / num_total_known_framings
-    print(f'Known framings re-discovered: {num_found_known_framings}/{num_total_known_framings} ({100*percent_found_known_framings:.0f}%)')
+    print(f'Known framings judged as re-discovered: {num_found_known_framings}/{num_total_known_framings} ({100*percent_found_known_framings:.0f}%)')
 
+    num_found_unknown_framings = len(found_unknown_framings)
+    num_found_non_framings = len(found_non_framings)
+    percent_found_non_framings = num_found_non_framings / num_total_found_framings
+    percent_found_known_framings_of_total_found = num_found_known_framings / num_total_found_framings
+    print(f'Unknown framings judged as discovered: {num_found_unknown_framings}')
+
+    print(f'Total framings discovered distribution: ')
+    print(f'Known framings judged as re-discovered: {num_found_known_framings}/{num_total_found_framings} ({100*percent_found_known_framings_of_total_found:.0f}%)')
+    print(f'Unknown framings judged as discovered: {num_found_unknown_framings}/{num_total_found_framings} ({100*percent_true_found_framings:.0f}%)')
+    print(f'Non framings judged: {num_found_non_framings}/{num_total_found_framings} ({100*percent_found_non_framings:.0f}%)')
 
 
 if __name__ == "__main__":
