@@ -55,12 +55,25 @@ def main():
     fn = num_total_known_framings - num_found_known_framings
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
+    k_recall = num_found_known_framings / num_total_known_framings
 
     f1 = (2.0 * precision * recall) / (precision + recall)
 
     print(f'Precision:  {100*precision:.1f}')
     print(f'Recall:     {100*recall:.1f}')
     print(f'F1-Score:   {100*f1:.1f}')
+
+    results = {
+        'F1': round(100*f1, 1),
+        'Precision': round(100*precision, 1),
+        'Recall': round(100*recall, 1),
+        'Known-Recall': round(100*k_recall, 1),
+    }
+
+    c_txt = '\t'.join([k for k in results.keys()])
+    v_txt = '\t'.join([f'{v}' for v in results.values()])
+    print(c_txt)
+    print(v_txt)
 
 
 if __name__ == "__main__":
