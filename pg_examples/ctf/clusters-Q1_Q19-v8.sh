@@ -4,7 +4,7 @@
 input_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_19.json
 frame_path=/shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json
 
-prediction_name=Q1_Q19-v2
+prediction_name=Q1_Q19-v8
 model_name=ct-v11
 save_path=/users/max/data/models/ct
 model_path=${save_path}/${model_name}
@@ -25,16 +25,16 @@ frame_compare_path=${model_path}/predictions-frames-${prediction_name}
 #	--data.init_args.predict_mode=same
 
 
-#python pytorch_gleam/scripts/contrastive_cluster.py \
-#	-i ${input_path} \
-#	-p ${cluster_pred_path}/predictions.jsonl \
-#	-o ${cluster_pred_path}/clusters.jsonl \
-#	--threshold 2.0 \
-#	--min_cluster_size 2 \
-#	--clustering single \
-#;python pytorch_gleam/scripts/contrastive_framing.py \
-#	-i ${cluster_pred_path}/clusters.jsonl \
-#	-o ${cluster_pred_path}/cluster-framings.jsonl
+python pytorch_gleam/scripts/contrastive_cluster.py \
+	-i ${input_path} \
+	-p /users/max/data/models/ct/ct-v11/predictions/predictions-Q1_Q19.jsonl \
+	-o ${cluster_pred_path}/clusters.jsonl \
+	--threshold 16.0 \
+	--min_cluster_size 2 \
+	--clustering complete \
+;python pytorch_gleam/scripts/contrastive_framing.py \
+	-i ${cluster_pred_path}/clusters.jsonl \
+	-o ${cluster_pred_path}/cluster-framings.jsonl
 
 gleam predict \
 	--config pg_examples/cikm2022/ct-v11-pred.yaml \
@@ -50,8 +50,8 @@ python pytorch_gleam/scripts/contrastive_question_cluster.py \
 	-i ${cluster_pred_path}/cluster-framings.jsonl \
 	-p ${frame_pred_path}/predictions.jsonl \
 	-o ${frame_pred_path}/question-clusters.jsonl \
-	--threshold 2.0 \
-	--clustering single \
+	--threshold 16.0 \
+	--clustering complete \
 ;python pytorch_gleam/scripts/contrastive_question_framing.py \
 	-i ${frame_pred_path}/question-clusters.jsonl \
 	-o ${frame_pred_path}/question-cluster-framings.jsonl
@@ -82,6 +82,6 @@ python pytorch_gleam/scripts/contrastive_compare_framing_manual.py \
   -o ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
 
 
-#python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
-#	-f ${frame_path} \
-#  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
+python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
+	-f ${frame_path} \
+  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx

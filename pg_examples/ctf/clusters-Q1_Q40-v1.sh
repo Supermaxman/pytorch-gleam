@@ -1,20 +1,10 @@
 #!/usr/bin/bash
 
-tweet_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/tweets.jsonl
-input_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_samples_1_19.json
 
-# TODO sample 200 for 19 qs for approx same number of tweets
-python pytorch_gleam/scripts/sample_tweets.py \
-	-i ${tweet_path} \
-	-n 9133471 \
-	-q 19 \
-	-t 200 \
-	-o ${input_path}
-
-
+input_path=/shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v4/jsonl-non-rt/covid_candidates_1_40.json
 frame_path=/shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json
 
-prediction_name=Q1_Q19-v6
+prediction_name=Q1_Q40-v1
 model_name=ct-v11
 save_path=/users/max/data/models/ct
 model_path=${save_path}/${model_name}
@@ -86,12 +76,11 @@ python pytorch_gleam/scripts/contrastive_compare_framing.py \
 	-p ${frame_compare_path}/predictions.jsonl \
 	-o ${frame_compare_path}/question-cluster-framings-compare.jsonl
 
-
 python pytorch_gleam/scripts/contrastive_compare_framing_manual.py \
   -i ${frame_compare_path}/question-cluster-framings-compare.jsonl \
   -o ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
 
 
-#python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
-#	-f ${frame_path} \
-#  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
+python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
+	-f ${frame_path} \
+  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx

@@ -82,7 +82,6 @@ python pytorch_gleam/scripts/contrastive_compare_framing_manual.py \
   -o ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
 
 
-#python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
-#	-f ${frame_path} \
-#  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
-
+python pytorch_gleam/scripts/contrastive_compare_framing_stats.py \
+	-f ${frame_path} \
+  -i ${frame_compare_path}/${model_name}-${prediction_name}.xlsx
