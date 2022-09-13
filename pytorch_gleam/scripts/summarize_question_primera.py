@@ -18,7 +18,7 @@ def preprocess_example(example, preprocess_config):
         doc_txt = " ".join(doc_txt.split())
         all_docs.append(doc_txt)
 
-    ex = {"id": ex_id, "documents": all_docs, 'docs': example['docs']}
+    ex = {"id": ex_id, "documents": all_docs, "docs": example["docs"]}
     return ex
 
 
@@ -118,7 +118,7 @@ def main():
         ex_id = ex["id"]
 
         summary = summaries[0]
-        ex = {"id": ex_id, "text": summary, "docs": ex['docs'], "size": sum([len(c["docs"]) for c in ex["docs"]])}
+        ex = {"id": ex_id, "text": summary, "docs": ex["docs"], "size": sum([len(c["docs"]) for c in ex["docs"]])}
         results.append(ex)
     print("Saving results...")
     write_jsonl(output_path, results)

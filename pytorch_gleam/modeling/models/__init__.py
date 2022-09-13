@@ -6,8 +6,8 @@ from pytorch_gleam.modeling.models.base_models import (
 )
 from pytorch_gleam.modeling.models.bert_pretrain import BertPreTrainLanguageModel
 from pytorch_gleam.modeling.models.contrastive_frame import (
+    ContrastiveEmbFrameLanguageModel,
     ContrastiveFrameLanguageModel,
-    ContrastiveEmbFrameLanguageModel
 )
 from pytorch_gleam.modeling.models.kbi import KbiLanguageModel
 from pytorch_gleam.modeling.models.multi_class import MultiClassLanguageModel

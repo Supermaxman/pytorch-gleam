@@ -157,6 +157,7 @@ ______________________________________________________________________
 These are a work-in-progress, as my original research code is a bit messy, but they will be updated soon!
 
 ###### COVID-19 Vaccine Misinformation Detection on Twitter
+
 ```
 @article{weinzierl-covid-glp,
 	title        = {Automatic detection of COVID-19 vaccine misinformation with graph link prediction},
@@ -175,6 +176,7 @@ These are a work-in-progress, as my original research code is a bit messy, but t
 - [CoVaxLies V1 with Graph-Link Prediction](<>)
 
 ###### COVID-19 Vaccine Misinformation Stance Identification on Twitter
+
 ```
 @inproceedings{weinzierl-covid19-acs-stance,
     author = {Weinzierl, Maxwell and Harabagiu, Sanda},
@@ -196,6 +198,7 @@ These are a work-in-progress, as my original research code is a bit messy, but t
 - [CoVaxLies V2 with Attitude Consistency Scoring](<>)
 
 ###### COVID-19 Misinformation Stance Identification on Twitter
+
 ```
 @article{Weinzierl_Hopfer_Harabagiu_2021,
 	title        = {Misinformation Adoption or Rejection in the Era of COVID-19},
@@ -210,10 +213,10 @@ These are a work-in-progress, as my original research code is a bit messy, but t
 }
 ```
 
-
 - [COVIDLies with Lexical, Emotion, and Semantic GATs for Stance Identification](<>)
 
 ###### Vaccine Misinformation Transfer Learning
+
 ```
 @misc{weinzierl2022vaccinelies,
 	title        = {VaccineLies: A Natural Language Resource for Learning to Recognize Misinformation about the COVID-19 and HPV Vaccines},
@@ -229,6 +232,7 @@ These are a work-in-progress, as my original research code is a bit messy, but t
 - [HPV to COVID-19 on VaccineLies](<>)
 
 ###### Vaccine Hesitancy Profiling on Twitter
+
 ```
 @article{weinzierl-hesitancy-profiling,
 	author = {Weinzierl, Maxwell A. and Hopfer, Suellen and Harabagiu, Sanda M.},

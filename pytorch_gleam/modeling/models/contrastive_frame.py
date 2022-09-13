@@ -170,8 +170,8 @@ class ContrastiveEmbFrameLanguageModel(ContrastiveFrameLanguageModel):
 
         pos_samples = batch["pos_samples"]
         anchor_embs = embeddings[:, :1]
-        pos_embs = embeddings[:, 1:1+pos_samples]
-        neg_embs = embeddings[:, 1+pos_samples:]
+        pos_embs = embeddings[:, 1 : 1 + pos_samples]
+        neg_embs = embeddings[:, 1 + pos_samples :]
         # [bsize, 1, emb_size] - [bsize, pos_samples, emb_size] -> [bsize, pos_samples]
         pos_scores = torch.norm(anchor_embs - pos_embs, p=2, dim=-1)
         # [bsize, 1, emb_size] - [bsize, neg_samples, emb_size] -> [bsize, neg_samples]

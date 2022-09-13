@@ -1,8 +1,8 @@
 from pytorch_gleam.data.collators.base_collators import BatchCollator
 from pytorch_gleam.data.collators.bert_pre import BertPreBatchCollator
 from pytorch_gleam.data.collators.contrastive_frame import (
-	ContrastiveFrameBatchCollator,
-	ContrastiveEmbFrameBatchCollator
+    ContrastiveEmbFrameBatchCollator,
+    ContrastiveFrameBatchCollator,
 )
 from pytorch_gleam.data.collators.kbi import KbiBatchCollator
 from pytorch_gleam.data.collators.multi_class_frame import MultiClassFrameBatchCollator

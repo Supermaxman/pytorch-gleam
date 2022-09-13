@@ -7,7 +7,7 @@ import ujson as json
 from pytorch_lightning.utilities.cli import DATAMODULE_REGISTRY
 from torch.utils.data import Dataset
 
-from pytorch_gleam.data.collators import ContrastiveFrameBatchCollator, ContrastiveEmbFrameBatchCollator
+from pytorch_gleam.data.collators import ContrastiveEmbFrameBatchCollator, ContrastiveFrameBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 
@@ -176,7 +176,7 @@ class ContrastiveEmbFrameDataset(ContrastiveFrameDataset):
             "ids": anchor["id"],
             "anchor_example": self.create_example(anchor),
             "pos_examples": [self.create_example(pos)],
-            "neg_examples": [self.create_example(neg)]
+            "neg_examples": [self.create_example(neg)],
         }
 
         return example

@@ -12,15 +12,15 @@ def parse_text(ex_text, preprocess_config):
     return doc_txt
 
 
-def preprocess_example(example, preprocess_config, sort_mode='length'):
+def preprocess_example(example, preprocess_config, sort_mode="length"):
     ex_id = example["id"]
     # sorted
-    if sort_mode == 'length':
+    if sort_mode == "length":
         all_docs = list(sorted(example["docs"], key=lambda x: len(parse_text(x["text"], preprocess_config))))
-    elif sort_mode == 'sim':
+    elif sort_mode == "sim":
         all_docs = example["docs"]
     else:
-        raise ValueError(f'Unknown sort_mode: {sort_mode}')
+        raise ValueError(f"Unknown sort_mode: {sort_mode}")
     doc = all_docs[0]
     doc_txt = parse_text(doc["text"], preprocess_config)
     ex = {"id": ex_id, "text": doc_txt, "docs": all_docs, "size": sum([len(c["docs"]) for c in example["docs"]])}
@@ -31,7 +31,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
-    parser.add_argument("-s", "--sort_mode", default='length')
+    parser.add_argument("-s", "--sort_mode", default="length")
     args = parser.parse_args()
 
     input_path = args.input_path

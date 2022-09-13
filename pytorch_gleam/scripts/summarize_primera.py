@@ -18,7 +18,7 @@ def preprocess_example(example, preprocess_config):
         doc_txt = " ".join(doc_txt.split())
         all_docs.append(doc_txt)
 
-    ex = {"id": ex_id, "documents": all_docs, 'docs': example['docs']}
+    ex = {"id": ex_id, "documents": all_docs, "docs": example["docs"]}
     return ex
 
 
