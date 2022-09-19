@@ -1,5 +1,6 @@
 from pytorch_gleam.data.collators.base_collators import BatchCollator
 from pytorch_gleam.data.collators.bert_pre import BertPreBatchCollator
+from pytorch_gleam.data.collators.contrastive_channel import ContrastiveChannelBatchCollator
 from pytorch_gleam.data.collators.contrastive_frame import (
     ContrastiveEmbFrameBatchCollator,
     ContrastiveFrameBatchCollator,

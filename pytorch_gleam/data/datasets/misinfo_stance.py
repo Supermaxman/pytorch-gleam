@@ -1,7 +1,7 @@
-import json
 from typing import Any, Dict, List, Union
 
 import torch
+import ujson as json
 from torch.utils.data import Dataset
 
 
@@ -19,6 +19,7 @@ class MisinfoStanceDataset(Dataset):
 
     def __init__(self, data_path: Union[str, List[str]], misinfo_path: str):
         super().__init__()
+        self.label_name = "misinfo"
         self.label_map = {
             "No Stance": 0,
             "no_stance": 0,
@@ -42,7 +43,7 @@ class MisinfoStanceDataset(Dataset):
             ex_id = ex["id"]
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
-            ex_labels = ex["misinfo"]
+            ex_labels = ex[self.label_name]
             for m_id, m_label in ex_labels.items():
                 if m_id not in self.misinfo:
                     print(f"MISSING M_ID: {m_id}")
