@@ -108,7 +108,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
     def loss(self, pos_energy, neg_energy):
         # different contrastive losses with losses as input
-        loss, accuracy = self.contrastive(pos_energy, neg_energy)
+        loss = self.contrastive(pos_energy, neg_energy)
+        accuracy = (pos_energy > neg_energy).float().mean(dim=-1)
         return loss, accuracy
 
     def training_step(self, batch, batch_idx):
