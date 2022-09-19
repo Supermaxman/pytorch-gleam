@@ -9,12 +9,12 @@ from transformers import AutoModelForSeq2SeqLM
 from pytorch_gleam.inference import ConsistencyScoring
 from pytorch_gleam.modeling.losses import ContrastiveLoss
 from pytorch_gleam.modeling.metrics import Metric
-from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
+from pytorch_gleam.modeling.models.base_models import BasePreModel
 from pytorch_gleam.modeling.thresholds import MultiClassThresholdModule, ThresholdModule
 
 
 # noinspection PyAbstractClass
-class ContrastiveChannelLanguageModel(BaseLanguageModel):
+class ContrastiveChannelLanguageModel(BasePreModel):
     def __init__(
         self,
         pre_model_name: str,

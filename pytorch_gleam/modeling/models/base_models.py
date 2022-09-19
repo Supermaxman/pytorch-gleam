@@ -16,7 +16,7 @@ from transformers import (
 
 
 class BasePreModel(pl.LightningModule, ABC):
-    lm: Union[Callable]
+    lm: Callable
 
     def __init__(
         self,
