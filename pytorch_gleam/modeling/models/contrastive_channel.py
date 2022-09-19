@@ -66,7 +66,6 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 self.threshold[m_id] = MultiClassThresholdModule()
 
     def forward(self, batch):
-        _, pad_seq_len = batch["input_ids"].shape
         num_examples = batch["num_examples"]
         num_sequences_per_example = batch["num_sequences_per_example"]
 
@@ -74,17 +73,18 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         input_ids = batch["input_ids"]
         # [bsize * num_seq, seq_len]
         attention_mask = batch["attention_mask"]
-        # [bsize * num_seq, seq_len]
+        # [bsize * num_seq, target_seq_len]
         target_ids = batch["target_ids"]
+        _, pad_target_seq_len = target_ids.shape
 
         # get logits here
         results = self.lm(input_ids=input_ids, attention_mask=attention_mask, labels=target_ids)
-        # [bsize * num_seq, seq_len, vocab_size]
+        # [bsize * num_seq, target_seq_len, vocab_size]
         logits = results.logits
-        # [bsize * num_seq * seq_len]
+        # [bsize * num_seq * target_seq_len]
         loss = self.lm_loss(logits.view(-1, logits.size(-1)), target_ids.view(-1))
-        # [bsize * num_seq, seq_len]
-        loss = loss.view(-1, pad_seq_len)
+        # [bsize * num_seq, target_seq_len]
+        loss = loss.view(-1, pad_target_seq_len)
         # [bsize * num_seq]
         seq_lens = (target_ids != -100).float().sum(dim=-1)
         # [bsize * num_seq]
