@@ -56,7 +56,7 @@ class ContrastiveChannelBatchCollator(BatchCollator):
             m_text = ex["m_ex"]["m_text"]
             samples = ex["p_samples"] + ex["n_samples"]
             relations.extend(ex["relations"])
-            directions.extend(ex["directions"])
+            directions.extend(ex["direction"])
             labels.extend(ex["labels"])
             stages.extend(ex["stages"])
 
