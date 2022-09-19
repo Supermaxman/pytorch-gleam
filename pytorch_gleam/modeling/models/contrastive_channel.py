@@ -44,6 +44,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         self.metric = metric
         self.lm_loss = CrossEntropyLoss(ignore_index=-100, reduction="none")
 
+    def lm_step(self, *args, **kwargs):
+        return self.lm(*args, **kwargs)
+
     def setup(self, stage: Optional[str] = None):
         super().setup(stage)
         if stage == "fit":
