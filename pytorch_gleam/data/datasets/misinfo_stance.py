@@ -49,7 +49,7 @@ class MisinfoStanceDataset(Dataset):
                     print(f"MISSING M_ID: {m_id}")
                     continue
                 if m_label not in self.label_map:
-                    print(f"MISSING M_LABEL: {m_label}")
+                    # print(f"MISSING M_LABEL: {m_label}")
                     continue
                 m_label_idx = self.label_map[m_label]
                 m = self.misinfo[m_id]

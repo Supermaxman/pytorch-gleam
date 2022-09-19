@@ -1,9 +1,6 @@
 import pytorch_lightning as pl
 from pytorch_lightning.cli import LightningCLI
 
-# import pytorch_gleam.callbacks
-# import pytorch_gleam.data.datasets
-
 
 def main():
     LightningCLI(

@@ -43,7 +43,7 @@ class ContrastiveChannelMisinfoStanceDataset(MisinfoStanceDataset):
                 "t_id": ex_id,
                 "t_text": pair_ex["ex_text"],
                 "m_label": m_label,
-                "m_label_text": self.label_text[m_label],
+                "m_label_text": self.relation_map[m_label],
                 "stage": pair_ex["stage"],
             }
             ex = {
