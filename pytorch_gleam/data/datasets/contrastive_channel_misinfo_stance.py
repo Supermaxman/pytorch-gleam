@@ -106,6 +106,7 @@ class ContrastiveChannelMisinfoStanceDataset(MisinfoStanceDataset):
         labels = [tm_stance] + [p_ex["m_label"] for p_ex in pos_samples] + [n_ex["m_label"] for n_ex in neg_samples]
         stages = [t_ex["stage"]] + [p_ex["stage"] for p_ex in pos_samples] + [n_ex["stage"] for n_ex in neg_samples]
         relations = [tmp_relation for _ in range(len(pos_samples))] + neg_relations
+        directions = [direction for _ in range(len(pos_samples) + len(neg_samples))]
         relation_texts = [self.relation_map[rel] for rel in relations]
         ex = {
             "t_ex": t_ex,
@@ -114,7 +115,7 @@ class ContrastiveChannelMisinfoStanceDataset(MisinfoStanceDataset):
             "stages": stages,
             "p_samples": pos_samples,
             "n_samples": neg_samples,
-            "direction": direction,
+            "directions": directions,
             "relations": relations,
             "relation_texts": relation_texts,
         }
@@ -226,8 +227,8 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
         # 2 is reject
         # 0 is no stance, and is only in negative_examples
 
-        # both directions
-        direction = [0, 1]
+        # only one direction
+        directions = [0 for _ in range(len(pair_examples))]
         labels = [t_ex["m_label"]] + [p_ex["m_label"] for p_ex in pair_examples]
         stages = [t_ex["stage"]] + [p_ex["stage"] for p_ex in pair_examples]
         # both relations
@@ -239,7 +240,7 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
             "stages": stages,
             "p_samples": pair_examples,
             "n_samples": [],
-            "direction": direction,
+            "directions": directions,
             "relations": relations,
         }
 
