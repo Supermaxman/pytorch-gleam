@@ -40,6 +40,8 @@ class ContrastiveChannelBatchCollator(BatchCollator):
         ids = []
         m_ids = []
         s_ids = []
+        assert pos_samples + neg_samples == len(examples[0]["relation_texts"])
+        assert pos_samples + neg_samples == len(examples[0]["directions"])
         for ex in examples:
             ids.append(ex["t_ex"]["t_id"])
             m_ids.append(ex["m_ex"]["m_id"])
@@ -60,7 +62,7 @@ class ContrastiveChannelBatchCollator(BatchCollator):
             labels.extend(ex["labels"])
             stages.extend(ex["stages"])
 
-            for s_sample, s_rel_text, s_direction in zip(samples, ex["relation_texts"], ex["directions"], strict=True):
+            for s_sample, s_rel_text, s_direction in zip(samples, ex["relation_texts"], ex["directions"]):
                 s_text = s_sample["t_text"]
                 texts.append(f"Misinformation:\n{m_text}\nRelation:\n{s_rel_text}\n")
                 s_ids.append(s_sample["t_id"])
