@@ -96,9 +96,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
     @staticmethod
     def split_losses_into_energy(loss, batch):
         pos_samples = batch["pos_samples"]
-        pos_loss = -loss[:, :pos_samples]
-        neg_loss = -loss[:, pos_samples:]
-        return pos_loss, neg_loss
+        pos_energy = loss[:, :pos_samples]
+        neg_energy = loss[:, pos_samples:]
+        return pos_energy, neg_energy
 
     def triplet_step(self, batch):
         loss = self(batch)
@@ -109,7 +109,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
     def loss(self, pos_energy, neg_energy):
         # different contrastive losses with losses as input
         loss = self.contrastive(pos_energy, neg_energy)
-        accuracy = (pos_energy > neg_energy).float().mean(dim=-1)
+        accuracy = (pos_energy < neg_energy).float().mean(dim=-1)
         return loss, accuracy
 
     def training_step(self, batch, batch_idx):
