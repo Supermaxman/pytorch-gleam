@@ -221,9 +221,18 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 m_ex_ids.append(ex_id)
                 m_ex_m_ids.append(m_id)
             m_ex_labels = torch.tensor(m_ex_labels, dtype=torch.long)
-            m_ex_scores = ContrastiveChannelLanguageModel.infer_m_scores(
-                infer, m_adj_list, stage_labels, stage, num_val_seeds
-            )
+            try:
+                m_ex_scores = ContrastiveChannelLanguageModel.infer_m_scores(
+                    infer, m_adj_list, stage_labels, stage, num_val_seeds
+                )
+            except Exception as e:
+                print(f"M_ID: {m_id} | Stage: {stage} | Num adj list: {len(m_adj_list)}")
+                input()
+                print(m_adj_list)
+                input()
+                print(stage_labels)
+                input()
+                raise e
             if update_threshold:
                 m_min_score = torch.min(m_ex_scores).item()
                 m_max_score = torch.max(m_ex_scores).item()
@@ -368,16 +377,3 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 m_labels[ex_m_id][ex_p_stage][ex_p_id] = ex_p_label.item()
 
         return m_adj_list, m_labels
-
-    @staticmethod
-    def build_stage_labels(m_labels):
-        m_s_labels = defaultdict(list)
-        m_m_ids = defaultdict(list)
-        m_t_ids = defaultdict(list)
-        for m_id, m_t_labels in m_labels.items():
-            for stage_idx, stage_labels in m_t_labels.items():
-                for m_t_id, m_t_label in stage_labels.items():
-                    m_t_ids[stage_idx].append(m_t_id)
-                    m_m_ids[stage_idx].append(m_id)
-                    m_s_labels[stage_idx].append(m_t_label)
-        return m_s_labels, m_m_ids, m_t_ids
