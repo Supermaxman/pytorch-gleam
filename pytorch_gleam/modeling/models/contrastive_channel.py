@@ -293,8 +293,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         return result
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
-        loss = self(batch)
-        energies = -loss
+        energies = self(batch)
         results = {
             # [bsize]
             "ids": batch["ids"],
