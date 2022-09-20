@@ -137,13 +137,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 if u_id in seed_labels and v_id in seed_labels
             ]
         seed_examples = {ex_id: label for (ex_id, label) in seed_examples}
-        print(f"Num Seed examples: {len(seed_examples)}")
-        input()
-        print(f"Seed examples: {seed_examples}")
-        input()
-        print(f"Adj list: {adj_list}")
-        input()
-        if len(adj_list) == 0:
+        if len(adj_list) == 0 or len(seed_examples) == 0:
             node_scores = np.zeros([len(seed_labels), 3], dtype=np.float32)
             node_idx_map = {node: idx for (idx, node) in enumerate(seed_labels)}
         else:
@@ -201,22 +195,6 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # stage 0 is validation
         # stage 1 is test
         m_adj_lists, m_stage_labels = ContrastiveChannelLanguageModel.build_adj_list(infer_eval_outputs)
-        print(f"Stage: {stage}")
-        input()
-        print(m_adj_lists)
-        input()
-        print(m_stage_labels.keys())
-        input()
-        first_key = list(m_stage_labels.keys())[0]
-        first_dict = m_stage_labels[first_key]
-        print(first_dict)
-        input()
-        print(first_dict.keys())
-        input()
-        first_dict_key = list(first_dict.keys())[0]
-        first_dict_dict = first_dict[first_dict_key]
-        print(first_dict_dict)
-        input()
 
         for m_id in m_stage_labels:
             if m_id not in threshold:
@@ -243,7 +221,6 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 m_ex_ids.append(ex_id)
                 m_ex_m_ids.append(m_id)
             m_ex_labels = torch.tensor(m_ex_labels, dtype=torch.long)
-            print(f"M_ID: {m_id}")
             m_ex_scores = ContrastiveChannelLanguageModel.infer_m_scores(
                 infer, m_adj_list, stage_labels, stage, num_val_seeds
             )
