@@ -202,15 +202,15 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         input()
         print(m_stage_labels.keys())
         input()
-        print(m_stage_labels[next(list(m_stage_labels.keys()))])
+        first_key = list(m_stage_labels.keys())[0]
+        first_dict = m_stage_labels[first_key]
+        print(first_dict)
         input()
-        print(m_stage_labels[next(list(m_stage_labels.keys()))].keys())
+        print(first_dict.keys())
         input()
-        print(
-            m_stage_labels[next(list(m_stage_labels.keys()))][
-                next(list(m_stage_labels[next(list(m_stage_labels.keys()))].keys()))
-            ]
-        )
+        first_dict_key = list(first_dict.keys())[0]
+        first_dict_dict = first_dict[first_dict_key]
+        print(first_dict_dict)
         input()
 
         for m_id in m_stage_labels:
