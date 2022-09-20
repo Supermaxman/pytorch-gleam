@@ -214,6 +214,7 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
                     "m_ex": m_ex,
                 }
                 self.examples.append(pair_ex)
+        print(len(self.examples))
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
