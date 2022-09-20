@@ -99,8 +99,7 @@ class BaseDataModule(pl.LightningDataModule, ABC):
                 persistent_workers=False,
                 # *MIGHT*? causes memory leak on TPUs
                 pin_memory=not self.use_tpus,
-                # TODO warn about this
-                drop_last=not self.use_tpus,
+                drop_last=False,
             )
             for ds in datasets
         ]

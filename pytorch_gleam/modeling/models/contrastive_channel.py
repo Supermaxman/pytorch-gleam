@@ -221,18 +221,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 m_ex_ids.append(ex_id)
                 m_ex_m_ids.append(m_id)
             m_ex_labels = torch.tensor(m_ex_labels, dtype=torch.long)
-            try:
-                m_ex_scores = ContrastiveChannelLanguageModel.infer_m_scores(
-                    infer, m_adj_list, stage_labels, stage, num_val_seeds
-                )
-            except Exception as e:
-                print(f"M_ID: {m_id} | Stage: {stage} | Num adj list: {len(m_adj_list)}")
-                input()
-                print(m_adj_list)
-                input()
-                print(stage_labels)
-                input()
-                raise e
+            m_ex_scores = ContrastiveChannelLanguageModel.infer_m_scores(
+                infer, m_adj_list, stage_labels, stage, num_val_seeds
+            )
             if update_threshold:
                 m_min_score = torch.min(m_ex_scores).item()
                 m_max_score = torch.max(m_ex_scores).item()
@@ -335,18 +326,6 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"] for x in outputs])[::2]
         assert len(p_ids) == len(t_ids)
         assert len(m_ids) == len(t_ids)
-        lengths = {}
-        lengths2 = {}
-        for batch in outputs:
-            slen_l = len(batch["s_ids"])
-            p = len(batch["ids"])
-            if p not in lengths:
-                print(f"BATCH p SIZE: {p}")
-                lengths[p] = 0
-            if slen_l not in lengths2:
-                print(f"BATCH l SIZE: {slen_l}")
-                lengths2[slen_l] = 0
-
         # [count, 3]
         # TODO don't hardcode this, but for now there's only two examples in each relationship
         labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu().view(-1, 3)
