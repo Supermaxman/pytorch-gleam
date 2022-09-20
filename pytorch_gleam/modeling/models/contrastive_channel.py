@@ -376,7 +376,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
             ex_p_labels = p_labels[ex_idx]
             ex_p_stage = p_stage[ex_idx]
             ex_t_energies = t_energies[ex_idx]
-            m_labels[ex_m_id][ex_t_stage][ex_t_id] = ex_t_label
+            m_labels[ex_m_id][ex_t_stage][ex_t_id] = ex_t_label.item()
             for p_idx in range(len(ex_p_ids)):
                 ex_p_id = ex_p_ids[p_idx]
                 ex_p_label = ex_p_labels[p_idx]
