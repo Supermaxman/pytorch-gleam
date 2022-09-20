@@ -335,6 +335,18 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"] for x in outputs])[::2]
         assert len(p_ids) == len(t_ids)
         assert len(m_ids) == len(t_ids)
+        lengths = {}
+        lengths2 = {}
+        for batch in outputs:
+            slen_l = len(batch["s_ids"])
+            p = len(batch["ids"])
+            if p not in lengths:
+                print(f"BATCH p SIZE: {p}")
+                lengths[p] = 0
+            if slen_l not in lengths2:
+                print(f"BATCH l SIZE: {slen_l}")
+                lengths2[slen_l] = 0
+
         # [count, 3]
         # TODO don't hardcode this, but for now there's only two examples in each relationship
         labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu().view(-1, 3)
