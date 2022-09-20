@@ -128,7 +128,6 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         seed_examples = [(ex_id, label) for (ex_id, label) in seed_labels.items() if label != 0]
         # if the stage is val then we have no test set, so pick
         # some number of seed examples from val and test on remaining val
-        print(f"Seed examples: {len(seed_examples)}")
         if stage == "val":
             seed_examples = seed_examples[:num_val_seeds]
             # make sure adj list only has val labeled data
@@ -138,6 +137,12 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 if u_id in seed_labels and v_id in seed_labels
             ]
         seed_examples = {ex_id: label for (ex_id, label) in seed_examples}
+        print(f"Num Seed examples: {len(seed_examples)}")
+        input()
+        print(f"Seed examples: {seed_examples}")
+        input()
+        print(f"Adj list: {adj_list}")
+        input()
         if len(adj_list) == 0:
             node_scores = np.zeros([len(seed_labels), 3], dtype=np.float32)
             node_idx_map = {node: idx for (idx, node) in enumerate(seed_labels)}
@@ -238,6 +243,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 m_ex_ids.append(ex_id)
                 m_ex_m_ids.append(m_id)
             m_ex_labels = torch.tensor(m_ex_labels, dtype=torch.long)
+            print(f"M_ID: {m_id}")
             m_ex_scores = ContrastiveChannelLanguageModel.infer_m_scores(
                 infer, m_adj_list, stage_labels, stage, num_val_seeds
             )
@@ -377,7 +383,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 ex_p_stage = int(ex_p_stage[p_idx])
                 ex_tmp_energy = ex_t_energies[p_idx]
                 m_adj_list[ex_m_id].append((ex_t_id, ex_p_id, ex_tmp_energy))
-                m_labels[ex_m_id][ex_p_stage][ex_p_id] = ex_p_label
+                m_labels[ex_m_id][ex_p_stage][ex_p_id] = ex_p_label.item()
 
         return m_adj_list, m_labels
 
