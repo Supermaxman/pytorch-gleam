@@ -8,17 +8,6 @@ class ContrastiveChannelBatchCollator(BatchCollator):
         self.tokenizer = tokenizer
         super().__init__(*args, **kwargs)
 
-    def _calculate_multi_seq_padding(self, examples):
-        if self.use_tpus:
-            pad_seq_len = self.max_seq_len
-        else:
-            pad_seq_len = 0
-            for ex in examples:
-                ex_seqs = [ex["t_ex"], ex["m_ex"]] + ex["p_samples"] + ex["n_samples"]
-                for ex_seq in ex_seqs:
-                    pad_seq_len = max(pad_seq_len, min(len(ex_seq["input_ids"]), self.max_seq_len))
-        return pad_seq_len
-
     def __call__(self, examples):
         pos_samples = len(examples[0]["p_samples"])
         neg_samples = len(examples[0]["n_samples"])
@@ -26,8 +15,6 @@ class ContrastiveChannelBatchCollator(BatchCollator):
         num_sequences_per_example = pos_samples + neg_samples
         # pos_samples + neg_samples
         num_sequences = num_examples * num_sequences_per_example
-        # labels = torch.zeros([num_examples, num_sequences_per_example - 1], dtype=torch.long)
-        # stages = torch.zeros([num_examples, num_sequences_per_example - 1], dtype=torch.long)
 
         # prompt which will be static, and not measured for model probs
         texts = []

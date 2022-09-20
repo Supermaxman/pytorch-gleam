@@ -301,7 +301,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
             # [bsize]
             "m_ids": batch["m_ids"],
             # [bsize, num_pairs]
-            "p_ids": batch["p_ids"],
+            "s_ids": batch["s_ids"],
             # [bsize, num_pairs+1]
             "labels": batch["labels"],
             # [bsize, num_pairs+1]
@@ -322,21 +322,25 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # [count]
         m_ids = ContrastiveChannelLanguageModel.flatten([x["m_ids"] for x in outputs])
         # [count]
-        p_ids = ContrastiveChannelLanguageModel.flatten([x["p_ids"] for x in outputs])
-        # [count, 2]
-        labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu()
-        stages = torch.cat([x["stages"] for x in outputs], dim=0).cpu()
+        # skip every other s_id since they are duplicates from two relationships
+        p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"][::2] for x in outputs])
+        # [count, 3]
+        # TODO don't hardcode this, but for now there's only two examples in each relationship
+        labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu().view(-1, 3)
+        # [count, 3]
+        stages = torch.cat([x["stages"] for x in outputs], dim=0).cpu().view(-1, 3)
         # [count]
         t_label = labels[:, 0]
         # [count]
         t_stage = stages[:, 0]
+        # labels and stage are duplicated here for each relation
         # [count, 1]
-        p_labels = labels[:, 1:]
+        p_labels = labels[:, 1].unsqueeze(dim=-1)
         # [count, 1]
-        p_stage = stages[:, 1:]
+        p_stage = stages[:, 1].unsqueeze(dim=-1)
 
         # [count, 1, num_relations]
-        t_energies = torch.cat([x["energies"] for x in outputs], dim=0).cpu()
+        t_energies = torch.cat([x["energies"] for x in outputs], dim=0).cpu().unsqueeze(dim=1)
 
         m_adj_list = defaultdict(list)
         m_labels = defaultdict(lambda: defaultdict(dict))

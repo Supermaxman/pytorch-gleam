@@ -222,7 +222,8 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
         ex = self.examples[idx]
         t_ex = ex["t_ex"]
         m_ex = ex["m_ex"]
-        pair_examples = [ex["p_ex"]]
+        # same pos example, but two possible relations
+        pair_examples = [ex["p_ex"], ex["p_ex"]]
         # 1 is accept
         # 2 is reject
         # 0 is no stance, and is only in negative_examples
@@ -231,8 +232,9 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
         directions = [0 for _ in range(len(pair_examples))]
         labels = [t_ex["m_label"]] + [p_ex["m_label"] for p_ex in pair_examples]
         stages = [t_ex["stage"]] + [p_ex["stage"] for p_ex in pair_examples]
-        # both relations
-        relations = [[0, 1] for _ in range(len(pair_examples))]
+        # both relations (agree, disagree)
+        relations = [0, 1]
+        relation_texts = [self.relation_map[rel] for rel in relations]
         ex = {
             "t_ex": t_ex,
             "m_ex": m_ex,
@@ -242,6 +244,7 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
             "n_samples": [],
             "directions": directions,
             "relations": relations,
+            "relation_texts": relation_texts,
         }
 
         return ex
@@ -265,27 +268,26 @@ class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
                 misinfo_path=self.misinfo_path,
             )
         if self.val_path is not None:
-            self.val_dataset = ContrastiveChannelMisinfoStanceDataset(
-                pos_samples=self.pos_samples,
-                neg_samples=self.neg_samples,
-                data_path=self.val_path,
-                misinfo_path=self.misinfo_path,
-            )
-            # TODO when infer works properly do this:
-            # val_triplet_dataset = ContrastiveChannelMisinfoStanceDataset(
+            # self.val_dataset = ContrastiveChannelMisinfoStanceDataset(
             #     pos_samples=self.pos_samples,
             #     neg_samples=self.neg_samples,
             #     data_path=self.val_path,
             #     misinfo_path=self.misinfo_path,
             # )
-            # val_infer_dataset = ContrastiveChannelMisinfoInferStanceDataset(
-            #     pos_samples=1,
-            #     neg_samples=1,
-            #     data_path=self.val_path,
-            #     misinfo_path=self.misinfo_path,
-            # )
-
-            # self.val_dataset = [val_triplet_dataset, val_infer_dataset]
+            # when infer works properly do this:
+            val_triplet_dataset = ContrastiveChannelMisinfoStanceDataset(
+                pos_samples=self.pos_samples,
+                neg_samples=self.neg_samples,
+                data_path=self.val_path,
+                misinfo_path=self.misinfo_path,
+            )
+            val_infer_dataset = ContrastiveChannelMisinfoInferStanceDataset(
+                pos_samples=1,
+                neg_samples=1,
+                data_path=self.val_path,
+                misinfo_path=self.misinfo_path,
+            )
+            self.val_dataset = [val_triplet_dataset, val_infer_dataset]
         if self.test_path is not None:
             test_triplet_dataset = ContrastiveChannelMisinfoStanceDataset(
                 pos_samples=self.pos_samples,

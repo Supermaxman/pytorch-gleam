@@ -28,11 +28,11 @@ model:
         num_classes: 3
 
 trainer:
-  max_epochs: 36
+  max_epochs: 10
   accumulate_grad_batches: 8
-  check_val_every_n_epoch: 4
+  check_val_every_n_epoch: 1
   deterministic: true
-  num_sanity_val_steps: 0
+  num_sanity_val_steps: -1
   accelerator: gpu
   devices: 1
   default_root_dir: /shared/hltdir4/disk1/team/data/models/cvl-cncac/cncac-v1
