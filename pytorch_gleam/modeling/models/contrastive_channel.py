@@ -323,9 +323,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         m_ids = ContrastiveChannelLanguageModel.flatten([x["m_ids"] for x in outputs])
         # [count]
         # skip every other s_id since they are duplicates from two relationships
-        p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"] for x in outputs])
-        print(p_ids)
-        input()
+        p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"] for x in outputs])[::2]
+        assert len(p_ids) == len(t_ids)
+        assert len(m_ids) == len(t_ids)
         # [count, 3]
         # TODO don't hardcode this, but for now there's only two examples in each relationship
         labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu().view(-1, 3)
@@ -335,6 +335,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         t_label = labels[:, 0]
         # [count]
         t_stage = stages[:, 0]
+        assert len(t_label) == len(t_ids)
+        assert len(t_stage) == len(t_ids)
         # labels and stage are duplicated here for each relation
         # [count, 1]
         p_labels = labels[:, 1].unsqueeze(dim=-1)
@@ -343,6 +345,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
         # [count, 1, num_relations]
         t_energies = torch.cat([x["energies"] for x in outputs], dim=0).cpu().unsqueeze(dim=1)
+        assert t_energies.shape[0] == len(t_ids)
 
         m_adj_list = defaultdict(list)
         m_labels = defaultdict(lambda: defaultdict(dict))
