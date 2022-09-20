@@ -323,7 +323,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         m_ids = ContrastiveChannelLanguageModel.flatten([x["m_ids"] for x in outputs])
         # [count]
         # skip every other s_id since they are duplicates from two relationships
-        p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"][::2] for x in outputs])
+        p_ids = ContrastiveChannelLanguageModel.flatten([x["s_ids"] for x in outputs])
+        print(p_ids)
+        input()
         # [count, 3]
         # TODO don't hardcode this, but for now there's only two examples in each relationship
         labels = torch.cat([x["labels"] for x in outputs], dim=0).cpu().view(-1, 3)
