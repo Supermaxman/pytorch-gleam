@@ -28,9 +28,9 @@ model:
         num_classes: 3
 
 trainer:
-  max_epochs: 10
+  max_epochs: 36
   accumulate_grad_batches: 8
-  check_val_every_n_epoch: 1
+  check_val_every_n_epoch: 4
   deterministic: true
   num_sanity_val_steps: 0
   accelerator: gpu
@@ -52,7 +52,7 @@ data:
     batch_size: 4
     pos_samples: 1
     neg_samples: 1
-    max_seq_len: 512
+    max_seq_len: 256
     num_workers: 8
     tokenizer_name: t5-base
     misinfo_path: /users/max/data/corpora/vaccine-lies/covid19/taxonomy/misinfo.json
