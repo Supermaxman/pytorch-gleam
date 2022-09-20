@@ -128,6 +128,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         seed_examples = [(ex_id, label) for (ex_id, label) in seed_labels.items() if label != 0]
         # if the stage is val then we have no test set, so pick
         # some number of seed examples from val and test on remaining val
+        print(f"Seed examples: {len(seed_examples)}")
         if stage == "val":
             seed_examples = seed_examples[:num_val_seeds]
             # make sure adj list only has val labeled data
@@ -195,6 +196,22 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # stage 0 is validation
         # stage 1 is test
         m_adj_lists, m_stage_labels = ContrastiveChannelLanguageModel.build_adj_list(infer_eval_outputs)
+        print(f"Stage: {stage}")
+        input()
+        print(m_adj_lists)
+        input()
+        print(m_stage_labels.keys())
+        input()
+        print(m_stage_labels[next(list(m_stage_labels.keys()))])
+        input()
+        print(m_stage_labels[next(list(m_stage_labels.keys()))].keys())
+        input()
+        print(
+            m_stage_labels[next(list(m_stage_labels.keys()))][
+                next(list(m_stage_labels[next(list(m_stage_labels.keys()))].keys()))
+            ]
+        )
+        input()
 
         for m_id in m_stage_labels:
             if m_id not in threshold:
