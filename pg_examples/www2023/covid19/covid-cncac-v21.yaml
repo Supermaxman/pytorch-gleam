@@ -8,6 +8,7 @@ model:
     contrastive:
       class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
       init_args:
+        # ln(2) for pos/neg prob ratio of 2
         margin: 0.7
     infer:
       class_path: pytorch_gleam.inference.MultiHopConsistencyScoring
