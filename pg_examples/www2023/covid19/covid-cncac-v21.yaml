@@ -13,7 +13,8 @@ model:
         # ln(2) for pos/neg prob ratio of 2
         # TODO now needs to consider seq_len:
         # pos - neg + margin/seq_len > 0
-        margin: 100.0
+        # ln(100) for pos/neg prob ratio of 100
+        margin: 4.61
     infer:
       class_path: pytorch_gleam.inference.MultiHopConsistencyScoring
       init_args:
