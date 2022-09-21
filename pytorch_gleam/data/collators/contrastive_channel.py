@@ -51,12 +51,14 @@ class ContrastiveChannelBatchCollator(BatchCollator):
 
             for s_sample, s_rel_text, s_direction in zip(samples, ex["relation_texts"], ex["directions"]):
                 s_text = s_sample["t_text"]
-                texts.append(f"Misinformation:\n{m_text}\nRelation:\n{s_rel_text}\n")
                 s_ids.append(s_sample["t_id"])
-                if s_direction == 0:
-                    text_targets.append(f"First Text:\n{ex_text}\nSecond Text:\n{s_text}\n")
-                else:
-                    text_targets.append(f"First Text:\n{s_text}\nSecond Text:\n{ex_text}\n")
+                given_text = ex_text
+                target_text = s_text
+                if s_direction == 1:
+                    given_text = s_text
+                    target_text = ex_text
+                texts.append(f"Topic:\n{m_text}\nRelation:\n{s_rel_text}\nText:\n{given_text}\n")
+                text_targets.append(f"Relation Text:\n{target_text}\n")
 
         model_inputs = self.tokenizer(
             text=texts,
@@ -65,7 +67,6 @@ class ContrastiveChannelBatchCollator(BatchCollator):
             max_length=self.max_seq_len,
             return_tensors="pt",
         )
-
         model_targets = self.tokenizer(
             text=text_targets,
             padding="max_length" if self.use_tpus else "longest",
@@ -73,6 +74,15 @@ class ContrastiveChannelBatchCollator(BatchCollator):
             max_length=self.max_seq_len,
             return_tensors="pt",
         )
+        for input_ids, target_ids in zip(model_inputs["input_ids"], model_targets["input_ids"]):
+            print(f"Input Ids: {len(input_ids[input_ids != self.tokenizer.pad_token_id])}")
+            print(self.tokenizer.decode(input_ids))
+            print("-------------------------------------")
+            print(f"Target Ids: {len(target_ids[target_ids != self.tokenizer.pad_token_id])}")
+            print(self.tokenizer.decode(target_ids))
+            print("=====================================")
+            input()
+
         target_ids = model_targets["input_ids"]
         # replace padding token id's of the labels by -100 so it's ignored by the loss
         # https://huggingface.co/docs/transformers/v4.22.1/en/model_doc/t5#overview
