@@ -86,9 +86,10 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # [bsize * num_seq, target_seq_len]
         loss = loss.view(-1, pad_target_seq_len)
         # [bsize * num_seq]
-        seq_lens = (target_ids != -100).float().sum(dim=-1)
+        # seq_lens = (target_ids != -100).float().sum(dim=-1)
         # [bsize * num_seq]
-        loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
+        # loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
+        loss = loss.sum(dim=-1)
         # [bsize, num_seq]
         loss = loss.view(num_examples, num_sequences_per_example)
         return loss
