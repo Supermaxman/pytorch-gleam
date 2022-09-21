@@ -105,7 +105,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         loss = self(batch)
         pos_energy, neg_energy = self.split_energy(loss, batch)
         loss, accuracy = self.loss(pos_energy, neg_energy)
-        return loss, accuracy
+        return loss, accuracy, pos_energy, neg_energy
 
     def loss(self, pos_energy, neg_energy):
         # different contrastive losses with losses as input
@@ -114,11 +114,22 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         return loss, accuracy
 
     def training_step(self, batch, batch_idx):
-        loss, accuracy = self.triplet_step(batch)
+        loss, accuracy, pos_energy, neg_energy = self.triplet_step(batch)
         accuracy = accuracy.mean()
         loss = loss.mean()
         self.log("train_loss", loss)
         self.log("train_accuracy", accuracy)
+        self.log("train_pos_energy", pos_energy.mean())
+        self.log("train_neg_energy", neg_energy.mean())
+        self.log("train_energy_margin", (neg_energy - pos_energy).mean())
+        train_pos_probs = torch.exp(-pos_energy)
+        train_neg_probs = torch.exp(-neg_energy)
+        self.log("train_pos_probs", train_pos_probs.mean())
+        self.log("train_neg_probs", train_neg_probs.mean())
+        self.log("train_prob_margin", (train_pos_probs - train_neg_probs).mean())
+        train_prob_ratio = train_pos_probs / (train_neg_probs + 1e-8)
+        self.log("train_prob_ratio", train_prob_ratio.mean())
+
         result = {"loss": loss}
         return result
 
@@ -283,7 +294,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
         if dataloader_idx is None or dataloader_idx == 0:
-            loss, accuracy = self.triplet_step(batch)
+            loss, accuracy, pos_energy, neg_energy = self.triplet_step(batch)
             result = {
                 "loss": loss,
                 "accuracy": accuracy,
