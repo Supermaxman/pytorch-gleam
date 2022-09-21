@@ -75,12 +75,16 @@ class ContrastiveChannelBatchCollator(BatchCollator):
             return_tensors="pt",
         )
         for input_ids, target_ids in zip(model_inputs["input_ids"], model_targets["input_ids"]):
-            print(f"Input Ids: {len(input_ids[input_ids != self.tokenizer.pad_token_id])}")
-            print(self.tokenizer.decode(input_ids))
-            print("-------------------------------------")
-            print(f"Target Ids: {len(target_ids[target_ids != self.tokenizer.pad_token_id])}")
-            print(self.tokenizer.decode(target_ids))
-            print("=====================================")
+            x = input_ids[input_ids != self.tokenizer.pad_token_id]
+            y = target_ids[target_ids != self.tokenizer.pad_token_id]
+            lines = [
+                f"Input Ids: {len(x)} Target Ids: {len(y)}",
+                self.tokenizer.decode(x),
+                "---------------------------",
+                self.tokenizer.decode(y),
+                "===========================",
+            ]
+            print("\n".join(lines))
             input()
 
         target_ids = model_targets["input_ids"]
