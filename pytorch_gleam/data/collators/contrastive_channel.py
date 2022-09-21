@@ -57,8 +57,8 @@ class ContrastiveChannelBatchCollator(BatchCollator):
                 if s_direction == 1:
                     given_text = s_text
                     target_text = ex_text
-                texts.append(f"Topic:\n{m_text}\nRelation:\n{s_rel_text}\nText:\n{given_text}\n")
-                text_targets.append(f"Relation Text:\n{target_text}\n")
+                texts.append(f"topic: {m_text} relation: {s_rel_text} sentence: {given_text}")
+                text_targets.append(target_text)
 
         model_inputs = self.tokenizer(
             text=texts,
