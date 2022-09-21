@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Union
 
 import torch
 import ujson as json
-from pytorch_lightning.utilities.cli import DATAMODULE_REGISTRY
 from torch.utils.data import Dataset
 
 from pytorch_gleam.data.collators import ContrastiveEmbFrameBatchCollator, ContrastiveFrameBatchCollator
@@ -304,7 +303,6 @@ class ContrastiveQuestionDataset(Dataset):
         pass
 
 
-@DATAMODULE_REGISTRY
 class ContrastiveFrameDataModule(BaseDataModule):
     def __init__(
         self,
@@ -373,7 +371,6 @@ class ContrastiveFrameDataModule(BaseDataModule):
         )
 
 
-@DATAMODULE_REGISTRY
 class ContrastiveEmbFrameDataModule(BaseDataModule):
     def __init__(
         self,

@@ -4,21 +4,16 @@ import torch
 import ujson as json
 from torch.utils.data import Dataset
 
-
-def read_jsonl(path):
-    with open(path, "r") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                ex = json.loads(line)
-                yield ex
+from pytorch_gleam.data.twitter import preprocess_tweet, read_jsonl, TweetPreprocessConfig
 
 
 class MisinfoStanceDataset(Dataset):
     examples: List[Dict[Any, Union[Any, Dict]]]
+    preprocess_config: TweetPreprocessConfig
 
-    def __init__(self, data_path: Union[str, List[str]], misinfo_path: str):
+    def __init__(self, data_path: Union[str, List[str]], misinfo_path: str, preprocess_config: TweetPreprocessConfig):
         super().__init__()
+        self.preprocess_config = preprocess_config
         self.label_name = "misinfo"
         self.label_map = {
             "No Stance": 0,
@@ -43,6 +38,8 @@ class MisinfoStanceDataset(Dataset):
             ex_id = ex["id"]
             ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
+            ex_text = preprocess_tweet(ex_text, self.preprocess_config)
+
             ex_labels = ex[self.label_name]
             for m_id, m_label in ex_labels.items():
                 if m_id not in self.misinfo:

@@ -7,12 +7,13 @@ from transformers import AutoTokenizer
 from pytorch_gleam.data.collators import ContrastiveChannelBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.datasets.misinfo_stance import MisinfoStanceDataset
+from pytorch_gleam.data.twitter import TweetPreprocessConfig
 
 
 class ContrastiveChannelMisinfoStanceDataset(MisinfoStanceDataset):
     def __init__(self, pos_samples: int = 1, neg_samples: int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.relation_map = {0: "Agree", 1: "Disagree"}
+        self.relation_map = {0: "entailment", 1: "contradiction"}
         self.pos_samples = pos_samples
         self.neg_samples = neg_samples
         self.permutations = [
@@ -252,9 +253,19 @@ class ContrastiveChannelMisinfoInferStanceDataset(ContrastiveChannelMisinfoStanc
 
 class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
     def __init__(
-        self, misinfo_path: str, tokenizer_name: str, pos_samples: int = 1, neg_samples: int = 1, *args, **kwargs
+        self,
+        misinfo_path: str,
+        tokenizer_name: str,
+        pos_samples: int = 1,
+        neg_samples: int = 1,
+        preprocess_config: TweetPreprocessConfig = None,
+        *args,
+        **kwargs
     ):
         super().__init__(*args, **kwargs)
+        if preprocess_config is None:
+            preprocess_config = TweetPreprocessConfig(do_lower_case=False)
+
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
         self.misinfo_path = misinfo_path
         self.pos_samples = pos_samples
@@ -280,12 +291,14 @@ class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
                 neg_samples=self.neg_samples,
                 data_path=self.val_path,
                 misinfo_path=self.misinfo_path,
+                preprocess_config=preprocess_config,
             )
             val_infer_dataset = ContrastiveChannelMisinfoInferStanceDataset(
                 pos_samples=1,
                 neg_samples=1,
                 data_path=self.val_path,
                 misinfo_path=self.misinfo_path,
+                preprocess_config=preprocess_config,
             )
             self.val_dataset = [val_triplet_dataset, val_infer_dataset]
         if self.test_path is not None:
@@ -294,12 +307,14 @@ class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
                 neg_samples=self.neg_samples,
                 data_path=self.test_path,
                 misinfo_path=self.misinfo_path,
+                preprocess_config=preprocess_config,
             )
             test_infer_dataset = ContrastiveChannelMisinfoInferStanceDataset(
                 pos_samples=1,
                 neg_samples=1,
                 data_path=[self.val_path, self.test_path],
                 misinfo_path=self.misinfo_path,
+                preprocess_config=preprocess_config,
             )
 
             self.test_dataset = [test_triplet_dataset, test_infer_dataset]
@@ -309,6 +324,7 @@ class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
                 neg_samples=1,
                 data_path=[self.val_path, self.predict_path],
                 misinfo_path=self.misinfo_path,
+                preprocess_config=preprocess_config,
             )
 
     def create_collator(self):
