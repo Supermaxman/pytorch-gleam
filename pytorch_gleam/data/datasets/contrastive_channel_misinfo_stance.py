@@ -277,15 +277,9 @@ class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
                 neg_samples=self.neg_samples,
                 data_path=self.train_path,
                 misinfo_path=self.misinfo_path,
+                preprocess_config=preprocess_config,
             )
         if self.val_path is not None:
-            # self.val_dataset = ContrastiveChannelMisinfoStanceDataset(
-            #     pos_samples=self.pos_samples,
-            #     neg_samples=self.neg_samples,
-            #     data_path=self.val_path,
-            #     misinfo_path=self.misinfo_path,
-            # )
-            # when infer works properly do this:
             val_triplet_dataset = ContrastiveChannelMisinfoStanceDataset(
                 pos_samples=self.pos_samples,
                 neg_samples=self.neg_samples,
