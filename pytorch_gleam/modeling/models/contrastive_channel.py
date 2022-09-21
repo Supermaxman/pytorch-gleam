@@ -127,10 +127,14 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         self.log("train_accuracy", accuracy)
         self.log("train_pos_energy", pos_energy.mean())
         self.log("train_neg_energy", neg_energy.mean())
-        train_energy_margin = neg_energy - pos_energy
-        self.log("train_energy_margin", train_energy_margin.mean())
-        train_prob_ratio = torch.exp(train_energy_margin * seq_lens)
-        self.log("train_prob_ratio", train_prob_ratio.mean())
+        train_energy_token_margin = (neg_energy - pos_energy).mean()
+        self.log("train_energy_token_margin", train_energy_token_margin)
+        train_energy_margin = ((neg_energy - pos_energy) * seq_lens).mean()
+        self.log("train_energy_margin", train_energy_margin)
+        # estimate how close we are getting to the prob ratio we want to achieve
+        # average before exp to avoid outliers killing the estimate
+        train_prob_ratio = torch.exp(train_energy_margin)
+        self.log("train_prob_ratio", train_prob_ratio)
         result = {"loss": loss}
         return result
 
