@@ -74,18 +74,19 @@ class ContrastiveChannelBatchCollator(BatchCollator):
             max_length=self.max_seq_len,
             return_tensors="pt",
         )
-        for input_ids, target_ids in zip(model_inputs["input_ids"], model_targets["input_ids"]):
-            x = input_ids[input_ids != self.tokenizer.pad_token_id]
-            y = target_ids[target_ids != self.tokenizer.pad_token_id]
-            lines = [
-                f"Input Ids: {len(x)} Target Ids: {len(y)}",
-                self.tokenizer.decode(x),
-                "---------------------------",
-                self.tokenizer.decode(y),
-                "===========================",
-            ]
-            print("\n".join(lines))
-            input()
+        # debugging
+        # for input_ids, target_ids in zip(model_inputs["input_ids"], model_targets["input_ids"]):
+        #     x = input_ids[input_ids != self.tokenizer.pad_token_id]
+        #     y = target_ids[target_ids != self.tokenizer.pad_token_id]
+        #     lines = [
+        #         f"Input Ids: {len(x)} Target Ids: {len(y)}",
+        #         self.tokenizer.decode(x),
+        #         "---------------------------",
+        #         self.tokenizer.decode(y),
+        #         "===========================",
+        #     ]
+        #     print("\n".join(lines))
+        #     input()
 
         target_ids = model_targets["input_ids"]
         # replace padding token id's of the labels by -100 so it's ignored by the loss
