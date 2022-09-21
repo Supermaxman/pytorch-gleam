@@ -108,7 +108,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         loss, seq_len = self(batch)
         pos_energy, neg_energy, seq_lens = self.split_energy(loss, batch, seq_len)
         loss, accuracy = self.loss(pos_energy, neg_energy, seq_lens)
-        return loss, accuracy, pos_energy, neg_energy
+        return loss, accuracy, pos_energy, neg_energy, seq_lens
 
     def loss(self, pos_energy, neg_energy, seq_lens):
         # different contrastive losses with losses as input
@@ -117,7 +117,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         return loss, accuracy
 
     def training_step(self, batch, batch_idx):
-        loss, accuracy, pos_energy, neg_energy = self.triplet_step(batch)
+        loss, accuracy, pos_energy, neg_energy, seq_lens = self.triplet_step(batch)
         accuracy = accuracy.mean()
         loss = loss.mean()
         self.log("train_loss", loss)
@@ -126,7 +126,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         self.log("train_neg_energy", neg_energy.mean())
         train_energy_margin = neg_energy - pos_energy
         self.log("train_energy_margin", train_energy_margin.mean())
-        train_prob_ratio = torch.exp(train_energy_margin)
+        train_prob_ratio = torch.exp(-train_energy_margin * seq_lens)
         self.log("train_prob_ratio", train_prob_ratio.mean())
 
         result = {"loss": loss}
@@ -293,7 +293,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
         if dataloader_idx is None or dataloader_idx == 0:
-            loss, accuracy, pos_energy, neg_energy = self.triplet_step(batch)
+            loss, accuracy, _, _, _ = self.triplet_step(batch)
             result = {
                 "loss": loss,
                 "accuracy": accuracy,

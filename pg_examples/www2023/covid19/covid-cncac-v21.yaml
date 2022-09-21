@@ -9,7 +9,9 @@ model:
       class_path: pytorch_gleam.modeling.losses.MarginContrastiveLoss
       init_args:
         # ln(2) for pos/neg prob ratio of 2
-        margin: 0.7
+        # TODO now needs to consider seq_len:
+        # pos - neg + margin/seq_len > 0
+        margin: 10.0
     infer:
       class_path: pytorch_gleam.inference.MultiHopConsistencyScoring
       init_args:
