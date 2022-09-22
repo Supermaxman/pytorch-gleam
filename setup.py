@@ -105,6 +105,9 @@ setup(
             "ex-bqueue=pytorch_gleam.exqueue.exbqueue:main",
             "ex-start=pytorch_gleam.exqueue.exstart:main",
             "ex-stat=pytorch_gleam.exqueue.exstat:main",
+            # TODO kill default queue and kill running processes
+            # "ex-end=pytorch_gleam.exqueue.exend:main",
+            "ex-copy=pytorch_gleam.ex.copy:main",
             "ex-rm=pytorch_gleam.exqueue.exrm:main",
             "t-parse=pytorch_gleam.parse.tparse:main",
             "f-parse=pytorch_gleam.parse.fparse:main",
