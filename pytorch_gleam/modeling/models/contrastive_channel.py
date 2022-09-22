@@ -7,7 +7,6 @@ from torch.nn import CrossEntropyLoss
 from transformers import AutoModelForSeq2SeqLM
 
 from pytorch_gleam.inference import ConsistencyScoring
-from pytorch_gleam.modeling.losses import ContrastiveLoss
 from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.models.base_models import BasePreModel
 from pytorch_gleam.modeling.thresholds import MultiClassThresholdModule, ThresholdModule
@@ -18,7 +17,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
     def __init__(
         self,
         pre_model_name: str,
-        contrastive: ContrastiveLoss,
+        margin: float,
         infer: ConsistencyScoring,
         threshold: ThresholdModule,
         metric: Metric,
@@ -34,7 +33,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         super().__init__(pre_model_name, AutoModelForSeq2SeqLM, *args, **kwargs)
         self.num_relations = num_relations
         self.num_classes = num_classes
-        self.contrastive = contrastive
+        self.margin = margin
         self.infer = infer
         self.num_val_seeds = num_val_seeds
         self.threshold = threshold
@@ -88,11 +87,13 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # [bsize * num_seq]
         seq_lens = (target_ids != -100).float().sum(dim=-1)
         # [bsize * num_seq]
-        # loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
-        loss = loss.sum(dim=-1)
+        loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
+        # loss = loss.sum(dim=-1)
         # [bsize, num_seq]
         loss = loss.view(num_examples, num_sequences_per_example)
+        # [bsize, num_seq]
         seq_lens = seq_lens.view(num_examples, num_sequences_per_example)
+
         return loss, seq_lens
 
     @staticmethod
@@ -100,39 +101,30 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         pos_samples = batch["pos_samples"]
         pos_energy = loss[:, :pos_samples]
         # neg seq lens equal to pos seq lens since direction is same for both pos and neg
-        seq_lens = seq_lens[:, :pos_samples]
+        pos_seq_lens = seq_lens[:, :pos_samples]
         neg_energy = loss[:, pos_samples:]
-        return pos_energy, neg_energy, seq_lens
+        neg_seq_lens = seq_lens[:, pos_samples:]
+        return pos_energy, neg_energy, pos_seq_lens, neg_seq_lens
 
     def triplet_step(self, batch):
         loss, seq_len = self(batch)
-        pos_energy, neg_energy, seq_lens = self.split_energy(loss, batch, seq_len)
-        loss, accuracy = self.loss(pos_energy, neg_energy, seq_lens)
-        return loss, accuracy, pos_energy, neg_energy, seq_lens
-
-    def loss(self, pos_energy, neg_energy, seq_lens):
-        # different contrastive losses with losses as input
-        # loss = self.contrastive(pos_energy, neg_energy, seq_lens)
-        loss = self.contrastive(pos_energy, neg_energy)
+        pos_energy, neg_energy, pos_seq_lens, neg_seq_lens = self.split_energy(loss, batch, seq_len)
+        loss = loss = torch.relu(pos_energy - neg_energy + self.margin)
         accuracy = (pos_energy < neg_energy).float().mean(dim=-1)
-        return loss, accuracy
+        return loss, accuracy, pos_energy, neg_energy, pos_seq_lens, neg_seq_lens
 
     def training_step(self, batch, batch_idx):
-        loss, accuracy, pos_energy, neg_energy, seq_lens = self.triplet_step(batch)
+        loss, accuracy, pos_energy, neg_energy, _, _ = self.triplet_step(batch)
         accuracy = accuracy.mean()
         loss = loss.mean()
         self.log("train_loss", loss)
         self.log("train_accuracy", accuracy)
         self.log("train_pos_energy", pos_energy.mean())
         self.log("train_neg_energy", neg_energy.mean())
-        train_energy_token_margin = (neg_energy - pos_energy).mean()
-        self.log("train_energy_token_margin", train_energy_token_margin)
         train_energy_margin = ((neg_energy - pos_energy)).mean()
         self.log("train_energy_margin", train_energy_margin)
         # estimate how close we are getting to the prob ratio we want to achieve
         # average before exp to avoid outliers killing the estimate
-        train_prob_ratio = torch.exp(train_energy_margin)
-        self.log("train_prob_ratio", train_prob_ratio)
         result = {"loss": loss}
         return result
 
@@ -297,7 +289,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
         if dataloader_idx is None or dataloader_idx == 0:
-            loss, accuracy, _, _, _ = self.triplet_step(batch)
+            loss, accuracy, _, _, _, _ = self.triplet_step(batch)
             result = {
                 "loss": loss,
                 "accuracy": accuracy,
