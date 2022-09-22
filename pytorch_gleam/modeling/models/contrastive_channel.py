@@ -107,7 +107,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
     def triplet_step(self, batch):
         loss, seq_len = self(batch)
         pos_energy, neg_energy, seq_lens = self.split_energy(loss, batch, seq_len)
-        loss, accuracy = self.loss(pos_energy, neg_energy)
+        loss, accuracy = self.loss(pos_energy, neg_energy, seq_lens)
         # minimize pos_energy unconditionally
         # then use contrastive loss to maximize neg_energy up to threshold
         loss = loss + pos_energy
@@ -115,7 +115,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
     def loss(self, pos_energy, neg_energy, seq_lens):
         # different contrastive losses with losses as input
-        loss = self.contrastive(pos_energy, neg_energy, seq_lens)
+        # loss = self.contrastive(pos_energy, neg_energy, seq_lens)
+        loss = self.contrastive(pos_energy, neg_energy)
         accuracy = (pos_energy < neg_energy).float().mean(dim=-1)
         return loss, accuracy
 
