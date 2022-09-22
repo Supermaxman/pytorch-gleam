@@ -88,8 +88,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # [bsize * num_seq]
         seq_lens = (target_ids != -100).float().sum(dim=-1)
         # [bsize * num_seq]
-        loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
-        # loss = loss.sum(dim=-1)
+        # loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
+        loss = loss.sum(dim=-1)
         # [bsize, num_seq]
         loss = loss.view(num_examples, num_sequences_per_example)
         seq_lens = seq_lens.view(num_examples, num_sequences_per_example)
@@ -107,7 +107,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
     def triplet_step(self, batch):
         loss, seq_len = self(batch)
         pos_energy, neg_energy, seq_lens = self.split_energy(loss, batch, seq_len)
-        loss, accuracy = self.loss(pos_energy, neg_energy, seq_lens)
+        loss, accuracy = self.loss(pos_energy, neg_energy)
         # minimize pos_energy unconditionally
         # then use contrastive loss to maximize neg_energy up to threshold
         loss = loss + pos_energy
@@ -129,7 +129,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         self.log("train_neg_energy", neg_energy.mean())
         train_energy_token_margin = (neg_energy - pos_energy).mean()
         self.log("train_energy_token_margin", train_energy_token_margin)
-        train_energy_margin = ((neg_energy - pos_energy) * seq_lens).mean()
+        train_energy_margin = ((neg_energy - pos_energy)).mean()
         self.log("train_energy_margin", train_energy_margin)
         # estimate how close we are getting to the prob ratio we want to achieve
         # average before exp to avoid outliers killing the estimate
