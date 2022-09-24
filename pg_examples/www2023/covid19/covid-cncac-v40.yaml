@@ -34,7 +34,7 @@ model:
 
 trainer:
   max_epochs: 100
-  accumulate_grad_batches: 16
+  accumulate_grad_batches: 32
   check_val_every_n_epoch: 4
   deterministic: true
   num_sanity_val_steps: 0
@@ -54,10 +54,10 @@ trainer:
 data:
   class_path: pytorch_gleam.data.datasets.ContrastiveChannelMisinfoStanceDataModule
   init_args:
-    batch_size: 2
+    batch_size: 1
     pos_samples: 1
     neg_samples: 1
-    max_seq_len: 128
+    max_seq_len: 96
     num_workers: 8
     tokenizer_name: t5-large
     misinfo_path: /users/max/data/corpora/vaccine-lies/covid19/taxonomy/misinfo.json
