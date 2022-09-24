@@ -57,22 +57,24 @@ class ContrastiveChannelBatchCollator(BatchCollator):
                 if s_direction == 1:
                     given_text = s_text
                     target_text = ex_text
-                texts.append(f"mnli hypothesis: {m_text} premise: {given_text} relation: {s_rel_text}")
+                texts.append(f"mnli hypothesis: {m_text} relation: {s_rel_text} premise: {given_text}")
                 text_targets.append(target_text)
 
         model_inputs = self.tokenizer(
             text=texts,
             padding="max_length" if self.use_tpus else "longest",
             # can't afford to truncate here
-            truncation=False,
-            # max_length=self.max_seq_len,
+            truncation="longest_first",
+            # m_text and given text get 2/3 seq len
+            max_length=(2 * self.max_seq_len) // 3,
             return_tensors="pt",
         )
         model_targets = self.tokenizer(
             text=text_targets,
             padding="max_length" if self.use_tpus else "longest",
             truncation="longest_first",
-            max_length=self.max_seq_len,
+            # target text gets 1/3 seq len
+            max_length=self.max_seq_len // 3,
             return_tensors="pt",
         )
         # debugging
