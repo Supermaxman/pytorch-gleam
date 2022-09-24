@@ -5,10 +5,8 @@ import torch
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.trainer.states import TrainerFn
 from pytorch_lightning.utilities import rank_zero_only
-from pytorch_lightning.utilities.cli import CALLBACK_REGISTRY
 
 
-@CALLBACK_REGISTRY
 class FitCheckpointCallback(Callback):
     def __init__(self):
         super().__init__()

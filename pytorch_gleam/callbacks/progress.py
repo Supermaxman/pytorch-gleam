@@ -1,10 +1,8 @@
 from pytorch_lightning.callbacks.progress import RichProgressBar
 from pytorch_lightning.callbacks.progress.rich_progress import CustomProgress
-from pytorch_lightning.utilities.cli import CALLBACK_REGISTRY
 from rich.console import Console
 
 
-@CALLBACK_REGISTRY
 class TPURichProgressBar(RichProgressBar):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
