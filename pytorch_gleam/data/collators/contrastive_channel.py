@@ -63,8 +63,9 @@ class ContrastiveChannelBatchCollator(BatchCollator):
         model_inputs = self.tokenizer(
             text=texts,
             padding="max_length" if self.use_tpus else "longest",
-            truncation="longest_first",
-            max_length=self.max_seq_len,
+            # can't afford to truncate here
+            truncation=False,
+            # max_length=self.max_seq_len,
             return_tensors="pt",
         )
         model_targets = self.tokenizer(
