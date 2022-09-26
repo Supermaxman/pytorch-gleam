@@ -41,7 +41,7 @@ trainer:
   num_sanity_val_steps: 0
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/cvl-cncac/cncac-v44
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/cvl-cncac/cncac-v50
   enable_checkpointing: false
   callbacks:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
