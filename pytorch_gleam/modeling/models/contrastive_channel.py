@@ -109,7 +109,10 @@ class ContrastiveChannelLanguageModel(BasePreModel):
     def triplet_step(self, batch):
         loss, seq_len = self(batch)
         pos_energy, neg_energy, pos_seq_lens, neg_seq_lens = self.split_energy(loss, batch, seq_len)
-        loss = loss = torch.relu(pos_energy - neg_energy + self.margin)
+        if self.margin != 0:
+            loss = torch.relu(pos_energy - neg_energy + self.margin)
+        else:
+            loss = pos_energy - neg_energy
         accuracy = (pos_energy < neg_energy).float().mean(dim=-1)
         return loss, accuracy, pos_energy, neg_energy, pos_seq_lens, neg_seq_lens
 
