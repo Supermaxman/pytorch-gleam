@@ -63,4 +63,4 @@ data:
     misinfo_path: /users/max/data/corpora/vaccine-lies/covid19/taxonomy/misinfo.json
     train_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/train.jsonl
     val_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/dev.jsonl
-    # test_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/test.jsonl
+    test_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/test.jsonl
