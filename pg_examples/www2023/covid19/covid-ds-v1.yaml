@@ -5,7 +5,7 @@ model:
     learning_rate: 5e-4
     pre_model_name: bert-base-uncased
     label_map:
-      No Stance: 0
+      "No Stance": 0
       Accept: 1
       Reject: 2
     threshold:
@@ -41,7 +41,7 @@ data:
     max_seq_len: 128
     label_name: misinfo
     label_map:
-      No Stance: 0
+      "No Stance": 0
       Accept: 1
       Reject: 2
     tokenizer_name: bert-base-uncased
