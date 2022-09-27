@@ -1,0 +1,44 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.DirectStanceLanguageModel
+  init_args:
+    learning_rate: 5e-4
+    pre_model_name: t5-base
+    threshold:
+      class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
+    metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: macro
+        num_classes: 3
+
+trainer:
+  max_epochs: 10
+  accumulate_grad_batches: 4
+  check_val_every_n_epoch: 1
+  deterministic: true
+  num_sanity_val_steps: 0
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/hvl-cncac/ds-t5-v1
+  enable_checkpointing: false
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    # - class_path: pytorch_gleam.callbacks.JsonlWriter
+data:
+  class_path: pytorch_gleam.data.datasets.DirectMisinfoStanceDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 256
+    num_workers: 8
+    tokenizer_name: t5-base
+    misinfo_path: /users/max/data/corpora/vaccine-lies/hpv/taxonomy/misinfo.json
+    train_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/train.jsonl
+    val_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/dev.jsonl
+    test_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/test.jsonl
