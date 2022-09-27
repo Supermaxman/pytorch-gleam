@@ -142,7 +142,7 @@ class KbiLanguageModel(BaseLanguageModel):
                 if u_id in seed_labels and v_id in seed_labels
             ]
         seed_examples = {ex_id: label for (ex_id, label) in seed_examples}
-        if len(adj_list) == 0:
+        if len(adj_list) == 0 or len(seed_examples) == 0:
             node_scores = np.zeros([len(seed_labels), 3], dtype=np.float32)
             node_idx_map = {node: idx for (idx, node) in enumerate(seed_labels)}
         else:
@@ -154,6 +154,10 @@ class KbiLanguageModel(BaseLanguageModel):
         scores = []
         # make sure we pack example scores in proper order
         for ex_id in eval_labels:
+            # only happens if we have no seed examples
+            if ex_id not in node_idx_map:
+                scores.append(np.zeros([3], dtype=torch.float32))
+                continue
             ex_idx = node_idx_map[ex_id]
             ex_scores = torch.tensor(node_scores[ex_idx], dtype=torch.float32)
             scores.append(ex_scores)

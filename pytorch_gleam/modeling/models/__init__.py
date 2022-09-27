@@ -20,6 +20,7 @@ from pytorch_gleam.modeling.models.multi_class_frame import (
 from pytorch_gleam.modeling.models.multi_label import MultiLabelLanguageModel
 from pytorch_gleam.modeling.models.nli_misinfo import NliMisinfoLanguageModel
 from pytorch_gleam.modeling.models.nli_text import NliTextLanguageModel
+from pytorch_gleam.modeling.models.noisy_channel import NoisyChannelLanguageModel
 from pytorch_gleam.modeling.models.qa_frame import MultiTurnQAForConditionalGeneration
 from pytorch_gleam.modeling.models.rerank import ReRankLanguageModel
 from pytorch_gleam.modeling.models.unified_qa import UnifiedQAForConditionalGeneration
