@@ -24,8 +24,8 @@ class NoisyChannelBatchCollator(BatchCollator):
         for ex in examples:
             ids.append(ex["ex_id"])
             m_ids.append(ex["m_id"])
-            labels.append(ex["labels"])
-            stages.append(ex["stages"])
+            labels.append(ex["m_label"])
+            stages.append(ex["stage"])
             m_label_idxs.append(ex["m_label_idx"])
             ex_text = ex["ex_text"]
             m_text = ex["m_text"]
