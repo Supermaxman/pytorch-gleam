@@ -92,7 +92,7 @@ class DirectACSLanguageModel(BasePreModel):
         # [bsize, num_seq]
         seq_lens = seq_lens.view(num_examples, num_sequences_per_example)
 
-        return loss, seq_lens
+        return loss
 
     def training_step(self, batch, batch_idx):
         loss = self(batch)
