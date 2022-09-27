@@ -63,6 +63,7 @@ class MultiClassFrameDataset(Dataset):
                 frame = self.frames[f_id]
                 frame_text = frame["text"]
                 ex_label = 0
+                f_label = f_label.replace(" ", "_")
                 if f_label in self.label_map:
                     ex_label = self.label_map[f_label]
                 elif self.skip_unknown_labels:

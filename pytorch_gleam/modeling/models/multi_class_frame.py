@@ -142,6 +142,9 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
             results[f"{stage}_{label_name}_f1"] = c_f1
             results[f"{stage}_{label_name}_p"] = c_p
             results[f"{stage}_{label_name}_r"] = c_r
+            results[f"{stage}_{cls_index}_f1"] = c_f1
+            results[f"{stage}_{cls_index}_p"] = c_p
+            results[f"{stage}_{cls_index}_r"] = c_r
 
         return results, labels, preds, t_ids
 
