@@ -112,17 +112,18 @@ class KbiLanguageModel(BaseLanguageModel):
     def setup(self, stage: Optional[str] = None):
         super().setup(stage)
         if stage == "fit":
-            data_loader = self.train_dataloader()
+            data_loader = self.trainer.datamodule.train_dataloader()
         elif stage == "test":
-            data_loader = self.test_dataloader()[0]
+            data_loader = self.trainer.datamodule.test_dataloader()[0]
         elif stage == "val":
-            data_loader = self.val_dataloader()[0]
+            # data_loader = self.trainer.datamodule.val_dataloader()[0]
+            data_loader = self.trainer.datamodule.val_dataloader()
         elif stage == "predict":
-            data_loader = self.predict_dataloader()
+            data_loader = self.trainer.datamodule.predict_dataloader()
         else:
             raise ValueError(f"Unknown stage: {stage}")
         misinfo = data_loader.dataset.misinfo
-        for m_id, m in misinfo.items():
+        for m_id, _ in misinfo.items():
             if m_id not in self.threshold:
                 self.threshold[m_id] = MultiClassThresholdModule()
 
