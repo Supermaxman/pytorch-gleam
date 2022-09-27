@@ -17,7 +17,6 @@ class DirectACSLanguageModel(BasePreModel):
     def __init__(
         self,
         pre_model_name: str,
-        margin: float,
         infer: ConsistencyScoring,
         threshold: ThresholdModule,
         metric: Metric,
@@ -33,7 +32,6 @@ class DirectACSLanguageModel(BasePreModel):
         super().__init__(pre_model_name, AutoModelForSeq2SeqLM, *args, **kwargs)
         self.num_relations = num_relations
         self.num_classes = num_classes
-        self.margin = margin
         self.infer = infer
         self.num_val_seeds = num_val_seeds
         self.threshold = threshold
