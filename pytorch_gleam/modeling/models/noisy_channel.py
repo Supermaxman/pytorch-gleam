@@ -136,7 +136,7 @@ class NoisyChannelLanguageModel(BasePreModel):
             "ids": batch["ids"],
             "m_ids": batch["m_ids"],
             "labels": batch["labels"],
-            "m_label_idx": batch["m_label_idx"],
+            "m_label_idxs": batch["m_label_idxs"],
             "stages": batch["stages"],
             "scores": -loss,
         }

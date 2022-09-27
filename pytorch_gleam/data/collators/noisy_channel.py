@@ -77,7 +77,7 @@ class NoisyChannelBatchCollator(BatchCollator):
             "input_ids": model_inputs["input_ids"],
             "attention_mask": model_inputs["attention_mask"],
             "target_ids": target_ids,
-            "label_idxs": torch.tensor(m_label_idxs, dtype=torch.long),
+            "m_label_idxs": torch.tensor(m_label_idxs, dtype=torch.long),
             "labels": torch.tensor(labels, dtype=torch.long),
             "stages": torch.tensor(stages, dtype=torch.long),
         }
