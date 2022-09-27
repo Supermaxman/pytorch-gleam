@@ -1,13 +1,13 @@
 import torch
 from transformers import AutoTokenizer
 
-from pytorch_gleam.data.collators import NoisyChannelBatchCollator
+from pytorch_gleam.data.collators import DirectStanceBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.datasets.misinfo_stance import MisinfoStanceDataset
 from pytorch_gleam.data.twitter import TweetPreprocessConfig
 
 
-class NoisyChannelMisinfoStanceDataset(MisinfoStanceDataset):
+class DirectMisinfoStanceDataset(MisinfoStanceDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.label_text_map = {0: "No Stance", 1: "Accept", 2: "Reject"}
@@ -23,7 +23,7 @@ class NoisyChannelMisinfoStanceDataset(MisinfoStanceDataset):
         return ex
 
 
-class NoisyChannelInferMisinfoStanceDataset(NoisyChannelMisinfoStanceDataset):
+class DirectInferMisinfoStanceDataset(DirectMisinfoStanceDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.base_examples = self.examples
@@ -36,7 +36,7 @@ class NoisyChannelInferMisinfoStanceDataset(NoisyChannelMisinfoStanceDataset):
                 self.examples.append(new_ex)
 
 
-class NoisyChannelMisinfoStanceDataModule(BaseDataModule):
+class DirectMisinfoStanceDataModule(BaseDataModule):
     def __init__(
         self, misinfo_path: str, tokenizer_name: str, preprocess_config: TweetPreprocessConfig = None, *args, **kwargs
     ):
@@ -48,32 +48,32 @@ class NoisyChannelMisinfoStanceDataModule(BaseDataModule):
         self.misinfo_path = misinfo_path
 
         if self.train_path is not None:
-            self.train_dataset = NoisyChannelMisinfoStanceDataset(
+            self.train_dataset = DirectMisinfoStanceDataset(
                 data_path=self.train_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
             )
         if self.val_path is not None:
-            self.val_dataset = NoisyChannelInferMisinfoStanceDataset(
+            self.val_dataset = DirectInferMisinfoStanceDataset(
                 data_path=self.val_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
             )
         if self.test_path is not None:
-            self.test_dataset = NoisyChannelInferMisinfoStanceDataset(
+            self.test_dataset = DirectInferMisinfoStanceDataset(
                 data_path=self.test_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
             )
         if self.predict_path is not None:
-            self.predict_dataset = NoisyChannelInferMisinfoStanceDataset(
+            self.predict_dataset = DirectInferMisinfoStanceDataset(
                 data_path=self.predict_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
             )
 
     def create_collator(self):
-        return NoisyChannelBatchCollator(
+        return DirectStanceBatchCollator(
             tokenizer=self.tokenizer,
             max_seq_len=self.max_seq_len,
             use_tpus=self.use_tpus,
