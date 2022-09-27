@@ -6,6 +6,7 @@ import torch
 from pytorch_gleam.data.collators import KbiBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.datasets.misinfo_stance import MisinfoStanceDataset
+from pytorch_gleam.data.twitter import TweetPreprocessConfig
 
 
 class KbiMisinfoStanceDataset(MisinfoStanceDataset):
@@ -271,10 +272,13 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
         pos_samples: int = 1,
         neg_samples: int = 1,
         num_relations: int = 2,
+        preprocess_config: TweetPreprocessConfig = None,
         *args,
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+        if preprocess_config is None:
+            preprocess_config = TweetPreprocessConfig()
 
         self.train_misinfo_path = train_misinfo_path
         self.val_misinfo_path = val_misinfo_path
@@ -291,6 +295,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.train_path,
                 misinfo_path=self.train_misinfo_path,
+                preprocess_config=preprocess_config,
             )
         if self.val_path is not None and self.val_misinfo_path is not None:
             val_triplet_dataset = KbiMisinfoStanceDataset(
@@ -299,6 +304,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.val_path,
                 misinfo_path=self.val_misinfo_path,
+                preprocess_config=preprocess_config,
             )
             val_infer_dataset = KbiMisinfoInferStanceDataset(
                 pos_samples=1,
@@ -306,6 +312,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.val_path,
                 misinfo_path=self.val_misinfo_path,
+                preprocess_config=preprocess_config,
             )
 
             self.val_dataset = [val_triplet_dataset, val_infer_dataset]
@@ -316,6 +323,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=self.test_path,
                 misinfo_path=self.test_misinfo_path,
+                preprocess_config=preprocess_config,
             )
             test_infer_dataset = KbiMisinfoInferStanceDataset(
                 pos_samples=1,
@@ -323,6 +331,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=[self.val_path, self.test_path],
                 misinfo_path=self.test_misinfo_path,
+                preprocess_config=preprocess_config,
             )
 
             self.test_dataset = [test_triplet_dataset, test_infer_dataset]
@@ -333,6 +342,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 tokenizer=self.tokenizer,
                 data_path=[self.val_path, self.predict_path],
                 misinfo_path=self.predict_misinfo_path,
+                preprocess_config=preprocess_config,
             )
 
     def create_collator(self):
