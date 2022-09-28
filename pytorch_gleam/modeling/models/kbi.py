@@ -157,7 +157,7 @@ class KbiLanguageModel(BaseLanguageModel):
         for ex_id in eval_labels:
             # only happens if we have no seed examples
             if ex_id not in node_idx_map:
-                scores.append(np.zeros([3], dtype=torch.float32))
+                scores.append(torch.zeros([3], dtype=torch.float32))
                 continue
             ex_idx = node_idx_map[ex_id]
             ex_scores = torch.tensor(node_scores[ex_idx], dtype=torch.float32)
