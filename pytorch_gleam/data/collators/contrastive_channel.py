@@ -119,6 +119,8 @@ class ContrastiveChannelBatchCollator(BatchCollator):
 class ContrastiveCausalChannelBatchCollator(ContrastiveChannelBatchCollator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.tokenizer.pad_token_id is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
 
     def __call__(self, examples):
         pos_samples = len(examples[0]["p_samples"])
@@ -186,7 +188,7 @@ class ContrastiveCausalChannelBatchCollator(ContrastiveChannelBatchCollator):
             return_tensors="pt",
         )
         input_ids = model_inputs["input_ids"]
-
+        attention_mask = model_inputs["attention_mask"]
         # debugging
         # for input_ids, target_ids in zip(model_inputs["input_ids"], model_targets["input_ids"]):
         #     x = input_ids[input_ids != self.tokenizer.pad_token_id]
@@ -204,7 +206,7 @@ class ContrastiveCausalChannelBatchCollator(ContrastiveChannelBatchCollator):
         target_ids = torch.clone(input_ids)
         # replace padding token id's of the labels by -100 so it's ignored by the loss
         # https://huggingface.co/docs/transformers/v4.22.1/en/model_doc/t5#overview
-        target_ids[target_ids == self.tokenizer.pad_token_id] = -100
+        target_ids[attention_mask == 0] = -100
         for ex_idx, target_idx in enumerate(target_indices):
             target_ids[ex_idx, :target_idx] = -100
 
@@ -218,7 +220,7 @@ class ContrastiveCausalChannelBatchCollator(ContrastiveChannelBatchCollator):
             "num_sequences_per_example": num_sequences_per_example,
             "num_sequences": num_sequences,
             "input_ids": input_ids,
-            "attention_mask": model_inputs["attention_mask"],
+            "attention_mask": attention_mask,
             "target_ids": target_ids,
             "relations": torch.tensor(relations, dtype=torch.long),
             "directions": torch.tensor(directions, dtype=torch.long),
