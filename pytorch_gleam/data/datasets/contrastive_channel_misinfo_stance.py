@@ -4,7 +4,7 @@ from collections import defaultdict
 import torch
 from transformers import AutoTokenizer
 
-from pytorch_gleam.data.collators import ContrastiveChannelBatchCollator
+from pytorch_gleam.data.collators import ContrastiveCausalChannelBatchCollator, ContrastiveChannelBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
 from pytorch_gleam.data.datasets.misinfo_stance import MisinfoStanceDataset
 from pytorch_gleam.data.twitter import TweetPreprocessConfig
@@ -323,6 +323,18 @@ class ContrastiveChannelMisinfoStanceDataModule(BaseDataModule):
 
     def create_collator(self):
         return ContrastiveChannelBatchCollator(
+            tokenizer=self.tokenizer,
+            max_seq_len=self.max_seq_len,
+            use_tpus=self.use_tpus,
+        )
+
+
+class ContrastiveCausalChannelMisinfoStanceDataModule(ContrastiveChannelMisinfoStanceDataModule):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def create_collator(self):
+        return ContrastiveCausalChannelBatchCollator(
             tokenizer=self.tokenizer,
             max_seq_len=self.max_seq_len,
             use_tpus=self.use_tpus,

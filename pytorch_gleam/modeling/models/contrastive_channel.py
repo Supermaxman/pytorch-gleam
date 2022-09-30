@@ -1,10 +1,10 @@
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, Type
 
 import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
-from transformers import AutoModelForSeq2SeqLM
+from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM
 
 from pytorch_gleam.inference import ConsistencyScoring
 from pytorch_gleam.modeling.metrics import Metric
@@ -27,10 +27,11 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         num_val_seeds: int = 1,
         num_threshold_steps: int = 100,
         update_threshold: bool = True,
+        pre_model_type: Type = AutoModelForSeq2SeqLM,
         *args,
         **kwargs,
     ):
-        super().__init__(pre_model_name, AutoModelForSeq2SeqLM, *args, **kwargs)
+        super().__init__(pre_model_name, pre_model_type, *args, **kwargs)
         self.num_relations = num_relations
         self.num_classes = num_classes
         self.margin = margin
@@ -53,8 +54,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         elif stage == "test":
             data_loader = self.trainer.datamodule.test_dataloader()[0]
         elif stage == "val":
-            # data_loader = self.trainer.datamodule.val_dataloader()[0]
-            data_loader = self.trainer.datamodule.val_dataloader()
+            data_loader = self.trainer.datamodule.val_dataloader()[0]
         elif stage == "predict":
             data_loader = self.trainer.datamodule.predict_dataloader()
         else:
@@ -386,3 +386,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
                 m_labels[ex_m_id][ex_p_stage][ex_p_id] = ex_p_label.item()
 
         return m_adj_list, m_labels
+
+
+# noinspection PyAbstractClass
+class ContrastiveCausalChannelLanguageModel(ContrastiveChannelLanguageModel):
+    def __init__(self, pre_model_type: Type = AutoModelForCausalLM, *args, **kwargs):
+        super().__init__(*args, pre_model_type=pre_model_type, **kwargs)

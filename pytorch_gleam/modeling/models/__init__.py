@@ -5,7 +5,10 @@ from pytorch_gleam.modeling.models.base_models import (
     BasePreModel,
 )
 from pytorch_gleam.modeling.models.bert_pretrain import BertPreTrainLanguageModel
-from pytorch_gleam.modeling.models.contrastive_channel import ContrastiveChannelLanguageModel
+from pytorch_gleam.modeling.models.contrastive_channel import (
+    ContrastiveCausalChannelLanguageModel,
+    ContrastiveChannelLanguageModel,
+)
 from pytorch_gleam.modeling.models.contrastive_frame import (
     ContrastiveEmbFrameLanguageModel,
     ContrastiveFrameLanguageModel,
