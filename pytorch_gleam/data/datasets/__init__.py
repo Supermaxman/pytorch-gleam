@@ -1,6 +1,9 @@
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule, BaseIterableDataset
 from pytorch_gleam.data.datasets.bert_pretrain import BertPreDataModule, BertPreTrainDataConfig
-from pytorch_gleam.data.datasets.contrastive_channel_misinfo_stance import ContrastiveChannelMisinfoStanceDataModule
+from pytorch_gleam.data.datasets.contrastive_channel_misinfo_stance import (
+    ContrastiveCausalChannelMisinfoStanceDataModule,
+    ContrastiveChannelMisinfoStanceDataModule,
+)
 from pytorch_gleam.data.datasets.contrastive_frame import ContrastiveEmbFrameDataModule, ContrastiveFrameDataModule
 from pytorch_gleam.data.datasets.direct_acs_misinfo_stance import DirectACSMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.direct_misinfo_stance import DirectMisinfoStanceDataModule
