@@ -17,7 +17,7 @@ model:
     infer:
       class_path: pytorch_gleam.inference.MultiHopConsistencyScoring
       init_args:
-        num_steps: 0
+        num_steps: 32
         num_classes: 3
     threshold:
       class_path: pytorch_gleam.modeling.thresholds.MultiClassMultiLabelThresholdModule
@@ -40,7 +40,7 @@ trainer:
   num_sanity_val_steps: 0
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/hvl-cncac/cncac-v3
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/cvl-cncac/cncac-v51
   enable_checkpointing: false
   callbacks:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
@@ -60,7 +60,7 @@ data:
     max_seq_len: 384
     num_workers: 8
     tokenizer_name: gpt2
-    misinfo_path: /users/max/data/corpora/vaccine-lies/hpv/taxonomy/misinfo.json
-    train_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/train.jsonl
-    val_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/dev.jsonl
-    test_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/test.jsonl
+    misinfo_path: /users/max/data/corpora/vaccine-lies/covid19/taxonomy/misinfo.json
+    train_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/train.jsonl
+    val_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/dev.jsonl
+    test_path: /users/max/data/corpora/vaccine-lies/covid19/annotations-and-data/test.jsonl
