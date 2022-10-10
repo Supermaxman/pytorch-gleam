@@ -55,10 +55,26 @@ def invert_includes(includes):
 
 def parse_tweet(tweet, inv_includes, inv_errors):
     author_id = tweet["author_id"]
+
+    users = {}
+    if "users" in inv_includes:
+        users = inv_includes["users"]
+    tweets = {}
+    if "tweets" in inv_includes:
+        tweets = inv_includes["tweets"]
+    # media key => media dict
+    media = {}
+    if "media" in inv_includes:
+        media = inv_includes["media"]
+    # id => place dict
+    places = {}
+    if "places" in inv_includes:
+        places = inv_includes["places"]
+    # get media from inv_includes
     if author_id in inv_errors:
         author = inv_errors[author_id]
     else:
-        author = inv_includes["users"][author_id]
+        author = users[author_id]
     tweet["author"] = author
     if "entities" not in tweet:
         tweet["entities"] = {}
@@ -69,8 +85,8 @@ def parse_tweet(tweet, inv_includes, inv_errors):
                     e_username = e["username"]
                     if e_username in inv_errors:
                         e_user = inv_errors[e_username]
-                    elif e_username in inv_includes["users"]:
-                        e_user = inv_includes["users"][e_username]
+                    elif e_username in users:
+                        e_user = users[e_username]
                     else:
                         e_user = None
                     e["user"] = e_user
@@ -81,13 +97,28 @@ def parse_tweet(tweet, inv_includes, inv_errors):
         r_id = ref_tweet["id"]
         if r_id in inv_errors:
             r_tweet = inv_errors[r_id]
-        elif r_id in inv_includes["tweets"]:
-            r_tweet = inv_includes["tweets"][r_id]
+        elif r_id in tweets:
+            r_tweet = tweets[r_id]
         else:
             r_tweet = None
         ref_tweet["data"] = r_tweet
         if ref_tweet["type"] == "retweeted":
             is_retweet = True
+    if "attachments" not in tweet:
+        tweet["attachments"] = {}
+    tweet["media"] = {}
+    for a_type, a_vals in tweet["attachments"].items():
+        if a_type == "media_keys":
+            for m_key in a_vals:
+                if m_key in media:
+                    tweet["media"][m_key] = media[m_key]
+    if "geo" not in tweet:
+        tweet["geo"] = {}
+    tweet["places"] = {}
+    for g_type, g_id in tweet["geo"].items():
+        if g_type == "place_id":
+            if g_id in places:
+                tweet["places"][g_id] = places[g_id]
     return tweet, is_retweet
 
 
