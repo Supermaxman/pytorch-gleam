@@ -67,7 +67,8 @@ class JsonlIndex(ContextDecorator):
     def create(path: str, index_path: str = None):
         index = {}
         with open(path, "r") as f:
-            for line in f:
+            # must be done for f.tell to work inside for loop over lines
+            while line := f.readline():
                 line = line.strip()
                 if line:
                     ex = json.loads(line)
