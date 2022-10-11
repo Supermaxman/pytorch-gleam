@@ -1,10 +1,16 @@
 import os
 from contextlib import ContextDecorator
+from typing import Any, BinaryIO, Dict, Iterator, List, Union
 
 import ujson as json
 
 
 class JsonlIndex(ContextDecorator):
+    index: Dict[str, int]
+    f: Union[None, BinaryIO]
+    path: str
+    index_path: str
+
     def __init__(self, path: str, index_path: str = None):
         self.path = path
         if index_path is None:
@@ -27,20 +33,32 @@ class JsonlIndex(ContextDecorator):
         self.f.close()
         return False
 
-    def get(self, ex_id):
+    def get(self, ex_id: Union[str, List[str]]) -> Union[Dict[str, Any], Iterator[Dict[str, Any]]]:
+        if isinstance(ex_id, str):
+            return self._get_one(ex_id)
+        else:
+            # seek in order from lowest to highest byte position
+            sorted_ex_ids = sorted(self.index[x_id] for x_id in ex_id)
+            for ex_pos in sorted_ex_ids:
+                yield self._get_pos(ex_pos)
+
+    def _get_one(self, ex_id) -> Dict[str, Any]:
         position = self.index[ex_id]
-        self.f.seek(position)
+        return self._get_pos(position)
+
+    def _get_pos(self, ex_position: int) -> Dict[str, Any]:
+        self.f.seek(ex_position)
         line = self.f.readline()
         ex = json.loads(line)
         return ex
 
-    def __getitem__(self, ex_id):
+    def __getitem__(self, ex_id: Union[str, List[str]]):
         return self.get(ex_id)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.index)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Dict[str, Any]]:
         self.f.seek(0)
         while line := self.f.readline():
             line = line.strip()
