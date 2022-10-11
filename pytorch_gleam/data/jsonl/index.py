@@ -20,7 +20,7 @@ class JsonlIndex(ContextDecorator):
         self.f = None
 
     def __enter__(self):
-        self.f = open(self.path, "r")
+        self.f = open(self.path, "rb")
         return self
 
     def __exit__(self, *exc):
@@ -42,7 +42,7 @@ class JsonlIndex(ContextDecorator):
 
     def __iter__(self):
         self.f.seek(0)
-        for line in self.f:
+        while line := self.f.readline():
             line = line.strip()
             if line:
                 ex = json.loads(line)
@@ -51,7 +51,7 @@ class JsonlIndex(ContextDecorator):
     @staticmethod
     def write(path, examples, index_path=None):
         index = {}
-        with open(path, "w") as f:
+        with open(path, "wb") as f:
             for ex in examples:
                 ex_id = ex["id"]
                 ex_position = f.tell()
@@ -66,7 +66,7 @@ class JsonlIndex(ContextDecorator):
     @staticmethod
     def create(path: str, index_path: str = None):
         index = {}
-        with open(path, "r") as f:
+        with open(path, "rb") as f:
             # must be done for f.tell to work inside for loop over lines
             while line := f.readline():
                 line = line.strip()
