@@ -33,14 +33,16 @@ class JsonlIndex(ContextDecorator):
         self.f.close()
         return False
 
-    def get(self, ex_id: Union[str, List[str]]) -> Union[Dict[str, Any], Iterator[Dict[str, Any]]]:
+    def get(self, ex_id: Union[str, List[str]]) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         if isinstance(ex_id, str):
             return self._get_one(ex_id)
         else:
             # seek in order from lowest to highest byte position
             sorted_ex_ids = sorted(self.index[x_id] for x_id in ex_id)
-            for ex_pos in sorted_ex_ids:
-                yield self._get_pos(ex_pos)
+            sorted_exs = (self._get_pos(pos) for pos in sorted_ex_ids)
+            # reorder to follow provided ex id order
+            ex_dict = {ex["id"]: ex for ex in sorted_exs}
+            return [ex_dict[x_id] for x_id in ex_id]
 
     def _get_one(self, ex_id) -> Dict[str, Any]:
         position = self.index[ex_id]
@@ -52,7 +54,7 @@ class JsonlIndex(ContextDecorator):
         ex = json.loads(line)
         return ex
 
-    def __getitem__(self, ex_id: Union[str, List[str]]):
+    def __getitem__(self, ex_id: Union[str, List[str]]) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         return self.get(ex_id)
 
     def __len__(self) -> int:
