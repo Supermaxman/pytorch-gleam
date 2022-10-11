@@ -31,6 +31,7 @@ class JsonlIndex(ContextDecorator):
 
     def __exit__(self, *exc):
         self.f.close()
+        self.f = None
         return False
 
     def get(self, ex_id: Union[str, List[str]]) -> Union[Dict[str, Any], List[Dict[str, Any]]]:

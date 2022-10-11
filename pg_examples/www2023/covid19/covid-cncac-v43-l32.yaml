@@ -50,7 +50,7 @@ trainer:
       init_args:
         leave: true
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
-    # - class_path: pytorch_gleam.callbacks.JsonlWriter
+    - class_path: pytorch_gleam.callbacks.JsonlWriter
 data:
   class_path: pytorch_gleam.data.datasets.ContrastiveChannelMisinfoStanceDataModule
   init_args:

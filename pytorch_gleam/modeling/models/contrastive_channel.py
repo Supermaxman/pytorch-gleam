@@ -81,20 +81,20 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         # [bsize * num_seq, target_seq_len, vocab_size]
         logits = results.logits
         # [bsize * num_seq * target_seq_len]
-        loss = self.lm_loss(logits.view(-1, logits.size(-1)), target_ids.view(-1))
+        token_loss = self.lm_loss(logits.view(-1, logits.size(-1)), target_ids.view(-1))
         # [bsize * num_seq, target_seq_len]
-        loss = loss.view(-1, pad_target_seq_len)
+        token_loss = token_loss.view(-1, pad_target_seq_len)
         # [bsize * num_seq]
         seq_lens = (target_ids != -100).float().sum(dim=-1)
         # [bsize * num_seq]
-        loss = loss.sum(dim=-1) / (seq_lens + 1e-8)
+        loss = token_loss.sum(dim=-1) / (seq_lens + 1e-8)
         # loss = loss.sum(dim=-1)
         # [bsize, num_seq]
         loss = loss.view(num_examples, num_sequences_per_example)
         # [bsize, num_seq]
         seq_lens = seq_lens.view(num_examples, num_sequences_per_example)
 
-        return loss, seq_lens
+        return loss, seq_lens, token_loss
 
     @staticmethod
     def split_energy(loss, batch, seq_lens):
@@ -107,8 +107,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         return pos_energy, neg_energy, pos_seq_lens, neg_seq_lens
 
     def triplet_step(self, batch):
-        loss, seq_len = self(batch)
-        pos_energy, neg_energy, pos_seq_lens, neg_seq_lens = self.split_energy(loss, batch, seq_len)
+        loss, seq_lens, token_loss = self(batch)
+        pos_energy, neg_energy, pos_seq_lens, neg_seq_lens = self.split_energy(loss, batch, seq_lens)
         if self.margin != 0:
             loss = torch.relu(pos_energy - neg_energy + self.margin)
         else:
@@ -312,7 +312,7 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         return result
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
-        energies, _ = self(batch)
+        energies, seq_lens, token_loss = self(batch)
         results = {
             # [bsize]
             "ids": batch["ids"],
@@ -326,6 +326,11 @@ class ContrastiveChannelLanguageModel(BasePreModel):
             "stages": batch["stages"],
             # [bsize, num_pairs]
             "energies": energies,
+            "seq_lens": seq_lens,
+            "token_loss": token_loss,
+            "target_ids": batch["target_ids"],
+            "input_ids": batch["input_ids"],
+            "attention_mask": batch["attention_mask"],
         }
         return results
 
