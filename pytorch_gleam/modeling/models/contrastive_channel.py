@@ -328,10 +328,10 @@ class ContrastiveChannelLanguageModel(BasePreModel):
             "s_ids_reshaped": batch["s_ids"][::2],
             # [bsize, num_pairs+1]
             "labels": batch["labels"],
-            "labels_reshaped": batch["labels"].viw(num_examples, num_sequences_per_example + 1),
+            "labels_reshaped": batch["labels"].view(num_examples, num_sequences_per_example + 1),
             # [bsize, num_pairs+1]
             "stages": batch["stages"],
-            "stages_reshaped": batch["stages"].viw(num_examples, num_sequences_per_example + 1),
+            "stages_reshaped": batch["stages"].view(num_examples, num_sequences_per_example + 1),
             # [bsize, num_pairs]
             "energies": energies,
             "token_loss": token_loss,
