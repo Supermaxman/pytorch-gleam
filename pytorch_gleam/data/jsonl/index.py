@@ -68,12 +68,16 @@ class JsonlIndex(ContextDecorator):
         index = {}
         with open(path, "rb") as f:
             # must be done for f.tell to work inside for loop over lines
-            while line := f.readline():
+            while True:
+                # needs to happen BEFORE readline to get starting position
+                ex_position = f.tell()
+                line = f.readline()
+                if not line:
+                    break
                 line = line.strip()
                 if line:
                     ex = json.loads(line)
                     ex_id = ex["id"]
-                    ex_position = f.tell()
                     index[ex_id] = ex_position
 
         if index_path is None:
