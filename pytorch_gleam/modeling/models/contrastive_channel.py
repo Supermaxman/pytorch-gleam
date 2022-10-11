@@ -93,6 +93,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
         loss = loss.view(num_examples, num_sequences_per_example)
         # [bsize, num_seq]
         seq_lens = seq_lens.view(num_examples, num_sequences_per_example)
+        # [bsize, num_seq, target_seq_len]
+        token_loss = token_loss.view(num_examples, num_sequences_per_example, pad_target_seq_len)
 
         return loss, seq_lens, token_loss
 
@@ -313,6 +315,8 @@ class ContrastiveChannelLanguageModel(BasePreModel):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         energies, seq_lens, token_loss = self(batch)
+        num_examples = batch["num_examples"]
+        num_sequences_per_example = batch["num_sequences_per_example"]
         results = {
             # [bsize]
             "ids": batch["ids"],
@@ -326,11 +330,9 @@ class ContrastiveChannelLanguageModel(BasePreModel):
             "stages": batch["stages"],
             # [bsize, num_pairs]
             "energies": energies,
-            "seq_lens": seq_lens,
             "token_loss": token_loss,
-            "target_ids": batch["target_ids"],
-            "input_ids": batch["input_ids"],
-            "attention_mask": batch["attention_mask"],
+            "target_ids": batch["target_ids"].view(num_examples, num_sequences_per_example, -1),
+            "input_ids": batch["input_ids"].view(num_examples, num_sequences_per_example, -1),
         }
         return results
 
