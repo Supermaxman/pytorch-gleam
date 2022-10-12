@@ -1,6 +1,12 @@
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule, BaseIterableDataset
 from pytorch_gleam.data.datasets.bert_pretrain import BertPreDataModule, BertPreTrainDataConfig
+from pytorch_gleam.data.datasets.contrastive_channel_misinfo_stance import (
+    ContrastiveCausalChannelMisinfoStanceDataModule,
+    ContrastiveChannelMisinfoStanceDataModule,
+)
 from pytorch_gleam.data.datasets.contrastive_frame import ContrastiveEmbFrameDataModule, ContrastiveFrameDataModule
+from pytorch_gleam.data.datasets.direct_acs_misinfo_stance import DirectACSMisinfoStanceDataModule
+from pytorch_gleam.data.datasets.direct_misinfo_stance import DirectMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.kbi_misinfo_stance import KbiMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.multi_class_frame import MultiClassFrameDataModule
 from pytorch_gleam.data.datasets.multi_class_frame_edge import MultiClassFrameEdgeDataModule
@@ -12,4 +18,5 @@ from pytorch_gleam.data.datasets.multi_class_misinfo_stance import MultiClassMis
 from pytorch_gleam.data.datasets.multi_label import MultiLabelDataModule
 from pytorch_gleam.data.datasets.multi_turn_qa_frame import MultiTurnQAFrameDataModule
 from pytorch_gleam.data.datasets.nli_text_stance import NliTextMisinfoStanceDataModule
+from pytorch_gleam.data.datasets.noisy_channel_misinfo_stance import NoisyChannelMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.unified_stance import UnifiedQADataModule

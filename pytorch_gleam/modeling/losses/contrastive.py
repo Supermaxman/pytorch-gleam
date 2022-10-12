@@ -9,7 +9,7 @@ class ContrastiveLoss(nn.Module, ABC):
         super().__init__()
 
     @abstractmethod
-    def forward(self, pos_scores, neg_scores):
+    def forward(self, pos_scores, neg_scores, normalizer=None):
         pass
 
     def calculate_scores(self, pos_scores, neg_scores=None):
@@ -24,8 +24,11 @@ class MarginContrastiveLoss(ContrastiveLoss):
         super().__init__()
         self.margin = margin
 
-    def forward(self, pos_scores, neg_scores):
-        loss = torch.relu(pos_scores - neg_scores + self.margin)
+    def forward(self, pos_scores, neg_scores, normalizer=None):
+        margin = self.margin
+        if normalizer is not None:
+            margin = self.margin / normalizer
+        loss = torch.relu(pos_scores - neg_scores + margin)
         return loss
 
     def calculate_scores(self, pos_scores, neg_scores=None):
@@ -37,7 +40,7 @@ class MarginSigmoidContrastiveLoss(MarginContrastiveLoss):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def forward(self, pos_scores, neg_scores):
+    def forward(self, pos_scores, neg_scores, normalizer=None):
         pos_scores = torch.sigmoid(pos_scores)
         neg_scores = torch.sigmoid(neg_scores)
         loss = torch.relu(pos_scores - neg_scores + self.margin)
@@ -54,7 +57,7 @@ class ProbContrastiveLoss(ContrastiveLoss):
         super().__init__()
         self.criterion = torch.nn.BCEWithLogitsLoss(reduction="none")
 
-    def forward(self, pos_scores, neg_scores):
+    def forward(self, pos_scores, neg_scores, normalizer=None):
         pos_bce = self.criterion(pos_scores, torch.ones_like(pos_scores))
         neg_bce = self.criterion(neg_scores, torch.zeros_like(neg_scores))
 
