@@ -50,7 +50,7 @@ trainer:
       init_args:
         leave: true
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
-    # - class_path: pytorch_gleam.callbacks.JsonlWriter
+    - class_path: pytorch_gleam.callbacks.JsonlWriter
 data:
   class_path: pytorch_gleam.data.datasets.ContrastiveChannelMisinfoStanceDataModule
   init_args:
@@ -64,3 +64,4 @@ data:
     train_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/train.jsonl
     val_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/dev.jsonl
     test_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/test.jsonl
+    predict_path: /users/max/data/corpora/vaccine-lies/hpv/annotations-and-data/test.jsonl
