@@ -12,7 +12,6 @@ class ClearMLTask(Callback):
         super().__init__()
         self.project_name = project_name
         self.initialized = False
-        self.trainer
 
     def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: Optional[str] = None) -> None:
         """Called when fit, validate, test, predict, or tune begins."""
