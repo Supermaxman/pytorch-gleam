@@ -15,8 +15,11 @@ class ClearMLTask(Callback):
     def _init(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         if self.initialized:
             return
-        task_name = os.path.basename(trainer.logger.save_dir)
+        task_name = os.path.basename(trainer.default_root_dir)
         self.task = Task.init(project_name=self.project_name, task_name=task_name)
+        print(trainer.logger.save_dir)
+        print(trainer.logger.name)
+        print(trainer.logger.version)
         config_path = os.path.join(trainer.logger.save_dir, "config.yaml")
         self.task.connect_configuration(config_path)
         with open(config_path) as f:
