@@ -42,6 +42,10 @@ trainer:
   devices: 1
   default_root_dir: /shared/hltdir4/disk1/team/data/models/clearml/cncac-v1
   enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      project: "example"
   callbacks:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
       init_args:
@@ -50,9 +54,9 @@ trainer:
       init_args:
         leave: true
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
-    - class_path: pytorch_gleam.callbacks.ClearMLTask
-      init_args:
-        project_name: "example"
+    # - class_path: pytorch_gleam.callbacks.ClearMLTask
+    #   init_args:
+    #     project_name: "example"
 data:
   class_path: pytorch_gleam.data.datasets.ContrastiveChannelMisinfoStanceDataModule
   init_args:
