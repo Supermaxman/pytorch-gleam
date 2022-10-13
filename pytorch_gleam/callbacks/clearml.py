@@ -17,10 +17,9 @@ class ClearMLTask(Callback):
             return
         task_name = os.path.basename(trainer.default_root_dir)
         self.task = Task.init(project_name=self.project_name, task_name=task_name)
-        print(trainer.logger.save_dir)
-        print(trainer.logger.name)
-        print(trainer.logger.version)
-        config_path = os.path.join(trainer.logger.save_dir, "config.yaml")
+        config_path = os.path.join(
+            trainer.logger.save_dir, trainer.logger.name, f"version_{trainer.logger.version}", "config.yaml"
+        )
         self.task.connect_configuration(config_path)
         with open(config_path) as f:
             config = yaml.load(f)
