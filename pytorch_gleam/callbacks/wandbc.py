@@ -15,7 +15,6 @@ class WandbConfig(Callback):
         if self.loaded_config:
             return
         config_path = os.path.join(trainer.logger.save_dir, "config.yaml")
-        print(config_path)
         with open(config_path) as f:
             config = yaml.safe_load(f)
             wandb.config.update(config)
