@@ -22,7 +22,7 @@ class ClearMLTask(Callback):
         )
         self.task.connect_configuration(config_path)
         with open(config_path) as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
             self.task.connect(config)
         self.initialized = True
 
