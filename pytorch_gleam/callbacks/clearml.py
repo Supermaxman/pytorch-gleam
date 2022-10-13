@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import pytorch_lightning as pl
 import yaml
@@ -11,8 +12,10 @@ class ClearMLTask(Callback):
         super().__init__()
         self.project_name = project_name
         self.initialized = False
+        self.trainer
 
-    def _init(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: Optional[str] = None) -> None:
+        """Called when fit, validate, test, predict, or tune begins."""
         if self.initialized:
             return
         task_name = os.path.basename(trainer.default_root_dir)
@@ -26,18 +29,19 @@ class ClearMLTask(Callback):
             self.task.connect(config)
         self.initialized = True
 
-    def on_train_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
-        """Called when the train begins."""
-        self._init(trainer, pl_module)
+    # # TODO consider moving to setup for progressbar
+    # def on_train_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    #     """Called when the train begins."""
+    #     self._init(trainer, pl_module)
 
-    def on_validation_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
-        """Called when the validation loop begins."""
-        self._init(trainer, pl_module)
+    # def on_validation_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    #     """Called when the validation loop begins."""
+    #     self._init(trainer, pl_module)
 
-    def on_test_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
-        """Called when the test begins."""
-        self._init(trainer, pl_module)
+    # def on_test_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    #     """Called when the test begins."""
+    #     self._init(trainer, pl_module)
 
-    def on_predict_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
-        """Called when the predict begins."""
-        self._init(trainer, pl_module)
+    # def on_predict_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    #     """Called when the predict begins."""
+    #     self._init(trainer, pl_module)
