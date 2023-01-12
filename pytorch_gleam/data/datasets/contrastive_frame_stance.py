@@ -11,8 +11,10 @@ from pytorch_gleam.data.twitter import TweetPreprocessConfig
 
 
 class ContrastiveFrameStanceDataset(MisinfoStanceDataset):
-    def __init__(self, pos_samples: int = 1, neg_samples: int = 1, label_name: str = "labels", *args, **kwargs):
-        super().__init__(*args, label_name=label_name, **kwargs)
+    def __init__(
+        self, frame_path: str, pos_samples: int = 1, neg_samples: int = 1, label_name: str = "labels", *args, **kwargs
+    ):
+        super().__init__(*args, misinfo_path=frame_path, label_name=label_name, **kwargs)
         self.relation_map = {0: "entailment", 1: "contradiction"}
         self.pos_samples = pos_samples
         self.neg_samples = neg_samples
