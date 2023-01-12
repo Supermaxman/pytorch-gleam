@@ -3,7 +3,6 @@ from typing import Optional
 
 import numpy as np
 import torch
-from torch.nn import BCELoss
 
 from pytorch_gleam.inference import ConsistencyScoring
 from pytorch_gleam.modeling.metrics import Metric
@@ -39,7 +38,7 @@ class ContrastiveFrameStanceLanguageModel(BaseLanguageModel):
         self.num_threshold_steps = num_threshold_steps
         self.update_threshold = update_threshold
         self.metric = metric
-        self.lm_loss = BCELoss(reduction="none")
+        self.lm_loss = torch.nn.BCEWithLogitsLoss(reduction="none")
         self.score_func = torch.nn.Softmax(dim=-1)
         self.f_dropout = torch.nn.Dropout(p=self.hidden_dropout_prob)
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=1)
