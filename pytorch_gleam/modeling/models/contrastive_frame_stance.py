@@ -40,7 +40,6 @@ class ContrastiveFrameStanceLanguageModel(BaseLanguageModel):
         self.metric = metric
         self.lm_loss = torch.nn.BCEWithLogitsLoss(reduction="none")
         self.score_func = torch.nn.Softmax(dim=-1)
-        self.f_dropout = torch.nn.Dropout(p=self.hidden_dropout_prob)
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=1)
 
     def setup(self, stage: Optional[str] = None):
@@ -77,7 +76,6 @@ class ContrastiveFrameStanceLanguageModel(BaseLanguageModel):
             input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
         )
         lm_output = contextualized_embeddings[:, 0]
-        lm_output = self.f_dropout(lm_output)
         # [bsize * num_seq]
         logits = torch.unsqueeze(self.cls_layer(lm_output), -1)
 

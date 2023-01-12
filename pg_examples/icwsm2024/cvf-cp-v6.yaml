@@ -1,4 +1,4 @@
-seed_everything: 0
+seed_everything: 1
 model:
   class_path: pytorch_gleam.modeling.models.ContrastiveFrameStanceLanguageModel
   init_args:
@@ -34,12 +34,13 @@ model:
 
 trainer:
   max_epochs: 100
-  accumulate_grad_batches: 8
+  accumulate_grad_batches: 4
   check_val_every_n_epoch: 4
   deterministic: true
   num_sanity_val_steps: 0
   accelerator: gpu
   devices: 1
+  gradient_clip_val: 1.0
   default_root_dir: /shared/hltdir4/disk1/team/data/models/clearml/cvf-cp-v6
   enable_checkpointing: false
   logger:
