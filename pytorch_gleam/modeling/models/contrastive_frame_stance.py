@@ -44,9 +44,6 @@ class ContrastiveFrameStanceLanguageModel(BaseLanguageModel):
         self.f_dropout = torch.nn.Dropout(p=self.hidden_dropout_prob)
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=1)
 
-    def lm_step(self, *args, **kwargs):
-        return self.lm(*args, **kwargs)
-
     def setup(self, stage: Optional[str] = None):
         super().setup(stage)
         if stage == "fit":
