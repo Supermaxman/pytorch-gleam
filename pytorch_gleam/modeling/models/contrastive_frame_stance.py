@@ -39,7 +39,6 @@ class ContrastiveFrameStanceLanguageModel(BaseLanguageModel):
         self.update_threshold = update_threshold
         self.metric = metric
         self.lm_loss = torch.nn.BCEWithLogitsLoss(reduction="none")
-        self.score_func = torch.nn.Softmax(dim=-1)
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=1)
 
     def setup(self, stage: Optional[str] = None):
