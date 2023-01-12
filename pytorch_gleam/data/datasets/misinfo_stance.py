@@ -11,10 +11,16 @@ class MisinfoStanceDataset(Dataset):
     examples: List[Dict[Any, Union[Any, Dict]]]
     preprocess_config: TweetPreprocessConfig
 
-    def __init__(self, data_path: Union[str, List[str]], misinfo_path: str, preprocess_config: TweetPreprocessConfig):
+    def __init__(
+        self,
+        data_path: Union[str, List[str]],
+        misinfo_path: str,
+        preprocess_config: TweetPreprocessConfig,
+        label_name: str = "misinfo",
+    ):
         super().__init__()
         self.preprocess_config = preprocess_config
-        self.label_name = "misinfo"
+        self.label_name = label_name
         self.label_map = {
             "No Stance": 0,
             "no_stance": 0,

@@ -8,6 +8,7 @@ from pytorch_gleam.data.collators.contrastive_frame import (
     ContrastiveEmbFrameBatchCollator,
     ContrastiveFrameBatchCollator,
 )
+from pytorch_gleam.data.collators.contrastive_frame_stance import ContrastiveFrameStanceBatchCollator
 from pytorch_gleam.data.collators.direct_acs import DirectACSBatchCollator
 from pytorch_gleam.data.collators.direct_stance import DirectStanceBatchCollator
 from pytorch_gleam.data.collators.kbi import KbiBatchCollator

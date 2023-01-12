@@ -13,6 +13,7 @@ from pytorch_gleam.modeling.models.contrastive_frame import (
     ContrastiveEmbFrameLanguageModel,
     ContrastiveFrameLanguageModel,
 )
+from pytorch_gleam.modeling.models.contrastive_frame_stance import ContrastiveFrameStanceLanguageModel
 from pytorch_gleam.modeling.models.direct_acs import DirectACSLanguageModel
 from pytorch_gleam.modeling.models.direct_stance import DirectStanceLanguageModel
 from pytorch_gleam.modeling.models.kbi import KbiLanguageModel
