@@ -2,7 +2,7 @@ seed_everything: 1
 model:
   class_path: pytorch_gleam.modeling.models.ContrastiveFrameStanceLanguageModel
   init_args:
-    learning_rate: 5e-5
+    learning_rate: 1e-6
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
     num_val_seeds: 1
     # ln(2) for pos/neg prob ratio of 2
@@ -41,6 +41,7 @@ trainer:
   accelerator: gpu
   devices: 1
   gradient_clip_val: 1.0
+  track_grad_norm: 2
   default_root_dir: /shared/hltdir4/disk1/team/data/models/clearml/cvf-cp-v6
   enable_checkpointing: false
   logger:
