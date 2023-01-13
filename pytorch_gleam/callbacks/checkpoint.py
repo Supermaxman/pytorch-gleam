@@ -17,7 +17,10 @@ class FitCheckpointCallback(Callback):
 
     @rank_zero_only
     def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule):
+        if not os.path.exists(trainer.default_root_dir):
+            os.makedirs(trainer.default_root_dir)
         checkpoint_path = self._get_checkpoint_path(trainer)
+
         print("Saving checkpoint...")
         pl_module.to("cpu")
         torch.save(pl_module.state_dict(), checkpoint_path)
