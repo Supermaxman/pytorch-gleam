@@ -35,7 +35,7 @@ model:
 
 trainer:
   max_epochs: 100
-  accumulate_grad_batches: 4
+  accumulate_grad_batches: 2
   check_val_every_n_epoch: 4
   deterministic: true
   num_sanity_val_steps: 0
@@ -43,7 +43,7 @@ trainer:
   devices: 1
   gradient_clip_val: 1.0
   track_grad_norm: 2
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/clearml/cvf-cp-v6
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/clearml/cvf-cp-v9
   enable_checkpointing: false
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
