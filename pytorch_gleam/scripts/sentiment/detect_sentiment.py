@@ -32,7 +32,7 @@ def preprocess(text):
 
 def generate(id_gen, text_gen, sentiment_task, total):
     for ex_id, out in tqdm(
-        zip(id_gen, sentiment_task(text_gen, batch_size=32, num_workers=4, truncation="longest_first")), total=total
+        zip(id_gen, sentiment_task(text_gen, batch_size=128, num_workers=4, truncation="longest_first")), total=total
     ):
         pred = out["label"]
         yield {"id": ex_id, "pred": pred}
@@ -50,8 +50,7 @@ def main():
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     sentiment_task = pipeline("sentiment-analysis", model=model_name, tokenizer=model_name, device=device)
-    # [{'label': 'Negative', 'score': 0.7236}]
-    # TODO use iterator method
+    # {'label': 'Negative', 'score': 0.7236}
     write_jsonl(output_path, generate(id_gen, text_gen, sentiment_task, total))
     print("DONE!")
 
