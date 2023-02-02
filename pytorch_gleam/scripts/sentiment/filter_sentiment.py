@@ -42,7 +42,7 @@ def main():
     }
     # unique original tweets from ICWSM 2022 index from December 18th, 2019, and July 21st, 2021
     sent_counts = {"neutral": 0, "positive": 0, "negative": 0}
-    total = 5_865_046
+    total = 5_855_583
     try:
         for ex in tqdm(read_jsonl(data_path), total=total):
             ex_id = ex["id"]
@@ -55,6 +55,7 @@ def main():
             f.close()
 
     print("Sentiment counts:")
+    print(f"Total: {total}")
     for sent, count in sent_counts.items():
         print(f"{sent}: {count}")
 
