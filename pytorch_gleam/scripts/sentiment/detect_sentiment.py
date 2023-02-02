@@ -34,11 +34,8 @@ def generate(id_gen, text_gen, sentiment_task, total):
     for ex_id, out in tqdm(
         zip(id_gen, sentiment_task(text_gen, batch_size=32, num_workers=4, truncation="longest_first")), total=total
     ):
-        print(ex_id)
-        print(out)
-        break
-        # pred = out["label"]
-        # yield {"id": ex_id, "pred": pred}
+        pred = out["label"]
+        yield {"id": ex_id, "pred": pred}
 
 
 def main():
