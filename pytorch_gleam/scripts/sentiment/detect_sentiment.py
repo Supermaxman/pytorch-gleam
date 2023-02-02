@@ -54,3 +54,7 @@ def main():
     # TODO use iterator method
     write_jsonl(output_path, generate(id_gen, text_gen, sentiment_task, total))
     print("DONE!")
+
+
+if __name__ == "__main__":
+    main()
