@@ -41,6 +41,12 @@ def main():
         help="Sentiment to filter by",
         choices=["positive", "negative", "neutral"],
     )
+    parser.add_argument(
+        "--num_topics",
+        type=int,
+        default=5,
+        help="Number of topics to detect",
+    )
 
     args = parser.parse_args()
     # Total: 5855583
@@ -48,11 +54,12 @@ def main():
     # positive: 955470
     # negative: 2490010
     sentiment = args.sentiment
+    num_topics = args.num_topics
 
     sent_totals = {
-        "neutral": 2419566,
-        "positive": 955470,
-        "negative": 2490010,
+        "neutral": 2_419_566,
+        "positive": 955_470,
+        "negative": 2_490_010,
     }
     total = sent_totals[sentiment]
 
@@ -75,23 +82,25 @@ def main():
     training_dataset = tp.fit(text_for_contextual=unpreprocessed_corpus, text_for_bow=preprocessed_documents)
 
     print("Training CTM...")
-    ctm = CombinedTM(bow_size=len(tp.vocab), contextual_size=768, n_components=100, num_epochs=10)
+    ctm = CombinedTM(bow_size=len(tp.vocab), contextual_size=768, n_components=num_topics, num_epochs=10)
     ctm.fit(training_dataset, n_samples=5)
 
     print("Saving topics...")
     topics = ctm.get_topic_lists(5)
-    topics_path = os.path.join(data_folder, f"tweets-filtered-author-unique-reduced-sentiment-{sentiment}-topics.json")
+    topics_path = os.path.join(
+        data_folder, f"tweets-filtered-author-unique-reduced-sentiment-{sentiment}-{num_topics}-topics.json"
+    )
     with open(topics_path, "w") as f:
         json.dump(topics, f)
 
     print("Saving predictions...")
     preds_path = os.path.join(
-        data_folder, f"tweets-filtered-author-unique-reduced-sentiment-{sentiment}-topic-preds.jsonl"
+        data_folder, f"tweets-filtered-author-unique-reduced-sentiment-{sentiment}-{num_topics}-topic-preds.jsonl"
     )
     write_jsonl(preds_path, generate_preds(data_path, ctm.training_doc_topic_distributions, total))
 
     print("Saving CTM...")
-    model_path = os.path.join(data_folder, f"ctm-{sentiment}")
+    model_path = os.path.join(data_folder, f"ctm-{sentiment}-{num_topics}")
     os.makedirs(model_path, exist_ok=True)
     ctm.save(models_dir=model_path)
 
