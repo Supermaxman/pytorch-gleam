@@ -31,7 +31,7 @@ def preprocess(text):
 
 
 def generate(id_gen, text_gen, sentiment_task, total):
-    for ex_id, out in tqdm(zip(id_gen, sentiment_task(text_gen, batch_size=128, num_workers=4)), total=total):
+    for ex_id, out in tqdm(zip(id_gen, sentiment_task(text_gen, batch_size=128)), total=total):
         pred = out["label"]
         yield {"id": ex_id, "pred": pred}
 
