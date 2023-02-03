@@ -83,7 +83,7 @@ def main():
 
     print("Training CTM...")
     ctm = CombinedTM(bow_size=len(tp.vocab), contextual_size=768, n_components=num_topics, num_epochs=10)
-    ctm.fit(training_dataset, n_samples=5)
+    ctm.fit(training_dataset, do_train_predictions=False)
 
     print("Saving topics...")
     topics = ctm.get_topic_lists(5)
@@ -93,11 +93,14 @@ def main():
     with open(topics_path, "w") as f:
         json.dump(topics, f)
 
-    print("Saving predictions...")
+    print("Creating and saving predictions...")
     preds_path = os.path.join(
         data_folder, f"tweets-filtered-author-unique-reduced-sentiment-{sentiment}-{num_topics}-topic-preds.jsonl"
     )
-    write_jsonl(preds_path, generate_preds(data_path, ctm.training_doc_topic_distributions, total))
+    write_jsonl(
+        preds_path,
+        generate_preds(data_path, ctm.get_doc_topic_distribution_iterator(training_dataset, n_samples=5), total),
+    )
 
     print("Saving CTM...")
     model_path = os.path.join(data_folder, f"ctm-{sentiment}-{num_topics}")
