@@ -62,7 +62,7 @@ def main():
     parser.add_argument(
         "--top_k",
         type=int,
-        default=200,
+        default=100,
         help="Number of top k images to return",
     )
     parser.add_argument(
