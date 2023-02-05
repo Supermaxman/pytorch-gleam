@@ -35,7 +35,7 @@ def embed_text(model, device, text: str):
     return text_embeddings
 
 
-def query(index, model, device, text: str, image_list, k: int):
+def query_index(index, model, device, text: str, image_list, k: int):
     text_embeddings = embed_text(model, device, text)
     distances, indices = index.search(text_embeddings, k=k)
     results = []
@@ -101,10 +101,12 @@ def main():
     print("Loading queries...")
     with open(query_path) as f:
         queries = json.load(f)
+    print(f"  Total queries: {len(queries)}")
 
     print("Loading CLIP model...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load(model_name, device=device, jit=False)
+    print(f'  CLIP model loaded on "{device}"')
 
     print("Loading image list...")
     data_dir = Path(os.path.join(emb_path, "metadata"))
@@ -114,16 +116,20 @@ def main():
 
     print("Loading index...")
     index = faiss.read_index(index_path)
+
+    print("Querying index...")
+    total = 0
     results = {}
     for q_id, q in tqdm(queries.items()):
         query = q["text"]
-        q_results = query(index, model, device, query, image_list, top_k)
+        q_results = query_index(index, model, device, query, image_list, top_k)
         results[q_id] = q_results
-
+        total += len(q_results)
+    print(f"  Total images found: {total}")
     print("Writing results...")
     with open(output_path, "w") as f:
         json.dump(results, f)
-
+    print(f"  Results written to {output_path}")
     print("DONE!")
 
 
