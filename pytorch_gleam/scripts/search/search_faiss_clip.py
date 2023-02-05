@@ -44,7 +44,7 @@ def query_index(index, model, device, text: str, image_list, k: int):
         results.append(
             {
                 "rank": rank,
-                "distance": d,
+                "distance": float(d),
                 "file_name": file_name,
             }
         )
