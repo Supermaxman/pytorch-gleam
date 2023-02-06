@@ -6,7 +6,7 @@ from multiprocessing import Pool
 from pprint import pprint
 
 import ujson as json
-from tqdm import tqdm
+from tqdm.rich import tqdm
 
 
 def read_json(file_path):
