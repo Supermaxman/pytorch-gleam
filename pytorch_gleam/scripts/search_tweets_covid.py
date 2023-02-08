@@ -4,7 +4,7 @@ import time
 from datetime import date, timedelta
 
 import requests
-from tqdm import tqdm
+from tqdm.rich import tqdm
 
 
 def format_endpoint(endpoint_url, fields):
@@ -14,7 +14,7 @@ def format_endpoint(endpoint_url, fields):
 
 def date_range(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
-        yield start_date + timedelta(n), start_date + timedelta(n + 1)
+        yield start_date + timedelta(days=n), start_date + timedelta(days=n + 1)
 
 
 def main():
@@ -24,13 +24,19 @@ def main():
     # start_date = date(2021, 7, 23)
     # start_date = date(2021, 10, 20)
     # 2020-12-18
-    start_date = date(2019, 12, 18)
-    end_date = date(2020, 12, 18)
+    # start_date = date(2019, 12, 18)
+    # end_date = date(2020, 12, 18)
     # wait 5 seconds between queries
     q_delay = 5
+    # v8 goes to 2021-12-20
+    # v11 goes from 2021-12-20 to 2023-02-08
+    start_date = date(2021, 12, 20)
+    end_date = date(2023, 2, 8)
 
     # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
-    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v0"
+    # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v0"
+    output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v11"
+    os.makedirs(output_path, exist_ok=True)
     secrets_path = "private/secrets.json"
     with open(secrets_path, "r") as f:
         secrets = json.load(f)["twitter"]
