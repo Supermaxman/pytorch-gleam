@@ -30,7 +30,8 @@ def main():
     q_delay = 5
     # v8 goes to 2021-12-20
     # v11 goes from 2021-12-20 to 2023-02-08
-    start_date = date(2021, 12, 20)
+    # start_date = date(2021, 12, 20)
+    start_date = date(2021, 12, 23)
     end_date = date(2023, 2, 8)
 
     # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
