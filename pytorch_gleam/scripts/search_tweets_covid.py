@@ -18,6 +18,7 @@ def date_range(start_date, end_date):
 
 
 def main():
+    timeout = 60 * 5
     # 2021-07-23 2021-07-24
     # start_date = date(2021, 7, 1)
     # v7 2021-10-19
@@ -31,7 +32,8 @@ def main():
     # v8 goes to 2021-12-20
     # v11 goes from 2021-12-20 to 2023-02-08
     # start_date = date(2021, 12, 20)
-    start_date = date(2021, 12, 23)
+    # start_date = date(2021, 12, 23)
+    start_date = date(2022, 3, 19)
     end_date = date(2023, 2, 8)
 
     # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
@@ -121,7 +123,7 @@ def main():
             endpoint = format_endpoint(endpoint_url, fields)
             headers = {"Authorization": f"Bearer {secrets['bearer_token']}"}
             try:
-                results = requests.get(endpoint, headers=headers).json()
+                results = requests.get(endpoint, headers=headers, timeout=timeout).json()
                 with open(result_path, "w") as f:
                     json.dump(results, f)
             except Exception as e:
