@@ -33,7 +33,11 @@ def main():
     # v11 goes from 2021-12-20 to 2023-02-08
     # start_date = date(2021, 12, 20)
     # start_date = date(2021, 12, 23)
-    start_date = date(2022, 3, 19)
+    # start_date = date(2022, 3, 19)
+    # got cut off at 2023-01-24 by twitter api rate limit
+    # and unlikely to get to 10 million renewal of rate limit
+    # for academic research on 2023-02-21
+    start_date = date(2023, 1, 24)
     end_date = date(2023, 2, 8)
 
     # output_path = "/users/max/data/corpora/covid19-vaccine-twitter/raw-v7"
