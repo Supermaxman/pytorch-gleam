@@ -51,19 +51,18 @@ def worker_init_fn(_):
     try:
         process_id = dist.get_rank()
         num_processes = dist.get_world_size()
-
-        worker_info = torch.utils.data.get_worker_info()
-        worker_id = worker_info.id
-        num_workers = worker_info.num_workers
-        print(f"INFO: WORKER_INIT WORKER_INFO: {worker_id}/{num_workers}")
-        print(f"INFO: WORKER_INIT: RANK_INFO: {process_id}/{num_processes}")
-        dataset = worker_info.dataset
-        dataset.frequency = (process_id * num_workers) + worker_id
-        dataset.num_workers = num_processes * num_workers
-        print(f"INFO: WORKER_INIT: F_INFO: {dataset.frequency}/{dataset.num_workers}")
     except Exception:
-        dataset.frequency = 0
-        dataset.num_workers = 1
+        process_id = 0
+        num_processes = 1
+    worker_info = torch.utils.data.get_worker_info()
+    worker_id = worker_info.id
+    num_workers = worker_info.num_workers
+    print(f"INFO: WORKER_INIT WORKER_INFO: {worker_id}/{num_workers}")
+    print(f"INFO: WORKER_INIT: RANK_INFO: {process_id}/{num_processes}")
+    dataset = worker_info.dataset
+    dataset.frequency = (process_id * num_workers) + worker_id
+    dataset.num_workers = num_processes * num_workers
+    print(f"INFO: WORKER_INIT: F_INFO: {dataset.frequency}/{dataset.num_workers}")
 
 
 class RerankDataset(IterableDataset):
