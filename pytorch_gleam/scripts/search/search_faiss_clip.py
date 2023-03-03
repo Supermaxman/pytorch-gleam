@@ -66,12 +66,6 @@ def main():
         help="Number of top k images to return",
     )
     parser.add_argument(
-        "--emb_path",
-        type=str,
-        default="/shared/aifiles/disk1/media/twitter/v10/covid19-twitter-images-dedup-emb-vit-b-32",
-        help="Path to embeddings",
-    )
-    parser.add_argument(
         "--index_path",
         type=str,
         default="/shared/aifiles/disk1/media/twitter/v10/covid19-twitter-images-dedup-emb-vit-b-32-index/image.index",
@@ -93,7 +87,6 @@ def main():
     args = parser.parse_args()
     model_name = args.model_name
     top_k = args.top_k
-    emb_path = args.emb_path
     index_path = args.index_path
     query_path = args.query_path
     output_path = args.output_path
@@ -109,7 +102,8 @@ def main():
     print(f'  CLIP model loaded on "{device}"')
 
     print("Loading image list...")
-    data_dir = Path(os.path.join(emb_path, "metadata"))
+    meta_path = os.path.join(os.path.dirname(index_path), "metadata")
+    data_dir = Path(meta_path)
     df = pd.concat(pd.read_parquet(parquet_file) for parquet_file in data_dir.glob("*.parquet"))
     image_list = df["image_path"].tolist()
     print(f"  Total images: {len(image_list)}")

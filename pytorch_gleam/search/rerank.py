@@ -2,7 +2,6 @@ import argparse
 import json
 import logging
 import os
-from collections import defaultdict
 
 import pytorch_lightning as pl
 import torch
@@ -65,7 +64,6 @@ def worker_init_fn(_):
 
 class RerankDataset(IterableDataset):
     def __init__(self, index_path, scores_path, questions_path, worker_estimate=6):
-
         with open(questions_path, "r") as f:
             self.questions = json.load(f)
         with open(scores_path, "r") as f:
@@ -74,14 +72,11 @@ class RerankDataset(IterableDataset):
         self.index_path = index_path
         self.frequency = 0
         self.num_workers = 1
-        self.tweet_examples = defaultdict(list)
+        self.tweet_examples = scores
         self.num_examples = 0
         self.worker_estimate = worker_estimate
+        self.num_examples = sum(len(q_scores) for q_scores in scores.values())
 
-        for tweet_id, q_scores in scores.items():
-            for q_p_id, score in q_scores.items():
-                self.tweet_examples[tweet_id].append(q_p_id)
-                self.num_examples += 1
         print(f"Num examples: {self.num_examples}")
 
     def __len__(self):

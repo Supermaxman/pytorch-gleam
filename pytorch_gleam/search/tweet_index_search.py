@@ -46,8 +46,8 @@ def main():
             for rank, hit in enumerate(hits[: args.top_k], start=1):
                 tweet_id = hit.docid
                 if tweet_id not in scores:
-                    scores[tweet_id] = {}
-                scores[tweet_id][q_id] = hit.score
+                    scores[tweet_id] = []
+                scores[tweet_id].append(q_id)
 
     with open(args.output_path, "w") as f:
         json.dump(scores, f)
