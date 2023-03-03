@@ -11,7 +11,7 @@ from transformers import AutoModelForSequenceClassification, BertTokenizer
 
 
 def get_tweet_text(tweet):
-    tweet_text = tweet["text"]
+    tweet_text = tweet["text"] if "text" in tweet else tweet["full_text"]
     if tweet_text.startswith("RT "):
         ref_tweets = tweet["referenced_tweets"]
         if len(ref_tweets) > 0:
