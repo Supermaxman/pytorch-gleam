@@ -159,6 +159,7 @@ class RerankBert(pl.LightningModule):
         super().__init__()
         self.pre_model_name = pre_model_name
         self.predict_path = predict_path
+        os.makedirs(self.predict_path, exist_ok=True)
         self.bert = AutoModelForSequenceClassification.from_pretrained(pre_model_name)
         self.config = self.bert.config
         self.save_hyperparameters()
@@ -192,7 +193,7 @@ class RerankBert(pl.LightningModule):
         logits = logits.detach().cpu()
         device_id = get_device_id()
         if self.file is None:
-            self.file = open(os.path.join(self.predict_path, f"predictions-{device_id}.pt"), "w")
+            self.file = open(os.path.join(self.predict_path, f"predictions-{device_id}.jsonl"), "w")
         for i in range(len(logits)):
             self.file.write(
                 json.dumps(
