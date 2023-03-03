@@ -108,7 +108,7 @@ class RerankDataset(IterableDataset):
 
 
 class RerankBatchCollator(object):
-    def __init__(self, tokenizer, max_seq_len: int, force_max_seq_len: bool):
+    def __init__(self, tokenizer, max_seq_len: int, force_max_seq_len: bool = False):
         super().__init__()
         self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
@@ -142,15 +142,26 @@ class RerankBatchCollator(object):
         return batch
 
 
+def get_device_id():
+    try:
+        device_id = dist.get_rank()
+    except Exception:
+        if "XRT_SHARD_ORDINAL" in os.environ:
+            device_id = int(os.environ["XRT_SHARD_ORDINAL"])
+        else:
+            device_id = 0
+    return device_id
+
+
 class RerankBert(pl.LightningModule):
-    def __init__(self, pre_model_name, predict_mode=False, predict_path=None):
+    def __init__(self, pre_model_name, predict_path=None):
         super().__init__()
         self.pre_model_name = pre_model_name
-        self.predict_mode = predict_mode
         self.predict_path = predict_path
         self.bert = AutoModelForSequenceClassification.from_pretrained(pre_model_name)
         self.config = self.bert.config
         self.save_hyperparameters()
+        self.file = None
 
     def forward(self, input_ids, attention_mask, token_type_ids):
         # [batch_size, 2]
@@ -179,42 +190,31 @@ class RerankBert(pl.LightningModule):
         logits = self._forward_step(batch, batch_nb)
         logits = logits.detach().cpu()
         device_id = get_device_id()
-        self.write_prediction_dict(
-            {
-                "id": batch["id"],
-                "question_id": batch["question_id"],
-                "pos_score": logits[:, 1].tolist(),
-                "neg_score": logits[:, 0].tolist(),
-            },
-            filename=os.path.join(self.predict_path, f"predictions-{device_id}.pt"),
-        )
-        result = {
-            f"{name}_id": batch["id"],
-            f"{name}_question_id": batch["question_id"],
-            f"{name}_logits": logits,
-        }
-
-        return result
+        if self.file is None:
+            self.file = open(os.path.join(self.predict_path, f"predictions-{device_id}.pt"), "w")
+        for i in range(len(logits)):
+            self.file.write(
+                json.dumps(
+                    {
+                        "id": batch["id"][i],
+                        "question_id": batch["question_id"][i],
+                        "pos_score": logits[i, 1].item(),
+                        "neg_score": logits[i, 0].item(),
+                    }
+                )
+                + "\n"
+            )
 
     def _eval_epoch_end(self, outputs, name):
-        pass
+        if self.file is not None:
+            self.file.close()
+            self.file = None
 
     def validation_epoch_end(self, outputs):
         self._eval_epoch_end(outputs, "val")
 
     def test_epoch_end(self, outputs):
         self._eval_epoch_end(outputs, "test")
-
-
-def get_device_id():
-    try:
-        device_id = dist.get_rank()
-    except Exception:
-        if "XRT_SHARD_ORDINAL" in os.environ:
-            device_id = int(os.environ["XRT_SHARD_ORDINAL"])
-        else:
-            device_id = 0
-    return device_id
 
 
 def main():
@@ -230,7 +230,6 @@ def main():
     parser.add_argument("-ml", "--max_seq_len", default=96, type=int)
     parser.add_argument("-se", "--seed", default=0, type=int)
     parser.add_argument("-cd", "--torch_cache_dir", default=None)
-    parser.add_argument("-tpu", "--use_tpus", default=False, action="store_true")
     parser.add_argument("-gpu", "--gpus", default="0")
     parser.add_argument("-ts", "--train_sampling", default="none")
     parser.add_argument("-ls", "--losses", default="compare_loss")
@@ -242,10 +241,7 @@ def main():
     # export TPU_IP_ADDRESS=10.155.6.34
     # export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
     gpus = [int(x) for x in args.gpus.split(",")]
-    is_distributed = len(gpus) > 1
-    precision = 16 if args.use_tpus else 32
     # precision = 32
-    tpu_cores = 8
     num_workers = args.num_workers
     deterministic = True
 
@@ -267,7 +263,6 @@ def main():
         collate_fn=RerankBatchCollator(
             tokenizer,
             args.max_seq_len,
-            force_max_seq_len=args.use_tpus,
         ),
         worker_init_fn=worker_init_fn,
     )
@@ -276,32 +271,15 @@ def main():
 
     model = RerankBert(
         pre_model_name=args.pre_model_name,
-        predict_mode=True,
         predict_path=args.output_path,
     )
 
-    if args.use_tpus:
-        logging.warning("Gradient clipping slows down TPU training drastically, disabled for now.")
-        trainer = pl.Trainer(
-            tpu_cores=tpu_cores,
-            max_epochs=0,
-            precision=precision,
-            deterministic=deterministic,
-            checkpoint_callback=False,
-        )
-    else:
-        if len(gpus) > 1:
-            backend = "ddp" if is_distributed else "dp"
-        else:
-            backend = None
-        trainer = pl.Trainer(
-            gpus=gpus,
-            max_epochs=0,
-            precision=precision,
-            distributed_backend=backend,
-            deterministic=deterministic,
-            checkpoint_callback=False,
-        )
+    trainer = pl.Trainer(
+        gpus=gpus,
+        max_epochs=0,
+        deterministic=deterministic,
+        checkpoint_callback=False,
+    )
 
     logging.info("Predicting...")
     try:
