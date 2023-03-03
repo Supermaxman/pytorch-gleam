@@ -88,12 +88,10 @@ class RerankDataset(IterableDataset):
     def __iter__(self):
         ex_idx = 0
         for tweet in get_tweets(self.index_path):
-            if "tweet" in tweet:
-                tweet = tweet["tweet"]
             tweet_id = tweet["id"]
             if tweet_id not in self.tweet_examples:
                 continue
-            tweet_text = get_tweet_text(tweet)
+            tweet_text = tweet["contents"]
             # only do relevance re-ranking on bm25 results
             q_exs = self.tweet_examples[tweet_id]
             # OR do relevance re-ranking on all results (EXPENSIVE)
