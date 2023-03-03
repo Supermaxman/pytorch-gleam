@@ -278,7 +278,6 @@ def main():
         gpus=gpus,
         max_epochs=0,
         deterministic=deterministic,
-        checkpoint_callback=False,
     )
 
     logging.info("Predicting...")
