@@ -31,8 +31,12 @@ def read_jsonl(path):
 
 
 def worker_init_fn(_):
-    process_id = dist.get_rank()
-    num_processes = dist.get_world_size()
+    try:
+        process_id = dist.get_rank()
+        num_processes = dist.get_world_size()
+    except Exception:
+        process_id = 0
+        num_processes = 1
 
     worker_info = torch.utils.data.get_worker_info()
     worker_id = worker_info.id
@@ -93,7 +97,11 @@ class MultiClassFrameEdgeMoralityIterableDataset(IterableDataset):
         ex_idx = 0
         for tweet in read_jsonl(self.data_path):
             ex_id = tweet["id"]
-            ex_text = tweet["full_text"] if "full_text" in tweet else tweet["text"]
+            ex_text = (
+                tweet["full_text"]
+                if "full_text" in tweet
+                else (tweet["text"] if "text" in tweet else tweet["contents"])
+            )
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
 
             for f_id, f_label in tweet[self.label_name].items():

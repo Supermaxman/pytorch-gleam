@@ -33,9 +33,7 @@ def get_tweets(dir_path):
 
 
 def collect_tweets(dir_path, tweet_candidates):
-    for tweet in tqdm(get_tweets(dir_path), total=19000000):
-        if "tweet" in tweet:
-            tweet = tweet["tweet"]
+    for tweet in tqdm(get_tweets(dir_path), total=46_159_226):
         tweet_id = tweet["id"]
         if tweet_id not in tweet_candidates:
             continue
@@ -45,21 +43,21 @@ def collect_tweets(dir_path, tweet_candidates):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--index_path", required=True)
+    parser.add_argument("-i", "--data_path", required=True)
     parser.add_argument("-sc", "--scores_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
-    parser.add_argument("-mir", "--min_rank", default=1, type=int)
     parser.add_argument("-mis", "--min_score", default=0.0, type=float)
     args = parser.parse_args()
 
-    with open(args.scores_path) as f:
-        # [q_id][t_id] = score
-        scores = json.load(f)
-
+    print("Loading scores...")
     question_scores = defaultdict(list)
-    for tweet_id, t_scores in scores.items():
-        for q_id, score in t_scores.items():
-            question_scores[q_id].append((score, tweet_id))
+    for file in tqdm(sorted(os.listdir(args.scores_path), key=lambda x: int(x.split("-")[-1].split(".")[0]))):
+        for ex in read_jsonl(os.path.join(args.scores_path, file)):
+            score = ex["pos_score"]
+            if score > args.min_score:
+                q_id = ex["question_id"]
+                tweet_id = ex["id"]
+                question_scores[q_id].append((score, tweet_id))
 
     print("Sorting tweets for each subquestion...")
     for q_id in tqdm(list(question_scores)):
@@ -71,19 +69,14 @@ def main():
         )
 
     print("Collecting candidates for each tweet...")
-    tweet_candidates = {}
+    tweet_candidates = defaultdict(dict)
     for q_id, q_rel in tqdm(question_scores.items()):
         for rank, (t_score, tweet_id) in enumerate(q_rel, start=1):
-            if t_score < args.min_score and rank > args.min_rank:
-                break
-            if tweet_id not in tweet_candidates:
-                # tweet['candidates'] = {}
-                tweet_candidates[tweet_id] = {}
             t_candidates = tweet_candidates[tweet_id]
             t_candidates[q_id] = {"rank": rank, "score": t_score}
 
     print("Writing candidate tweets...")
-    write_jsonl(collect_tweets(args.index_path, tweet_candidates), args.output_path)
+    write_jsonl(collect_tweets(args.data_path, tweet_candidates), args.output_path)
 
 
 if __name__ == "__main__":

@@ -23,17 +23,13 @@ class JsonlWriter(BasePredictionWriter):
         else:
             predictions_dir = self.output_path
 
-        if not os.path.exists(predictions_dir):
-            os.mkdir(predictions_dir)
+        os.makedirs(predictions_dir, exist_ok=True)
 
         try:
             process_id = dist.get_rank()
         except RuntimeError:
-            process_id = -1
-        if process_id == -1:
-            file_name = "predictions.jsonl"
-        else:
-            file_name = f"predictions-{process_id}.jsonl"
+            process_id = 0
+        file_name = f"predictions-{process_id}.jsonl"
 
         pred_file = os.path.join(predictions_dir, file_name)
         rows = defaultdict(dict)

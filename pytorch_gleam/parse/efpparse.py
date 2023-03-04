@@ -227,7 +227,7 @@ def get_token_features(token):
 
 
 def parse_tweet(ex: dict):
-    ex_text = ex["full_text"] if "full_text" in ex else ex["text"]
+    ex_text = ex["full_text"] if "full_text" in ex else (ex["text"] if "text" in ex else ex["contents"])
     ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
     tweet_raw_parse = [get_token_features(x) for x in nlp(ex_text)]
     tweet_parse = [add_sentic_token_features(x) for x in tweet_raw_parse]
