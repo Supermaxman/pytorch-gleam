@@ -1,8 +1,8 @@
 import argparse
-import json
 import os
 from collections import defaultdict
 
+import ujson as json
 from tqdm import tqdm
 
 
