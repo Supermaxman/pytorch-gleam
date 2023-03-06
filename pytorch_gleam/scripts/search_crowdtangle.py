@@ -59,7 +59,8 @@ def download_media(posts, media_output_path, media_delay, retry_attempts=3):
                     continue
                 status = response.status_code
                 if status != 200:
-                    print(response.reason)
+                    print(f"{response.reason}: {media_url}")
+                    print(response.content)
                     if status == 403:
                         break
                     time.sleep(10 * media_delay)
