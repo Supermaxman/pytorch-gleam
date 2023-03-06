@@ -57,7 +57,7 @@ def download_media(posts, media_output_path, media_delay, retry_attempts=3):
                     time.sleep(10 * media_delay)
                     retry_count += 1
                     continue
-                status = response["status"]
+                status = response.status_code
                 if status != 200:
                     print(response)
                     time.sleep(10 * media_delay)
