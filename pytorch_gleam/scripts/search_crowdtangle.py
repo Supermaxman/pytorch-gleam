@@ -68,7 +68,7 @@ def download_media(posts, media_output_path, media_delay, retry_attempts=3, endp
                     retry_count += 1
                     continue
                 content_type = response.headers.get("content-type")
-                content_types = content_type.split("/")[0]
+                content_types = content_type.split("/")
                 if len(content_types) != 2:
                     print(f"Unknown content type: {content_type}")
                     break
