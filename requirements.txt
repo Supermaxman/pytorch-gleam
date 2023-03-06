@@ -2,7 +2,6 @@ torch>=1.12.1
 torchmetrics==0.9.3
 pytorch-lightning==1.7.5
 transformers>=4.22.1
-# clearml==1.7.1
 wandb==0.13.4
 scikit-learn==1.1.2
 datasets==2.4.0
