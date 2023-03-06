@@ -35,7 +35,7 @@ def parse_timedelta(ts_str: str):
     return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
-def download_media(posts, media_output_path, media_delay, retry_attempts=3):
+def download_media(posts, media_output_path, media_delay, retry_attempts=3, endpoint=None):
     for post in posts:
         if "media" not in post:
             continue
@@ -59,6 +59,7 @@ def download_media(posts, media_output_path, media_delay, retry_attempts=3):
                     continue
                 status = response.status_code
                 if status != 200:
+                    print(endpoint)
                     print(f"{response.reason}: {media_url}")
                     print(response.content)
                     if status == 403:
@@ -216,7 +217,7 @@ def main():
                 num_results = len(posts)
                 with open(result_path, "w") as f:
                     json.dump(posts, f)
-                download_media(posts, media_output_path, q_delay)
+                download_media(posts, media_output_path, q_delay, endpoint)
                 with open(completed_path, "w") as f:
                     json.dump({"num_results": num_results}, f)
                 process_time = time.time()
