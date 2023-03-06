@@ -68,7 +68,7 @@ python pytorch_gleam/parse/efpparse.py \
   --input_path ${output_path}_candidates.jsonl \
   --frame_path ${frame_path} \
   --output_path ${output_path}_candidates_parsed.jsonl \
-  --num_processes 8
+  --num_processes 12
 
 python pytorch_gleam/ex/gleam.py fit --config pg_examples/icwsm2023/infer/mcfmgcn-v36.yaml
 

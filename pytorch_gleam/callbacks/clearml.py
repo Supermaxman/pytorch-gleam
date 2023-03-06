@@ -3,7 +3,6 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import yaml
-from clearml import Task
 from pytorch_lightning.callbacks import Callback
 
 
@@ -19,6 +18,8 @@ class ClearMLTask(Callback):
         if self.initialized:
             return
         task_name = os.path.basename(trainer.default_root_dir)
+        from clearml import Task
+
         self.task = Task.init(project_name=self.project_name, task_name=task_name)
         self.initialized = True
 
