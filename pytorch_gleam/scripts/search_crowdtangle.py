@@ -217,7 +217,7 @@ def main():
                 num_results = len(posts)
                 with open(result_path, "w") as f:
                     json.dump(posts, f)
-                download_media(posts, media_output_path, q_delay, endpoint)
+                download_media(posts, media_output_path, q_delay, 3, endpoint)
                 with open(completed_path, "w") as f:
                     json.dump({"num_results": num_results}, f)
                 process_time = time.time()
