@@ -54,15 +54,25 @@ python pytorch_gleam/search/select_candidates.py \
   --output_path ${output_path}_candidates.jsonl \
   --min_score 1.0
 
+# ( sleep 7200 ; python pytorch_gleam/search/select_candidates.py \
+#   --data_path ${index_data_path} \
+#   --scores_path ${output_path}_rerank_scores \
+#   --output_path ${output_path}_candidates.jsonl \
+#   --min_score 1.0; python pytorch-gleam/pytorch_gleam/parse/efpparse.py \
+#   --input_path ${output_path}_candidates.jsonl \
+#   --frame_path ${frame_path} \
+#   --output_path ${output_path}_candidates_parsed.jsonl \
+#   --num_processes 8 ) &
+
 python pytorch-gleam/pytorch_gleam/parse/efpparse.py \
   --input_path ${output_path}_candidates.jsonl \
   --frame_path ${frame_path} \
   --output_path ${output_path}_candidates_parsed.jsonl \
   --num_processes 8
 
-gleam train --config pg_examples/icwsm2023/infer/mcfmgcn-v36.yaml
+( sleep 7200 ; python pytorch_gleam/ex/gleam.py fit --config pg_examples/icwsm2023/infer/mcfmgcn-v36.yaml ) &
 
-gleam predict --config pg_examples/icwsm2023/infer/mcfmgcn-v36-predict.yaml
+python pytorch_gleam/ex/gleam.py predict --config pg_examples/icwsm2023/infer/mcfmgcn-v36-predict.yaml
 
 
 python pytorch-gleam/pytorch_gleam/stance/frame_stance_ts.py \
