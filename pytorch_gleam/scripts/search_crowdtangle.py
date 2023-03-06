@@ -41,11 +41,11 @@ def download_media(posts, media_output_path, media_delay, retry_attempts=3, endp
             continue
         post_id = post["platformId"]
         for m_idx, media in enumerate(post["media"]):
-            if "full" not in media:
+            if "url" not in media:
                 continue
             if media["type"] != "photo":
                 continue
-            media_url = media["full"]
+            media_url = media["url"]
             media_id = f"{post_id}_{m_idx}"
             media_path = os.path.join(media_output_path, media_id)
             retry_count = 0
