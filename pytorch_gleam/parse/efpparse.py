@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import argparse
-import json
 from collections import Callable, defaultdict
 from multiprocessing import Pool
 from typing import Optional
 
 import numpy as np
 import spacy
+import ujson as json
 from tqdm import tqdm
 from transformers import AutoTokenizer
 

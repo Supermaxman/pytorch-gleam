@@ -70,7 +70,7 @@ python pytorch_gleam/parse/efpparse.py \
   --output_path ${output_path}_candidates_parsed.jsonl \
   --num_processes 8
 
-( sleep 7200 ; python pytorch_gleam/ex/gleam.py fit --config pg_examples/icwsm2023/infer/mcfmgcn-v36.yaml ) &
+python pytorch_gleam/ex/gleam.py fit --config pg_examples/icwsm2023/infer/mcfmgcn-v36.yaml
 
 python pytorch_gleam/ex/gleam.py predict --config pg_examples/icwsm2023/infer/mcfmgcn-v36-predict.yaml
 
