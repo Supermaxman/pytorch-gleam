@@ -53,7 +53,7 @@ def main():
     question_scores = defaultdict(list)
     for file in tqdm(sorted(os.listdir(args.scores_path), key=lambda x: int(x.split("-")[-1].split(".")[0]))):
         for ex in read_jsonl(os.path.join(args.scores_path, file)):
-            score = ex["pos_score"]
+            score = ex["pos_score"] - ex["neg_score"]
             if score > args.min_score:
                 q_id = ex["question_id"]
                 tweet_id = ex["id"]
