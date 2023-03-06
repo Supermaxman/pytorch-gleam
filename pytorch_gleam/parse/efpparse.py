@@ -260,7 +260,7 @@ def parse_tweets(tweet_path: str, num_processes: int, output_path: str):
             for ex_jsonl in tqdm(
                 p.imap_unordered(parse_tweet, read_jsonl(tweet_path)),
                 mininterval=1.0,
-                total=8161354,
+                total=46_159_226,
             ):
                 f.write(ex_jsonl)
 

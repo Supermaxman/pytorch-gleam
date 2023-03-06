@@ -13,10 +13,10 @@ index_data_path=${artifacts_path}/tweets-index-data
 small_index_path=${artifacts_path}/tweets-index-small
 frame_path=/shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-covid19-parsed.jsonl
 
+output_path=${artifacts_path}/${FILE_ID}/${FILE_ID}
+
 mkdir -p ${artifacts_path}
 mkdir -p ${artifacts_path}/${FILE_ID}
-
-output_path=${artifacts_path}/${FILE_ID}/${FILE_ID}
 mkdir -p ${index_data_path}
 
 gleam-tweet-to-jsonl \
