@@ -35,7 +35,7 @@ trainer:
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
 data:
-  class_path: pytorch_gleam.data.datasets.MultiClassFrameEdgeMoralityDataModule
+  class_path: pytorch_gleam.data.datasets.MultiClassFrameDataModule
   init_args:
     batch_size: 8
     max_seq_len: 96
@@ -44,20 +44,9 @@ data:
       Not Relevant: 0
       Accept: 1
       Reject: 2
-    morality_map:
-      subversion: 0
-      loyalty: 1
-      cheating: 2
-      care: 3
-      purity: 4
-      fairness: 5
-      harm: 6
-      betrayal: 7
-      authority: 8
-      degradation: 9
     tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
     num_workers: 8
-    frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-covid19-parsed.jsonl
-    train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-tparsed-train.jsonl
-    val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-tparsed-dev.jsonl
-    test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-tparsed-test.jsonl
+    frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames.json
+    train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-train.jsonl
+    val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev.jsonl
+    test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl
