@@ -39,8 +39,12 @@ trainer:
   num_sanity_val_steps: 1
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer/mcfmgcn-v36
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer/mcfmgcn-v37
   enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      project: icwsm2023
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
 data:
