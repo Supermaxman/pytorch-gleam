@@ -59,10 +59,22 @@ def download_media(posts, media_output_path, media_delay, retry_attempts=3):
                     continue
                 status = response.status_code
                 if status != 200:
-                    print(response)
+                    print(response.reason)
+                    if status == 403:
+                        break
                     time.sleep(10 * media_delay)
                     retry_count += 1
                     continue
+                content_type = response.headers.get("content-type")
+                content_types = content_type.split("/")[0]
+                if len(content_types) != 2:
+                    print(f"Unknown content type: {content_type}")
+                    break
+                if content_types[0] != "image":
+                    print(f"Not an image: {content_type}")
+                    break
+                image_type = content_types[1]
+                media_path = f"{media_path}.{image_type}"
                 with open(media_path, "wb") as f:
                     f.write(response.content)
                 time.sleep(media_delay)
