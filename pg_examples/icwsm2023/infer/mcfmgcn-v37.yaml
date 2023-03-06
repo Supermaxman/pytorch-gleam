@@ -44,7 +44,9 @@ trainer:
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
-      project: icwsm2023
+      project: "icwsm2023"
+      save_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer
+      dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
 data:
