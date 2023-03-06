@@ -35,6 +35,39 @@ def parse_timedelta(ts_str: str):
     return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
+def download_media(posts, media_output_path, media_delay, retry_attempts=3):
+    for post in posts:
+        if "media" not in post:
+            continue
+        post_id = post["platformId"]
+        for m_idx, media in enumerate(post["media"]):
+            if "url" not in media:
+                continue
+            if media["type"] != "photo":
+                continue
+            media_url = media["url"]
+            media_id = f"{post_id}_{m_idx}"
+            media_path = os.path.join(media_output_path, media_id)
+            retry_count = 0
+            while retry_count < retry_attempts and not os.path.exists(media_path):
+                try:
+                    response = requests.get(media_url, allow_redirects=True)
+                except Exception as e:
+                    print(e)
+                    time.sleep(10 * media_delay)
+                    retry_count += 1
+                    continue
+                status = response["status"]
+                if status != 200:
+                    print(response)
+                    time.sleep(10 * media_delay)
+                    retry_count += 1
+                    continue
+                with open(media_path, "wb") as f:
+                    f.write(response.content)
+                time.sleep(media_delay)
+
+
 def main():
     parser = argparse.ArgumentParser()
     # output_path = "/users/max/data/corpora/covid19-vaccine-facebook/raw-v3"
@@ -76,6 +109,7 @@ def main():
     default_search_query = f"({covid_query}) AND ({vaccine_query})"
 
     parser.add_argument("-o", "--output_path", required=True)
+    parser.add_argument("-mo", "--media_output_path", required=True)
     parser.add_argument("-s", "--start", required=True)
     parser.add_argument("-e", "--end", required=True)
     parser.add_argument("-q", "--query", default=default_search_query)
@@ -94,6 +128,7 @@ def main():
     start_date_str = args.start
     end_date_str = args.end
     output_path = args.output_path
+    media_output_path = args.media_output_path
     search_query = args.query
     language = args.language
     request_time_delta_str = args.request_time_delta
@@ -105,6 +140,9 @@ def main():
     secret_type = args.secrets_type
     endpoint_url = args.endpoint_url
     platform = args.platform
+
+    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(media_output_path, exist_ok=True)
 
     with open(secrets_path, "r") as f:
         secrets = json.load(f)[secret_type]
@@ -165,6 +203,7 @@ def main():
                 num_results = len(posts)
                 with open(result_path, "w") as f:
                     json.dump(posts, f)
+                download_media(posts, media_output_path, q_delay)
                 with open(completed_path, "w") as f:
                     json.dump({"num_results": num_results}, f)
                 process_time = time.time()
