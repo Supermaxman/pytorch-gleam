@@ -2,7 +2,7 @@ seed_everything: 0
 model:
   class_path: pytorch_gleam.modeling.models.MultiClassFrameGraphMoralityLanguageModel
   init_args:
-    learning_rate: 5e-4
+    learning_rate: 5e-5
     graphs: [semantic, emotion, lexical]
     gcn_size: 32
     gcn_depth: 3
@@ -39,8 +39,14 @@ trainer:
   num_sanity_val_steps: 1
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer/mcfmgcn-v36
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer/mcfmgcn-v48
   enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      project: "icwsm2023"
+      save_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer
+      dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer
   callbacks:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_gleam.callbacks.JsonlWriter
@@ -69,7 +75,7 @@ data:
       degradation: 9
     tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
     num_workers: 1
-    frame_path: data/frames-covid19-parsed.jsonl
+    frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-covid19-parsed.jsonl
     predict_path: /shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v11/artifacts/covid19-frame-predict-v3/covid19-frame-predict-v3_candidates_parsed.jsonl
     worker_estimate: 1
-    size_estimate: 46159226
+    size_estimate: 1322468
