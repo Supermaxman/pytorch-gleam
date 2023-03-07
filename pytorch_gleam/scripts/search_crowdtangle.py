@@ -5,8 +5,10 @@ import time
 from datetime import datetime, timedelta
 
 import requests
-from facebook_scraper import get_posts
+from facebook_scraper import get_posts, set_user_agent
 from tqdm import tqdm
+
+set_user_agent("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
 
 
 def format_parameters(endpoint, parameters):
@@ -80,10 +82,10 @@ def download_image(media_id, media_url, media_output_path, media_delay, retry_at
         content_type = response.headers.get("content-type")
         content_types = content_type.split("/")
         if len(content_types) != 2:
-            print(f"Unknown content type: {content_type}")
+            print(f"Unknown content type: {content_type} for {media_url}")
             break
         if content_types[0] != "image":
-            print(f"Not an image: {content_type}")
+            print(f"Not an image: {content_type} for {media_url}")
             break
         image_type = content_types[1]
         media_path = f"{media_path}.{image_type}"
