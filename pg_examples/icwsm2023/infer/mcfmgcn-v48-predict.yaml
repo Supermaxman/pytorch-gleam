@@ -55,7 +55,7 @@ trainer:
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameEdgeMoralityIterableDataModule
   init_args:
-    batch_size: 64
+    batch_size: 128
     max_seq_len: 96
     label_name: candidates
     label_map:
@@ -78,4 +78,4 @@ data:
     frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-covid19-parsed.jsonl
     predict_path: /shared/hltdir4/disk1/team/data/corpora/covid19-vaccine-twitter/v11/artifacts/covid19-frame-predict-v3/covid19-frame-predict-v3_candidates_parsed.jsonl
     worker_estimate: 1
-    size_estimate: 1322468
+    size_estimate: 36668907
