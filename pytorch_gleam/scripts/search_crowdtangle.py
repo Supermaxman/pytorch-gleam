@@ -110,6 +110,8 @@ def download_media(posts, media_output_path, media_delay, platform, retry_attemp
                 return post
             images = extra["images"]
             # TODO consider videos
+            if images is None:
+                return post
             if len(images) == 0:
                 return post
             for image_idx, media_url in enumerate(images):
