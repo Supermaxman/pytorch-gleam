@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timedelta
 
 import requests
+from facebook_scraper import get_posts
 from tqdm import tqdm
 
 
@@ -22,6 +23,13 @@ def datetime_range(start: datetime, end: datetime, step: timedelta):
         start += step
 
 
+def convert_datetime(post):
+    for key, value in list(post.items()):
+        if isinstance(value, datetime):
+            post[key] = value.isoformat()
+    return post
+
+
 def parse_timedelta(ts_str: str):
     p = [int(x) for x in ts_str.split(":")]
     hours = 0
@@ -35,51 +43,78 @@ def parse_timedelta(ts_str: str):
     return timedelta(hours=hours, minutes=minutes, seconds=seconds)
 
 
-def download_media(posts, media_output_path, media_delay, retry_attempts=3, endpoint=None):
+def download_facebook_extra(post, media_delay, retry_attempts=3):
+    retry_count = 0
+    while retry_count < retry_attempts:
+        try:
+            post_extra = list(get_posts(post_urls=[post["postUrl"]]))
+            post = convert_datetime(post_extra[0])
+        except Exception as e:
+            print(e)
+            time.sleep(10 * media_delay)
+            retry_count += 1
+            continue
+        return post
+    return None
+
+
+def download_image(media_id, media_url, media_output_path, media_delay, retry_attempts=3):
+    media_path = os.path.join(media_output_path, media_id)
+    retry_count = 0
+    while retry_count < retry_attempts and not os.path.exists(media_path):
+        try:
+            response = requests.get(media_url, allow_redirects=True)
+        except Exception as e:
+            print(e)
+            time.sleep(10 * media_delay)
+            retry_count += 1
+            continue
+        status = response.status_code
+        if status != 200:
+            print(f"{status} {response.reason}: {response.content} for {media_url}")
+            if status == 403:
+                break
+            time.sleep(10 * media_delay)
+            retry_count += 1
+            continue
+        content_type = response.headers.get("content-type")
+        content_types = content_type.split("/")
+        if len(content_types) != 2:
+            print(f"Unknown content type: {content_type}")
+            break
+        if content_types[0] != "image":
+            print(f"Not an image: {content_type}")
+            break
+        image_type = content_types[1]
+        media_path = f"{media_path}.{image_type}"
+        with open(media_path, "wb") as f:
+            f.write(response.content)
+        time.sleep(media_delay)
+    return media_path
+
+
+def download_media(posts, media_output_path, media_delay, platform, retry_attempts=3):
     for post in posts:
         if "media" not in post:
-            continue
+            return post
         post_id = post["platformId"]
-        for m_idx, media in enumerate(post["media"]):
-            if "url" not in media:
-                continue
-            if media["type"] != "photo":
-                continue
-            media_url = media["url"]
-            media_id = f"{post_id}_{m_idx}"
-            media_path = os.path.join(media_output_path, media_id)
-            retry_count = 0
-            while retry_count < retry_attempts and not os.path.exists(media_path):
-                try:
-                    response = requests.get(media_url, allow_redirects=True)
-                except Exception as e:
-                    print(e)
-                    time.sleep(10 * media_delay)
-                    retry_count += 1
-                    continue
-                status = response.status_code
-                if status != 200:
-                    print(endpoint)
-                    print(f"{response.reason}: {media_url}")
-                    print(response.content)
-                    if status == 403:
-                        break
-                    time.sleep(10 * media_delay)
-                    retry_count += 1
-                    continue
-                content_type = response.headers.get("content-type")
-                content_types = content_type.split("/")
-                if len(content_types) != 2:
-                    print(f"Unknown content type: {content_type}")
-                    break
-                if content_types[0] != "image":
-                    print(f"Not an image: {content_type}")
-                    break
-                image_type = content_types[1]
-                media_path = f"{media_path}.{image_type}"
-                with open(media_path, "wb") as f:
-                    f.write(response.content)
-                time.sleep(media_delay)
+        if platform == "facebook":
+            # urls turned out to be stale and not working, so we download the image from crawling
+            post["extra"] = download_facebook_extra(post, media_delay, retry_attempts)
+            extra = post["extra"]
+            if extra is None:
+                return post
+            if "images" not in extra:
+                return post
+            images = extra["images"]
+            # TODO consider videos
+            if len(images) == 0:
+                return post
+            for image_idx, media_url in enumerate(images):
+                media_id = f"{post_id}_image_{image_idx}"
+                download_image(media_id, media_url, media_output_path, media_delay, retry_attempts)
+        else:
+            raise NotImplementedError(f"Platform {platform} media not implemented")
 
 
 def main():
@@ -215,9 +250,9 @@ def main():
                 results = response["result"]
                 posts = results["posts"]
                 num_results = len(posts)
+                posts = download_media(posts, media_output_path, q_delay, platform)
                 with open(result_path, "w") as f:
                     json.dump(posts, f)
-                download_media(posts, media_output_path, q_delay, 3, endpoint)
                 with open(completed_path, "w") as f:
                     json.dump({"num_results": num_results}, f)
                 process_time = time.time()
