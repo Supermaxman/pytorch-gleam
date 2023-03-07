@@ -49,7 +49,7 @@ def download_facebook_extra(post, media_delay, retry_attempts=3):
     retry_count = 0
     while retry_count < retry_attempts:
         try:
-            post_extra = list(get_posts(post_urls=[post["postUrl"]], cookies="secrets/cookies.txt"))
+            post_extra = list(get_posts(post_urls=[post["postUrl"]], cookies="private/cookies.txt"))
             post = convert_datetime(post_extra[0])
         except Exception as e:
             print(f'{e}: {post["postUrl"]}')
