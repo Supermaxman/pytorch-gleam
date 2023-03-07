@@ -12,7 +12,6 @@ class MultiClassFrameEdgeMoralityBatchCollator(BatchCollator):
         pad_seq_len = self._calculate_seq_padding(examples)
 
         batch_size = len(examples)
-        print(batch_size)
         input_ids = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)
         attention_mask = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)
         token_type_ids = torch.zeros([batch_size, pad_seq_len], dtype=torch.long)
