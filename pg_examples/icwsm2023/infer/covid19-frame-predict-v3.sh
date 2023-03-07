@@ -70,10 +70,7 @@ python pytorch_gleam/parse/efpparse.py \
   --output_path ${output_path}_candidates_parsed.jsonl \
   --num_processes 12
 
-python pytorch_gleam/ex/gleam.py fit --config pg_examples/icwsm2023/infer/mcfmgcn-v36.yaml
-
-python pytorch_gleam/ex/gleam.py predict --config pg_examples/icwsm2023/infer/mcfmgcn-v36-predict.yaml
-
+python pytorch_gleam/ex/gleam.py predict --config pg_examples/icwsm2023/infer/mcfmgcn-v48-predict.yaml
 
 python pytorch_gleam/stance/frame_stance_ts.py \
   --input_path ${output_path}_stance-predictions \

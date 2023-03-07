@@ -53,7 +53,6 @@ def worker_init_fn(_):
 class MultiClassFrameEdgeMoralityIterableDataset(IterableDataset):
     def __init__(
         self,
-        batch_size: int,
         tokenizer,
         data_path: str,
         frame_path: str,
@@ -64,7 +63,6 @@ class MultiClassFrameEdgeMoralityIterableDataset(IterableDataset):
     ):
         super().__init__()
         self.tokenizer = tokenizer
-        self.batch_size = batch_size
         self.morality_map = morality_map
         self.frame_path = frame_path
         self.label_name = label_name
@@ -86,12 +84,12 @@ class MultiClassFrameEdgeMoralityIterableDataset(IterableDataset):
         print(f"Num examples: {self.num_examples}")
 
     def __len__(self):
-        length = int(ceil((self.num_examples / self.worker_estimate) / self.batch_size))
+        length = ceil(self.num_examples / self.worker_estimate)
         return length
 
     def __iter__(self):
-        for i_batch in batch(self._ex_iter(), self.batch_size):
-            yield i_batch
+        for ex in self._ex_iter():
+            yield ex
 
     def _ex_iter(self):
         ex_idx = 0
