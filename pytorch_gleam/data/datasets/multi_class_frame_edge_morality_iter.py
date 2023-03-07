@@ -1,4 +1,3 @@
-from itertools import islice
 from math import ceil
 from typing import Dict
 
@@ -10,15 +9,6 @@ from torch.utils.data import IterableDataset
 
 from pytorch_gleam.data.collators import MultiClassFrameEdgeMoralityBatchCollator
 from pytorch_gleam.data.datasets.base_datasets import BaseDataModule
-
-
-def batch(iterable, n):
-    try:
-        while True:
-            batch_iter = list(islice(iterable, n))
-            yield batch_iter
-    except StopIteration:
-        return
 
 
 def read_jsonl(path):
@@ -168,7 +158,6 @@ class MultiClassFrameEdgeMoralityIterableDataModule(BaseDataModule):
         self.size_estimate = size_estimate
 
         self.predict_dataset = MultiClassFrameEdgeMoralityIterableDataset(
-            batch_size=self.batch_size,
             tokenizer=self.tokenizer,
             data_path=self.predict_path,
             frame_path=self.frame_path,
