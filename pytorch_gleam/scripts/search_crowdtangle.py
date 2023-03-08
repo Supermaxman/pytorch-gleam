@@ -52,7 +52,15 @@ def download_facebook_extra(post, media_delay, retry_attempts=3):
             post_extra = list(get_posts(post_urls=[post["postUrl"]], cookies="private/cookies.txt"))
             post = convert_datetime(post_extra[0])
         except Exception as e:
+            error = str(e).lower().strip()
+            if "not found" in error:
+                # post was deleted or made private, skip
+                break
             print(f'{e}: {post["postUrl"]}')
+            if "temporarily blocked" in error:
+                # wait 15 minutes
+                time.sleep(1000 * media_delay)
+                continue
             time.sleep(10 * media_delay)
             retry_count += 1
             continue
@@ -75,6 +83,7 @@ def download_image(media_id, media_url, media_output_path, media_delay, retry_at
         if status != 200:
             print(f"{status} {response.reason}: {response.content} for {media_url}")
             if status == 403:
+                # no longer available, skip
                 break
             time.sleep(10 * media_delay)
             retry_count += 1
