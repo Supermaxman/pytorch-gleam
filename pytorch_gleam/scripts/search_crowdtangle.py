@@ -270,8 +270,6 @@ def main():
                     "offset": offset,
                 }
                 endpoint = format_parameters(endpoint_url, parameters)
-                print(endpoint)
-                exit()
                 try:
                     response = requests.get(endpoint).json()
                     response_time = time.time()
