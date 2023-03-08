@@ -58,12 +58,13 @@ def download_facebook_extra(post, media_delay, retry_attempts=3):
                 break
             print(f'{e}: {post["postUrl"]}')
             if "temporarily blocked" in error:
-                # wait 15 minutes
+                # wait 33 minutes
                 time.sleep(1000 * media_delay)
                 continue
             time.sleep(10 * media_delay)
             retry_count += 1
             continue
+        time.sleep(media_delay)
         return post
     return None
 
@@ -179,6 +180,7 @@ def main():
     parser.add_argument("-p", "--platform", default="facebook")
     parser.add_argument("-ln", "--language", default="en")
     parser.add_argument("-rd", "--request_delay", type=float, default=50.0 / 60.0)
+    parser.add_argument("-md", "--media_delay", type=float, default=2.0)
     parser.add_argument("-rc", "--request_max_count", type=int, default=100)
     parser.add_argument("-sp", "--secrets_path", default="private/secrets.json")
     parser.add_argument("-st", "--secrets_type", default="crowdtangle")
@@ -197,6 +199,7 @@ def main():
     query_time_format = args.query_time_format
     file_time_format = args.file_time_format
     q_delay = args.request_delay
+    m_delay = args.media_delay
     request_max_count = args.request_max_count
     secrets_path = args.secrets_path
     secret_type = args.secrets_type
@@ -263,7 +266,7 @@ def main():
                 results = response["result"]
                 posts = results["posts"]
                 num_results = len(posts)
-                posts = download_media(posts, media_output_path, q_delay, platform)
+                posts = download_media(posts, media_output_path, m_delay, platform)
                 with open(result_path, "w") as f:
                     json.dump(posts, f)
                 with open(completed_path, "w") as f:
