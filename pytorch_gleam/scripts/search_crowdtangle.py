@@ -4,6 +4,7 @@ import os
 import time
 from datetime import datetime, timedelta
 
+import numpy as np
 import requests
 from facebook_scraper import get_posts, set_user_agent
 from tqdm import tqdm
@@ -32,6 +33,17 @@ def convert_datetime(post):
     return post
 
 
+def random_delay(scale: float = 1.0, loc: float = 0.0, threshold: float = 2.0):
+    normal = np.random.normal(loc=0, scale=1.0)
+    normal = np.clip(normal, -threshold, threshold)
+    # 0 to threshold ** 2
+    # 0 to 4 for threshold = 2
+    d = normal**2
+    # 0 to 4 * scale + loc
+    d_scaled = loc + scale * d
+    return d_scaled
+
+
 def parse_timedelta(ts_str: str):
     p = [int(x) for x in ts_str.split(":")]
     hours = 0
@@ -48,6 +60,8 @@ def parse_timedelta(ts_str: str):
 def download_facebook_extra(post, media_delay, retry_attempts=3):
     retry_count = 0
     while retry_count < retry_attempts:
+        # 1 to 3 seconds + small random delay between repeat requests from 0 to 1 second
+        delay = media_delay + random_delay(scale=0.25)
         try:
             post_extra = list(get_posts(post_urls=[post["postUrl"]], cookies="private/cookies.txt"))
             post = convert_datetime(post_extra[0])
@@ -59,12 +73,12 @@ def download_facebook_extra(post, media_delay, retry_attempts=3):
             print(f'{e}: {post["postUrl"]}')
             if "temporarily blocked" in error:
                 # wait 33 minutes
-                time.sleep(1000 * media_delay)
+                time.sleep(3600 + 10 * delay)
                 continue
-            time.sleep(10 * media_delay)
+            time.sleep(10 * delay)
             retry_count += 1
             continue
-        time.sleep(media_delay)
+        time.sleep(delay)
         return post
     return None
 
@@ -73,11 +87,13 @@ def download_image(media_id, media_url, media_output_path, media_delay, retry_at
     media_path = os.path.join(media_output_path, media_id)
     retry_count = 0
     while retry_count < retry_attempts and not os.path.exists(media_path):
+        # small random delay from 0.5 to 1 seconds + small random delay between repeat requests from 0 to 1 second
+        delay = media_delay + random_delay(scale=0.25)
         try:
             response = requests.get(media_url, allow_redirects=True)
         except Exception as e:
             print(f"{e}: {media_url}")
-            time.sleep(10 * media_delay)
+            time.sleep(10 * delay)
             retry_count += 1
             continue
         status = response.status_code
@@ -86,7 +102,7 @@ def download_image(media_id, media_url, media_output_path, media_delay, retry_at
             if status == 403:
                 # no longer available, skip
                 break
-            time.sleep(10 * media_delay)
+            time.sleep(10 * delay)
             retry_count += 1
             continue
         content_type = response.headers.get("content-type")
@@ -101,18 +117,20 @@ def download_image(media_id, media_url, media_output_path, media_delay, retry_at
         media_path = f"{media_path}.{image_type}"
         with open(media_path, "wb") as f:
             f.write(response.content)
-        time.sleep(media_delay)
+        time.sleep(delay)
     return media_path
 
 
 def download_media(posts, media_output_path, media_delay, platform, retry_attempts=3):
     for post in posts:
+        # 1 to 2 seconds + random delay from 0 to 1 seconds
+        post_delay = media_delay + random_delay(scale=0.25)
         if "media" not in post:
             return post
         post_id = post["platformId"]
         if platform == "facebook":
             # urls turned out to be stale and not working, so we download the image from crawling
-            post["extra"] = download_facebook_extra(post, media_delay, retry_attempts)
+            post["extra"] = download_facebook_extra(post, post_delay, retry_attempts)
             extra = post["extra"]
             if extra is None:
                 return post
@@ -126,7 +144,9 @@ def download_media(posts, media_output_path, media_delay, platform, retry_attemp
                 return post
             for image_idx, media_url in enumerate(images):
                 media_id = f"{post_id}_image_{image_idx}"
-                download_image(media_id, media_url, media_output_path, media_delay, retry_attempts)
+                # small random delay from 0.5 to 1 seconds
+                image_delay = random_delay(scale=0.125, loc=0.5)
+                download_image(media_id, media_url, media_output_path, image_delay, retry_attempts)
         else:
             raise NotImplementedError(f"Platform {platform} media not implemented")
 
@@ -180,7 +200,7 @@ def main():
     parser.add_argument("-p", "--platform", default="facebook")
     parser.add_argument("-ln", "--language", default="en")
     parser.add_argument("-rd", "--request_delay", type=float, default=50.0 / 60.0)
-    parser.add_argument("-md", "--media_delay", type=float, default=2.0)
+    parser.add_argument("-md", "--media_delay", type=float, default=1.0)
     parser.add_argument("-rc", "--request_max_count", type=int, default=100)
     parser.add_argument("-sp", "--secrets_path", default="private/secrets.json")
     parser.add_argument("-st", "--secrets_type", default="crowdtangle")
@@ -266,7 +286,9 @@ def main():
                 results = response["result"]
                 posts = results["posts"]
                 num_results = len(posts)
-                posts = download_media(posts, media_output_path, m_delay, platform)
+                # 1 second delay between each post + random delay from 0 to 1
+                media_delay = m_delay + random_delay(scale=0.25)
+                posts = download_media(posts, media_output_path, media_delay, platform)
                 with open(result_path, "w") as f:
                     json.dump(posts, f)
                 with open(completed_path, "w") as f:
