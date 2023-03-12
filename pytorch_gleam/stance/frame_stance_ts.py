@@ -36,31 +36,25 @@ def main():
         time_lookup[tweet["id"]] = tweet["created_at"]
 
     print("loading scores")
-    scores = defaultdict(dict)
-    for file in tqdm(sorted(os.listdir(input_path), key=lambda x: int(x.split("-")[-1].split(".")[0]))):
-        for pred in read_jsonl(os.path.join(input_path, file)):
-            tweet_id, f_id = pred["ids"].split("|")
-            tf_scores = pred["scores"]
-            scores[tweet_id][f_id] = tf_scores
-
     frame_stats = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-    print("collecting tweet-frame scores")
-    for tweet_id, f_scores in tqdm(scores.items()):
-        ts = time_lookup[tweet_id]
-        # parse timestamp as datetime and convert to YYYY-MM-DD
-        # 2020-11-09T21:32:22.000Z
-        day = ts.split("T")[0]
-        count = count_lookup[tweet_id]
-        for f_id, fs_scores in f_scores.items():
-            _, accept_score, reject_score = fs_scores
+    for file in tqdm(sorted(os.listdir(input_path), key=lambda x: int(x.split("-")[-1].split(".")[0]))):
+        for pred in tqdm(read_jsonl(os.path.join(input_path, file)), total=36_668_907):
+            tweet_id, f_id = pred["ids"].split("|")
+            _, accept_score, reject_score = pred["scores"]
+            ts = time_lookup[tweet_id]
+            count = count_lookup[tweet_id]
+            # parse timestamp as datetime and convert to YYYY-MM-DD
+            # 2020-11-09T21:32:22.000Z
+            day = ts.split("T")[0]
             if accept_score > threshold or reject_score > threshold:
                 stance = "Accept"
                 if accept_score < reject_score:
                     stance = "Reject"
                 frame_stats[f_id][stance][day] += count
 
+    print("saving results")
     with open(output_path, "w") as f:
-        for f_id, stance_stats in frame_stats.items():
+        for f_id, stance_stats in tqdm(frame_stats.items()):
             for stance, day_stats in stance_stats.items():
                 for day, count in day_stats.items():
                     f.write(json.dumps({"f_id": f_id, "Date": day, "Stance": stance, "tweets": count}) + "\n")

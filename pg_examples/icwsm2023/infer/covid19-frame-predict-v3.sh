@@ -76,4 +76,4 @@ python pytorch_gleam/stance/frame_stance_ts.py \
   --input_path ${output_path}_stance-predictions \
   --tweet_path ${data_root}/${data_version}/tweets.jsonl \
   --output_path ${output_path}_stance-ts.jsonl \
-  --threshold 0.3
+  --threshold 0.3293
