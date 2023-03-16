@@ -82,6 +82,7 @@ class BasePreModel(pl.LightningModule, ABC):
         else:
             config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
             self.lm = self.pre_model_type.from_config(config)
+        self.outputs = []
 
     def configure_optimizers(self):
         params = self._get_optimizer_params(self.weight_decay)
@@ -129,16 +130,20 @@ class BasePreModel(pl.LightningModule, ABC):
         return optimizer_params
 
     def validation_step(self, batch, batch_idx, dataloader_idx=None):
-        return self.eval_step(batch, batch_idx, dataloader_idx)
+        batch_outputs = self.eval_step(batch, batch_idx, dataloader_idx)
+        self.outputs.append(batch_outputs)
 
     def test_step(self, batch, batch_idx, dataloader_idx=None):
-        return self.eval_step(batch, batch_idx, dataloader_idx)
+        batch_outputs = self.eval_step(batch, batch_idx, dataloader_idx)
+        self.outputs.append(batch_outputs)
 
-    def validation_epoch_end(self, outputs):
-        self.eval_epoch_end(outputs, "val")
+    def on_validation_epoch_end(self):
+        self.eval_epoch_end(self.outputs, "val")
+        self.outputs.clear()
 
-    def test_epoch_end(self, outputs):
-        self.eval_epoch_end(outputs, "test")
+    def on_test_epoch_end(self):
+        self.eval_epoch_end(self.outputs, "test")
+        self.outputs.clear()
 
     @abstractmethod
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
