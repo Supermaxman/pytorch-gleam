@@ -8,6 +8,7 @@ def main():
         pl.LightningDataModule,
         subclass_mode_model=True,
         subclass_mode_data=True,
+        save_config_overwrite=True,
     )
 
 
