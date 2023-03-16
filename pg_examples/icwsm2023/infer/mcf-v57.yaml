@@ -33,6 +33,9 @@ trainer:
       save_dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer
       dir: /shared/hltdir4/disk1/team/data/models/covid19-vaccine-misinfo-infer
   callbacks:
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameDataModule
