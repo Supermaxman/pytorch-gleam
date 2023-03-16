@@ -12,7 +12,8 @@ def main():
         save_config_kwargs={"overwrite": True},
         run=False,
     )
-    cli.model = torch.compile(cli.model)
+    torch._dynamo.config.verbose = True
+    cli.model = torch.compile(cli.model, dynamic=True)
     cli.trainer.fit(cli.model, datamodule=cli.datamodule)
 
 
