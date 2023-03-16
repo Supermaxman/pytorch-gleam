@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 import torch
+import torch._dynamo as dynamo
 from pytorch_lightning.cli import LightningCLI
 
 
@@ -12,7 +13,7 @@ def main():
         save_config_kwargs={"overwrite": True},
         run=False,
     )
-    torch._dynamo.config.verbose = True
+    dynamo.config.verbose = True
     cli.model = torch.compile(cli.model, dynamic=True)
     cli.trainer.fit(cli.model, datamodule=cli.datamodule)
 
