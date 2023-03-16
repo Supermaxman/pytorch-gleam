@@ -11,3 +11,5 @@ spacy==3.5.1
 ujson==5.7.0
 emoji==2.2.0
 rich==13.3.2
+unidecode==1.3.6
+py_lex==0.2.1

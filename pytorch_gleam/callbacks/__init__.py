@@ -5,4 +5,3 @@ from pytorch_gleam.callbacks.prediction import JsonlWriter
 from pytorch_gleam.callbacks.progress import TPURichProgressBar
 from pytorch_gleam.callbacks.results import JsonSaveResultsCallback
 from pytorch_gleam.callbacks.wandbc import WandbConfig
-from pytorch_gleam.callbacks.xla import XLAGraphMonitor
