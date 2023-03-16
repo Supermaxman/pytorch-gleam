@@ -1,4 +1,4 @@
-import math
+# import math
 from abc import ABC, abstractmethod
 from typing import Callable, Type, Union
 
@@ -91,16 +91,16 @@ class BasePreModel(pl.LightningModule, ABC):
             lr=self.learning_rate,
             weight_decay=self.weight_decay,
         )
-        scheduler = WarmupLR(
-            optimizer,
-            num_warmup_steps=int(math.ceil(self.lr_warm_up * self.trainer.estimated_stepping_batches)),
-            num_training_steps=self.trainer.estimated_stepping_batches,
-        )
+        # scheduler = WarmupLR(
+        #     optimizer,
+        #     num_warmup_steps=int(math.ceil(self.lr_warm_up * self.trainer.estimated_stepping_batches)),
+        #     num_training_steps=self.trainer.estimated_stepping_batches,
+        # )
         optimizer_dict = {
             "optimizer": optimizer,
             "lr_scheduler": {
                 # REQUIRED: The scheduler instance
-                "scheduler": scheduler,
+                # "scheduler": scheduler,
                 # The unit of the scheduler's step size, could also be 'step'.
                 # 'epoch' updates the scheduler on epoch end whereas 'step'
                 # updates it after a optimizer update.
