@@ -82,7 +82,6 @@ class BasePreModel(pl.LightningModule, ABC):
         else:
             config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
             self.lm = self.pre_model_type.from_config(config)
-        self.lm = torch.compile(self.lm)
         self.outputs = []
 
     def configure_optimizers(self):
