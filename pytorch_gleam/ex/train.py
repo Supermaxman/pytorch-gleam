@@ -14,7 +14,7 @@ def main():
         run=False,
     )
     dynamo.config.verbose = True
-    cli.model = torch.compile(cli.model, dynamic=True)
+    cli.model = torch.compile(cli.model)
     cli.trainer.fit(cli.model, datamodule=cli.datamodule)
 
 
