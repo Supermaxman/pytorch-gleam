@@ -34,6 +34,7 @@ data:
   init_args:
     batch_size: 8
     max_seq_len: 96
+    use_tpus: True
     label_name: labels
     label_map:
       Not Relevant: 0
