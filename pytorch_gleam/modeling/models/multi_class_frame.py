@@ -149,8 +149,18 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
         return results, labels, preds, t_ids
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
-        result = self.predict_step(batch, batch_idx, dataloader_idx)
-        return result
+        logits = self(batch)
+        loss = self.loss(logits, batch["labels"])
+        scores = self.score_func(logits)
+        results = {
+            # [bsize]
+            "ids": batch["ids"],
+            "labels": batch["labels"],
+            "logits": logits,
+            "loss": loss,
+            "scores": scores,
+        }
+        return results
 
     def forward(self, batch):
         input_ids = batch["input_ids"]
@@ -184,17 +194,7 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
         return result
 
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
-        logits = self(batch)
-        loss = self.loss(logits, batch["labels"])
-        scores = self.score_func(logits)
-        results = {
-            # [bsize]
-            "ids": batch["ids"],
-            "labels": batch["labels"],
-            "logits": logits,
-            "loss": loss,
-            "scores": scores,
-        }
+        results = self.eval_step(batch, batch_idx, dataloader_idx)
         return results
 
     @staticmethod
