@@ -1,0 +1,74 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.KbiLanguageModel
+  init_args:
+    learning_rate: 1e-6
+    lr_warm_up: 0.0
+    pre_model_name: bert-base-uncased
+    num_val_seeds: 1
+    ke:
+      class_path: pytorch_gleam.modeling.knowledge_embedding.TransMSEmbedding
+      init_args:
+        emb_size: 8
+        hidden_size: 32
+        gamma: 4.0
+        loss_norm: 1
+    infer:
+      class_path: pytorch_gleam.inference.MultiHopConsistencyScoring
+      init_args:
+        num_steps: 0
+        num_classes: 3
+    threshold:
+      class_path: pytorch_gleam.modeling.thresholds.MultiClassMultiLabelThresholdModule
+    metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: macro
+        num_classes: 3
+    m_metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: micro
+        num_classes: 3
+
+trainer:
+  max_epochs: 36
+  accumulate_grad_batches: 8
+  check_val_every_n_epoch: 4
+  deterministic: true
+  num_sanity_val_steps: 0
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/mm-stance/lacr-v1
+  enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      project: "mm-stance"
+      save_dir: /shared/hltdir4/disk1/team/data/models/clearml
+      dir: /shared/hltdir4/disk1/team/data/models/clearml
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_gleam.callbacks.WandbConfig
+data:
+  class_path: pytorch_gleam.data.datasets.KbiMisinfoStanceDataModule
+  init_args:
+    batch_size: 4
+    pos_samples: 1
+    neg_samples: 1
+    max_seq_len: 96
+    tokenizer_name: bert-base-uncased
+    num_workers: 8
+    label_name: labels
+    train_path: /shared/aifiles/disk1/media/twitter/v10/data/train.jsonl
+    train_misinfo_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
+    val_path: /shared/aifiles/disk1/media/twitter/v10/data/dev.jsonl
+    val_misinfo_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
+    test_path: /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl
+    test_misinfo_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json

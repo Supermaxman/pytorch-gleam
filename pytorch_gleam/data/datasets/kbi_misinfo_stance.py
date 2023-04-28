@@ -273,6 +273,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
         neg_samples: int = 1,
         num_relations: int = 2,
         preprocess_config: TweetPreprocessConfig = None,
+        label_name: str = "misinfo",
         *args,
         **kwargs
     ):
@@ -287,6 +288,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
         self.pos_samples = pos_samples
         self.neg_samples = neg_samples
         self.num_relations = num_relations
+        self.label_name = label_name
 
         if self.train_path is not None and self.train_misinfo_path is not None:
             self.train_dataset = KbiMisinfoStanceDataset(
@@ -296,6 +298,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 data_path=self.train_path,
                 misinfo_path=self.train_misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
         if self.val_path is not None and self.val_misinfo_path is not None:
             val_triplet_dataset = KbiMisinfoStanceDataset(
@@ -305,6 +308,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 data_path=self.val_path,
                 misinfo_path=self.val_misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
             val_infer_dataset = KbiMisinfoInferStanceDataset(
                 pos_samples=1,
@@ -313,6 +317,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 data_path=self.val_path,
                 misinfo_path=self.val_misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
 
             self.val_dataset = [val_triplet_dataset, val_infer_dataset]
@@ -324,6 +329,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 data_path=self.test_path,
                 misinfo_path=self.test_misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
             test_infer_dataset = KbiMisinfoInferStanceDataset(
                 pos_samples=1,
@@ -332,6 +338,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 data_path=[self.val_path, self.test_path],
                 misinfo_path=self.test_misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
 
             self.test_dataset = [test_triplet_dataset, test_infer_dataset]
@@ -343,6 +350,7 @@ class KbiMisinfoStanceDataModule(BaseDataModule):
                 data_path=[self.val_path, self.predict_path],
                 misinfo_path=self.predict_misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
 
     def create_collator(self):
