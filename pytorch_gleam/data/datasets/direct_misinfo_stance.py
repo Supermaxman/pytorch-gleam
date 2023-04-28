@@ -38,7 +38,13 @@ class DirectInferMisinfoStanceDataset(DirectMisinfoStanceDataset):
 
 class DirectMisinfoStanceDataModule(BaseDataModule):
     def __init__(
-        self, misinfo_path: str, tokenizer_name: str, preprocess_config: TweetPreprocessConfig = None, *args, **kwargs
+        self,
+        misinfo_path: str,
+        tokenizer_name: str,
+        preprocess_config: TweetPreprocessConfig = None,
+        label_name: str = "misinfo",
+        *args,
+        **kwargs
     ):
         super().__init__(*args, **kwargs)
         if preprocess_config is None:
@@ -46,30 +52,35 @@ class DirectMisinfoStanceDataModule(BaseDataModule):
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
         self.misinfo_path = misinfo_path
+        self.label_name = label_name
 
         if self.train_path is not None:
             self.train_dataset = DirectMisinfoStanceDataset(
                 data_path=self.train_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
         if self.val_path is not None:
             self.val_dataset = DirectInferMisinfoStanceDataset(
                 data_path=self.val_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
         if self.test_path is not None:
             self.test_dataset = DirectInferMisinfoStanceDataset(
                 data_path=self.test_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
         if self.predict_path is not None:
             self.predict_dataset = DirectInferMisinfoStanceDataset(
                 data_path=self.predict_path,
                 misinfo_path=self.misinfo_path,
                 preprocess_config=preprocess_config,
+                label_name=self.label_name,
             )
 
     def create_collator(self):
