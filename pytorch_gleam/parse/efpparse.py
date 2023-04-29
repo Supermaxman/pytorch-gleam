@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-from collections import Callable, defaultdict
+from collections import defaultdict
+from collections.abc import Callable
 from multiprocessing import Pool
 from typing import Optional
 
