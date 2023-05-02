@@ -19,7 +19,7 @@ model:
 
 trainer:
   max_epochs: 10
-  accumulate_grad_batches: 4
+  accumulate_grad_batches: 8
   check_val_every_n_epoch: 2
   deterministic: true
   num_sanity_val_steps: 1
@@ -45,7 +45,7 @@ trainer:
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameImageDataModule
   init_args:
-    batch_size: 8
+    batch_size: 4
     max_seq_len: 512
     label_name: labels
     label_map:
