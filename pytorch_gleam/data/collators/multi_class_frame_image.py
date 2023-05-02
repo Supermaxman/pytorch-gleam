@@ -22,7 +22,7 @@ class MultiClassFrameImageBatchCollator:
                 labels[ex_idx] = ex["label"]
             images.append(Image.open(ex["image_path"]).convert("RGB"))
             texts.append(ex["text"])
-        batch = self.processor(
+        data = self.processor(
             text=texts,
             images=images,
             return_tensors="pt",
@@ -30,6 +30,12 @@ class MultiClassFrameImageBatchCollator:
             truncation=True,
             max_length=self.max_seq_len,
         )
-        batch["ids"] = ids
-        batch["labels"] = labels
+        batch = {
+            "ids": ids,
+            "input_ids": data["input_ids"],
+            "attention_mask": data["attention_mask"],
+            "pixel_values": data["pixel_values"],
+            "pixel_mask": data["pixel_mask"],
+            "labels": labels,
+        }
         return batch
