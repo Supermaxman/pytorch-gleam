@@ -1,6 +1,6 @@
 seed_everything: 0
 model:
-  class_path: pytorch_gleam.modeling.models.MultiClassFrameImageLanguageModel
+  class_path: pytorch_gleam.modeling.models.MultiClassFrameImageBridgeTowerModel
   init_args:
     learning_rate: 1e-4
     lr_warm_up: 0.0

@@ -4,13 +4,13 @@ from typing import Dict, Optional
 import pytorch_lightning as pl
 import torch
 from torch.optim.lr_scheduler import LambdaLR
-from transformers import AutoConfig
+from transformers import AutoConfig, BridgeTowerModel
 
 from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.thresholds import ThresholdModule
 
 
-class MultiClassFrameImageLanguageModel(pl.LightningModule):
+class MultiClassFrameImageBridgeTowerModel(pl.LightningModule):
     def __init__(
         self,
         pre_model_name: str,
@@ -35,10 +35,10 @@ class MultiClassFrameImageLanguageModel(pl.LightningModule):
         self.lr_warm_up = lr_warm_up
         self.torch_cache_dir = torch_cache_dir
         if load_pre_model:
-            self.model = self.pre_model_type.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
+            self.model = BridgeTowerModel.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
         else:
             config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
-            self.model = self.pre_model_type.from_config(config)
+            self.model = BridgeTowerModel.from_config(config)
         self.outputs = []
 
         # noinspection PyUnresolvedReferences
