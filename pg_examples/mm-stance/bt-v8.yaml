@@ -55,7 +55,7 @@ data:
     processor_name: BridgeTower/bridgetower-base
     num_workers: 8
     skip_unknown_labels: true
-    frame_path: /shared/aifiles/disk1/media/twitter/v80/data/frames.json
-    train_path: /shared/aifiles/disk1/media/twitter/v80/data/train.jsonl
-    val_path: /shared/aifiles/disk1/media/twitter/v80/data/dev.jsonl
-    test_path: /shared/aifiles/disk1/media/twitter/v80/data/test.jsonl
+    frame_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
+    train_path: /shared/aifiles/disk1/media/twitter/v10/data/train.jsonl
+    val_path: /shared/aifiles/disk1/media/twitter/v10/data/dev.jsonl
+    test_path: /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl
