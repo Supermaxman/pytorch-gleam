@@ -23,6 +23,7 @@ from pytorch_gleam.modeling.models.multi_class_frame import (
     MultiClassFrameGraphMoralityLanguageModel,
     MultiClassFrameLanguageModel,
 )
+from pytorch_gleam.modeling.models.multi_class_frame_image import MultiClassFrameImageLanguageModel
 from pytorch_gleam.modeling.models.multi_label import MultiLabelLanguageModel
 from pytorch_gleam.modeling.models.nli_misinfo import NliMisinfoLanguageModel
 from pytorch_gleam.modeling.models.nli_text import NliTextLanguageModel
