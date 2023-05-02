@@ -1,16 +1,17 @@
 import math
+from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 import pytorch_lightning as pl
 import torch
 from torch.optim.lr_scheduler import LambdaLR
-from transformers import AutoConfig, BridgeTowerModel
+from transformers import AutoConfig, BridgeTowerModel, CLIPModel
 
 from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.thresholds import ThresholdModule
 
 
-class MultiClassFrameImageBridgeTowerModel(pl.LightningModule):
+class MultiClassFrameImageModel(pl.LightningModule, ABC):
     def __init__(
         self,
         pre_model_name: str,
@@ -19,14 +20,12 @@ class MultiClassFrameImageBridgeTowerModel(pl.LightningModule):
         metric: Metric,
         num_threshold_steps: int = 100,
         update_threshold: bool = False,
-        dropout_prob: float = 0.4,
+        dropout_prob: float = 0.1,
         learning_rate: float = 5e-4,
         weight_decay: float = 0.0,
         lr_warm_up: float = 0.1,
         load_pre_model: bool = True,
         torch_cache_dir: str = None,
-        *args,
-        **kwargs,
     ):
         super().__init__()
         self.pre_model_name = pre_model_name
@@ -34,22 +33,14 @@ class MultiClassFrameImageBridgeTowerModel(pl.LightningModule):
         self.weight_decay = weight_decay
         self.lr_warm_up = lr_warm_up
         self.torch_cache_dir = torch_cache_dir
-        if load_pre_model:
-            self.model = BridgeTowerModel.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
-        else:
-            config = AutoConfig.from_pretrained(pre_model_name, cache_dir=torch_cache_dir)
-            self.model = BridgeTowerModel.from_config(config)
+        self.load_pre_model = load_pre_model
         self.outputs = []
 
-        # noinspection PyUnresolvedReferences
-        self.hidden_size = self.model.config.hidden_size
         self.label_map = label_map
         self.num_classes = len(label_map)
         self.threshold = threshold
         self.num_threshold_steps = num_threshold_steps
         self.update_threshold = update_threshold
-        # 2 * hidden_size because we are concatenating the image and text pooled states
-        self.cls_layer = torch.nn.Linear(in_features=2 * self.hidden_size, out_features=self.num_classes)
         self.inv_label_map = {v: k for k, v in self.label_map.items()}
 
         self.f_dropout = torch.nn.Dropout(p=dropout_prob)
@@ -58,18 +49,9 @@ class MultiClassFrameImageBridgeTowerModel(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss(reduction="none")
         self.score_func = torch.nn.Softmax(dim=-1)
 
+    @abstractmethod
     def forward(self, batch):
-        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
-
-        # 'text_features' -> [bsize, seq_len, hidden_size]
-        # 'image_features' -> [bsize, img_seq_len, hidden_size]
-        # 'pooler_output' -> [bsize, 2 * hidden_size]
-        outputs = self.model(**model_batch)
-        pooled_output = outputs["pooler_output"]
-        pooled_output = self.f_dropout(pooled_output)
-        # [bsize, num_classes]
-        logits = self.cls_layer(pooled_output)
-        return logits
+        pass
 
     def eval_epoch_end(self, outputs, stage):
         loss = torch.cat([x["loss"] for x in outputs], dim=0).mean().cpu()
@@ -229,6 +211,138 @@ class MultiClassFrameImageBridgeTowerModel(pl.LightningModule):
     def on_test_epoch_end(self):
         self.eval_epoch_end(self.outputs, "test")
         self.outputs.clear()
+
+
+class MultiClassFrameImageBridgeTowerModel(MultiClassFrameImageModel):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if self.load_pre_model:
+            self.model = BridgeTowerModel.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+        else:
+            config = AutoConfig.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+            self.model = BridgeTowerModel.from_config(config)
+
+        # noinspection PyUnresolvedReferences
+        self.hidden_size = self.model.config.hidden_size
+
+        # 2 * hidden_size because we are concatenating the image and text pooled states
+        self.cls_layer = torch.nn.Linear(in_features=2 * self.hidden_size, out_features=self.num_classes)
+
+    def forward(self, batch):
+        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
+
+        # 'text_features' -> [bsize, seq_len, hidden_size]
+        # 'image_features' -> [bsize, img_seq_len, hidden_size]
+        # 'pooler_output' -> [bsize, 2 * hidden_size]
+        outputs = self.model(**model_batch)
+        pooled_output = outputs["pooler_output"]
+        pooled_output = self.f_dropout(pooled_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(pooled_output)
+        return logits
+
+
+class MultiClassFrameImageClipJointModel(MultiClassFrameImageModel):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if self.load_pre_model:
+            self.model = CLIPModel.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+        else:
+            config = AutoConfig.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+            self.model = CLIPModel.from_config(config)
+
+        self.hidden_size = self.model.config.projection_dim
+
+        self.cls_layer = torch.nn.Linear(in_features=2 * self.hidden_size, out_features=self.num_classes)
+
+    @abstractmethod
+    def forward(self, batch):
+        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
+
+        # 'text_embeds' -> [bsize, hidden_size]
+        # 'image_embeds' -> [bsize, hidden_size]
+        outputs = self.model(**model_batch)
+        text_embeds = outputs["text_embeds"]
+        image_embeds = outputs["image_embeds"]
+        pooled_output = torch.cat([text_embeds, image_embeds], dim=-1)
+        pooled_output = self.f_dropout(pooled_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(pooled_output)
+        return logits
+
+
+class MultiClassFrameImageClipTextModel(MultiClassFrameImageModel):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if self.load_pre_model:
+            self.model = CLIPModel.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+        else:
+            config = AutoConfig.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+            self.model = CLIPModel.from_config(config)
+
+        self.hidden_size = self.model.config.projection_dim
+
+        self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
+
+    @abstractmethod
+    def forward(self, batch):
+        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
+
+        # 'text_embeds' -> [bsize, hidden_size]
+        # 'image_embeds' -> [bsize, hidden_size]
+        outputs = self.model(**model_batch)
+        pooled_output = outputs["text_embeds"]
+        pooled_output = self.f_dropout(pooled_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(pooled_output)
+        return logits
+
+
+class MultiClassFrameImageClipImageModel(MultiClassFrameImageModel):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if self.load_pre_model:
+            self.model = CLIPModel.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+        else:
+            config = AutoConfig.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+            self.model = CLIPModel.from_config(config)
+
+        self.hidden_size = self.model.config.projection_dim
+
+        self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
+
+    @abstractmethod
+    def forward(self, batch):
+        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
+
+        # 'text_embeds' -> [bsize, hidden_size]
+        # 'image_embeds' -> [bsize, hidden_size]
+        outputs = self.model(**model_batch)
+        pooled_output = outputs["image_embeds"]
+        pooled_output = self.f_dropout(pooled_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(pooled_output)
+        return logits
 
 
 class WarmupLR(LambdaLR):

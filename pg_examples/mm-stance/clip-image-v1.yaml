@@ -1,10 +1,10 @@
 seed_everything: 0
 model:
-  class_path: pytorch_gleam.modeling.models.MultiClassFrameImageBridgeTowerModel
+  class_path: pytorch_gleam.modeling.models.MultiClassFrameImageClipImageModel
   init_args:
     learning_rate: 1e-4
     lr_warm_up: 0.0
-    pre_model_name: BridgeTower/bridgetower-base
+    pre_model_name: openai/clip-vit-large-patch14
     label_map:
       No_Stance: 0
       Accept: 1
@@ -25,7 +25,7 @@ trainer:
   num_sanity_val_steps: 1
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/mm-stance/bt-v2
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/mm-stance/bt-v1
   enable_checkpointing: false
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
@@ -52,10 +52,10 @@ data:
       No_Stance: 0
       Accept: 1
       Reject: 2
-    processor_name: BridgeTower/bridgetower-base
+    processor_name: openai/clip-vit-large-patch14
     num_workers: 8
     skip_unknown_labels: true
-    frame_path: /shared/aifiles/disk1/media/twitter/v20/data/frames.json
-    train_path: /shared/aifiles/disk1/media/twitter/v20/data/train.jsonl
-    val_path: /shared/aifiles/disk1/media/twitter/v20/data/dev.jsonl
-    test_path: /shared/aifiles/disk1/media/twitter/v20/data/test.jsonl
+    frame_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
+    train_path: /shared/aifiles/disk1/media/twitter/v10/data/train.jsonl
+    val_path: /shared/aifiles/disk1/media/twitter/v10/data/dev.jsonl
+    test_path: /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl

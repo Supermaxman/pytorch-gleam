@@ -35,7 +35,8 @@ class MultiClassFrameImageBatchCollator:
             "input_ids": data["input_ids"],
             "attention_mask": data["attention_mask"],
             "pixel_values": data["pixel_values"],
-            "pixel_mask": data["pixel_mask"],
             "labels": labels,
         }
+        if "pixel_mask" in data:
+            batch["pixel_mask"] = data["pixel_mask"]
         return batch
