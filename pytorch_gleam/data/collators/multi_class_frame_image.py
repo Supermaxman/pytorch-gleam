@@ -37,6 +37,8 @@ class MultiClassFrameImageBatchCollator:
             "pixel_values": data["pixel_values"],
             "labels": labels,
         }
+        if "token_type_ids" in data:
+            batch["token_type_ids"] = data["token_type_ids"]
         if "pixel_mask" in data:
             batch["pixel_mask"] = data["pixel_mask"]
         return batch

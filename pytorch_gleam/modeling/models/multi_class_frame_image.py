@@ -5,7 +5,7 @@ from typing import Dict, Optional
 import pytorch_lightning as pl
 import torch
 from torch.optim.lr_scheduler import LambdaLR
-from transformers import AutoConfig, BridgeTowerModel, CLIPModel
+from transformers import AutoConfig, BridgeTowerModel, CLIPModel, FlavaModel, ViltModel
 
 from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.thresholds import ThresholdModule
@@ -339,6 +339,70 @@ class MultiClassFrameImageClipImageModel(MultiClassFrameImageModel):
         # 'image_embeds' -> [bsize, hidden_size]
         outputs = self.model(**model_batch)
         pooled_output = outputs["image_embeds"]
+        pooled_output = self.f_dropout(pooled_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(pooled_output)
+        return logits
+
+
+class MultiClassFrameImageViltModel(MultiClassFrameImageModel):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if self.load_pre_model:
+            self.model = ViltModel.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+        else:
+            config = AutoConfig.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+            self.model = ViltModel.from_config(config)
+
+        self.hidden_size = self.model.config.hidden_size
+        self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
+
+    @abstractmethod
+    def forward(self, batch):
+        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
+
+        # 'text_embeds' -> [bsize, hidden_size]
+        # 'image_embeds' -> [bsize, hidden_size]
+        outputs = self.model(**model_batch)
+        pooled_output = outputs["pooler_output"]
+        pooled_output = self.f_dropout(pooled_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(pooled_output)
+        return logits
+
+
+class MultiClassFrameImageFlavaModel(MultiClassFrameImageModel):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if self.load_pre_model:
+            self.model = FlavaModel.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+        else:
+            config = AutoConfig.from_pretrained(self.pre_model_name, cache_dir=self.torch_cache_dir)
+            self.model = FlavaModel.from_config(config)
+
+        self.hidden_size = self.model.config.hidden_size
+        self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
+
+    @abstractmethod
+    def forward(self, batch):
+        model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
+
+        # 'image_embeddings' -> [bsize, img_seq_len, hidden_size]
+        # 'text_embeddings' -> [bsize, seq_len, hidden_size]
+        # 'multimodal_embeddings' -> [bsize, seq_len + img_seq_len, hidden_size]
+        outputs = self.model(**model_batch)
+        # cls embedding is first token
+        pooled_output = outputs["multimodal_embeddings"][:, 0, :]
         pooled_output = self.f_dropout(pooled_output)
         # [bsize, num_classes]
         logits = self.cls_layer(pooled_output)

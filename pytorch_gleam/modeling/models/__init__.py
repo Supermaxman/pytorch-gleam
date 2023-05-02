@@ -28,6 +28,8 @@ from pytorch_gleam.modeling.models.multi_class_frame_image import (
     MultiClassFrameImageClipImageModel,
     MultiClassFrameImageClipJointModel,
     MultiClassFrameImageClipTextModel,
+    MultiClassFrameImageFlavaModel,
+    MultiClassFrameImageViltModel,
 )
 from pytorch_gleam.modeling.models.multi_label import MultiLabelLanguageModel
 from pytorch_gleam.modeling.models.nli_misinfo import NliMisinfoLanguageModel
