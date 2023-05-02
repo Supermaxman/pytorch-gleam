@@ -2,7 +2,7 @@ seed_everything: 0
 model:
   class_path: pytorch_gleam.modeling.models.MultiClassFrameImageClipTextModel
   init_args:
-    learning_rate: 1e-4
+    learning_rate: 5e-5
     lr_warm_up: 0.0
     pre_model_name: openai/clip-vit-large-patch14
     label_map:
@@ -25,7 +25,7 @@ trainer:
   num_sanity_val_steps: 1
   accelerator: gpu
   devices: 1
-  default_root_dir: /shared/hltdir4/disk1/team/data/models/mm-stance/bt-v1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/mm-stance/clip-text-v1
   enable_checkpointing: false
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
