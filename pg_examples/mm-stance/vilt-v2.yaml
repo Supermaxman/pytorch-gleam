@@ -4,7 +4,7 @@ model:
   init_args:
     learning_rate: 3e-5
     lr_warm_up: 0.0
-    pre_model_name: dandelin/vilt-b32-finetuned-vqa
+    pre_model_name: dandelin/vilt-b32-mlm
     torch_cache_dir: /shared/aifiles/disk1/covid19/models/huggingface
     label_map:
       No_Stance: 0
@@ -47,13 +47,13 @@ data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameImageDataModule
   init_args:
     batch_size: 4
-    max_seq_len: 512
+    max_seq_len: 128
     label_name: labels
     label_map:
       No_Stance: 0
       Accept: 1
       Reject: 2
-    processor_name: dandelin/vilt-b32-finetuned-vqa
+    processor_name: dandelin/vilt-b32-mlm
     num_workers: 8
     skip_unknown_labels: true
     frame_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
