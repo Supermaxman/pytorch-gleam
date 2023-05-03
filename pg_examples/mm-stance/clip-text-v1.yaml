@@ -47,7 +47,7 @@ data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameImageDataModule
   init_args:
     batch_size: 4
-    max_seq_len: 512
+    max_seq_len: 128
     label_name: labels
     label_map:
       No_Stance: 0
