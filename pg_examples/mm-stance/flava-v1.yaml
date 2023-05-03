@@ -5,6 +5,7 @@ model:
     learning_rate: 3e-5
     lr_warm_up: 0.0
     pre_model_name: facebook/flava-full
+    torch_cache_dir: /shared/aifiles/disk1/covid19/models/huggingface
     label_map:
       No_Stance: 0
       Accept: 1
