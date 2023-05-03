@@ -265,7 +265,6 @@ class MultiClassFrameImageClipJointModel(MultiClassFrameImageModel):
 
         self.cls_layer = torch.nn.Linear(in_features=2 * self.hidden_size, out_features=self.num_classes)
 
-    @abstractmethod
     def forward(self, batch):
         model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
 
@@ -299,7 +298,6 @@ class MultiClassFrameImageClipTextModel(MultiClassFrameImageModel):
 
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
 
-    @abstractmethod
     def forward(self, batch):
         model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
 
@@ -331,7 +329,6 @@ class MultiClassFrameImageClipImageModel(MultiClassFrameImageModel):
 
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
 
-    @abstractmethod
     def forward(self, batch):
         model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
 
@@ -362,7 +359,6 @@ class MultiClassFrameImageViltModel(MultiClassFrameImageModel):
         self.hidden_size = self.model.config.hidden_size
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
 
-    @abstractmethod
     def forward(self, batch):
         model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
 
@@ -393,7 +389,6 @@ class MultiClassFrameImageFlavaModel(MultiClassFrameImageModel):
         self.hidden_size = self.model.config.hidden_size
         self.cls_layer = torch.nn.Linear(in_features=self.hidden_size, out_features=self.num_classes)
 
-    @abstractmethod
     def forward(self, batch):
         model_batch = {k: v for k, v in batch.items() if k not in {"ids", "labels"}}
 
