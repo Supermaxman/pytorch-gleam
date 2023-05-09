@@ -6,7 +6,7 @@ model:
     lr_warm_up: 0.0
     pre_model_name: BridgeTower/bridgetower-base
     label_map:
-      No Stance: 0
+      No_Stance: 0
       Accept: 1
       Reject: 2
     threshold:
@@ -49,7 +49,7 @@ data:
     max_seq_len: 512
     label_name: labels
     label_map:
-      No Stance: 0
+      No_Stance: 0
       Accept: 1
       Reject: 2
     processor_name: BridgeTower/bridgetower-base
