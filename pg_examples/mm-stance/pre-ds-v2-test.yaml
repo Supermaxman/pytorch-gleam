@@ -41,7 +41,6 @@ trainer:
         leave: true
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_gleam.callbacks.WandbConfig
-    - class_path: pytorch_gleam.callbacks.JsonlWriter
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameDataModule
   init_args:
