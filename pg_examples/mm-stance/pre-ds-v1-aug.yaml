@@ -53,4 +53,4 @@ data:
     num_workers: 8
     skip_unknown_labels: true
     frame_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
-    pred_path: /shared/aifiles/disk1/media/twitter/v10/data/train.jsonl
+    predict_path: /shared/aifiles/disk1/media/twitter/v10/data/train.jsonl
