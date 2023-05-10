@@ -46,7 +46,7 @@ trainer:
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameImageRelationDataModule
   init_args:
-    text_stance_path: /shared/hltdir4/disk1/team/data/models/mm-stance/pre-ds-v6/text-stance-preds.json
+    text_stance_path: /shared/hltdir4/disk1/team/data/models/mm-stance/pre-ds-v2/text-stance-preds.json
     # Sources in the format "Text Stance|Joint Stance|Image Stance"
     # where Image stance is inferred
     sources:
