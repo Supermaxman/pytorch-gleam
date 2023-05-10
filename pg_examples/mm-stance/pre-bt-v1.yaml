@@ -43,8 +43,25 @@ trainer:
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_gleam.callbacks.WandbConfig
 data:
-  class_path: pytorch_gleam.data.datasets.MultiClassFrameImageDataModule
+  class_path: pytorch_gleam.data.datasets.MultiClassFrameImageRelationDataModule
   init_args:
+    text_stance_path: /shared/hltdir4/disk1/team/data/models/mm-stance/pre-ds-v2/text-stance-preds.json
+    # Sources in the format "Text Stance|Joint Stance|Image Stance"
+    # where Image stance is inferred
+    sources:
+      - No_Stance|No_Stance|No_Stance
+      - No_Stance|Accept|Accept
+      - No_Stance|Reject|Reject
+      - Reject|Accept|Accept
+      - Accept|Reject|Reject
+    # Relations in the format "Text Stance|Joint Stance|Image Stance"
+    # where image & image stance is borrowed from source
+    relations:
+      - Accept|Accept|Accept
+      - Accept|Accept|No_Stance
+      - No_Stance|No_Stance|No_Stance
+      - Reject|Reject|Reject
+      - Reject|Reject|No_Stance
     batch_size: 4
     max_seq_len: 512
     label_name: labels

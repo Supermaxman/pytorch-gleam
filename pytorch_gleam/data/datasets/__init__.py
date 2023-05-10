@@ -15,7 +15,10 @@ from pytorch_gleam.data.datasets.multi_class_frame_edge_morality import MultiCla
 from pytorch_gleam.data.datasets.multi_class_frame_edge_morality_iter import (
     MultiClassFrameEdgeMoralityIterableDataModule,
 )
-from pytorch_gleam.data.datasets.multi_class_frame_image import MultiClassFrameImageDataModule
+from pytorch_gleam.data.datasets.multi_class_frame_image import (
+    MultiClassFrameImageDataModule,
+    MultiClassFrameImageRelationDataModule,
+)
 from pytorch_gleam.data.datasets.multi_class_misinfo_stance import MultiClassMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.multi_label import MultiLabelDataModule
 from pytorch_gleam.data.datasets.multi_turn_qa_frame import MultiTurnQAFrameDataModule
