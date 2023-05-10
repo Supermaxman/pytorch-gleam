@@ -101,9 +101,11 @@ class MultiClassFrameImageRelationDataset(MultiClassFrameImageDataset):
         relations: List[str] = None,
         sources: List[str] = None,
         text_stance_path: str = None,
+        keep_original: bool = False,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        self.keep_original = keep_original
         if relations is None:
             relations = []
         if sources is None:
@@ -154,6 +156,8 @@ class MultiClassFrameImageRelationDataset(MultiClassFrameImageDataset):
                                 "image_path": source["image_path"],
                             }
                         )
+            if self.keep_original:
+                self.examples.extend(self.orig_examples)
 
 
 class MultiClassFrameImageDataModule(BaseDataModule):
@@ -249,6 +253,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
         relations: List[str] = None,
         sources: List[str] = None,
         text_stance_path: str = None,
+        keep_original: bool = False,
         *args,
         **kwargs,
     ):
@@ -279,6 +284,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 relations=relations,
                 sources=sources,
                 text_stance_path=text_stance_path,
+                keep_original=keep_original,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
