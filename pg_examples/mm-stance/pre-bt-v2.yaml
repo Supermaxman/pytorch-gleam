@@ -18,7 +18,7 @@ model:
         num_classes: 3
 
 trainer:
-  max_epochs: 5
+  max_epochs: 1
   accumulate_grad_batches: 32
   check_val_every_n_epoch: 1
   val_check_interval: 1000
