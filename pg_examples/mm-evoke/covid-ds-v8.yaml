@@ -57,6 +57,7 @@ data:
     num_workers: 8
     skip_unknown_labels: false
     all_frames: true
+    gold_ratio: 0.2
     frame_path:
       - /shared/aifiles/disk1/media/twitter/v10/data/frames.json
     train_path:

@@ -1,4 +1,5 @@
 import os
+import random
 from collections import defaultdict
 from typing import Any, Dict, List, Union
 
@@ -24,6 +25,7 @@ class MultiClassFrameImageDataset(Dataset):
         preprocess_config: TweetPreprocessConfig,
         skip_unknown_labels: bool = False,
         all_frames: bool = False,
+        gold_ratio: float = None,
     ):
         super().__init__()
         self.frame_path = frame_path
@@ -32,6 +34,7 @@ class MultiClassFrameImageDataset(Dataset):
         self.preprocess_config = preprocess_config
         self.skip_unknown_labels = skip_unknown_labels
         self.all_frames = all_frames
+        self.gold_ratio = gold_ratio
 
         self.examples = []
         if isinstance(self.frame_path, str):
@@ -55,6 +58,24 @@ class MultiClassFrameImageDataset(Dataset):
             for stage, stage_path in enumerate(data_path):
                 self.read_path(stage_path, stage)
 
+        if self.gold_ratio is not None:
+            self.examples = self.gold_sample(self.examples)
+
+    def gold_sample(self, examples):
+        gold_examples = [ex for ex in examples if ex["gold"]]
+        non_gold_examples = [ex for ex in examples if not ex["gold"]]
+        num_gold = len(gold_examples)
+        num_non_gold = len(non_gold_examples)
+        total = num_gold + num_non_gold
+        assert num_gold > 0, "No gold examples found"
+        assert num_non_gold > 0, "No non-gold examples found"
+        non_gold_ratio = 1.0 - self.gold_ratio
+        gold_ratio = num_gold / total
+        if gold_ratio < self.gold_ratio:
+            random.shuffle(non_gold_examples)
+            non_gold_examples = non_gold_examples[: int(non_gold_ratio * num_gold)]
+        return gold_examples + non_gold_examples
+
     def read_path(self, data_path, stage=0):
         data_folder = os.path.dirname(data_path)
         for ex in read_jsonl(data_path):
@@ -68,7 +89,9 @@ class MultiClassFrameImageDataset(Dataset):
                     frame_text = frame["text"]
                     text = f"Frame: {frame_text} Tweet: {ex_text}"
                     ex_label = 0
+                    gold = False
                     if f_id in ex[self.label_name]:
+                        gold = True
                         f_label = ex[self.label_name][f_id]
                         f_label = f_label.replace(" ", "_")
                         if f_label in self.label_map:
@@ -80,6 +103,7 @@ class MultiClassFrameImageDataset(Dataset):
                         "label": ex_label,
                         "text": text,
                         "image_path": os.path.join(data_folder, ex_images[0]),
+                        "gold": gold,
                     }
                     self.examples.append(example)
             else:
@@ -98,6 +122,7 @@ class MultiClassFrameImageDataset(Dataset):
                         "label": ex_label,
                         "text": text,
                         "image_path": os.path.join(data_folder, ex_images[0]),
+                        "gold": True,
                     }
                     self.examples.append(example)
 
@@ -196,6 +221,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
         preprocess_config: TweetPreprocessConfig = None,
         skip_unknown_labels: bool = False,
         all_frames: bool = False,
+        gold_ratio: float = None,
         *args,
         **kwargs,
     ):
@@ -214,6 +240,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
         self.predict_path = predict_path
         self.frame_path = frame_path
         self.skip_unknown_labels = skip_unknown_labels
+        self.gold_ratio = gold_ratio
 
         if self.train_path is not None:
             self.train_dataset = MultiClassFrameImageDataset(
@@ -224,6 +251,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
+                gold_ratio=self.gold_ratio,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
@@ -282,6 +310,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
         text_stance_path: str = None,
         keep_original: bool = False,
         all_frames: bool = False,
+        gold_ratio: float = None,
         *args,
         **kwargs,
     ):
@@ -300,6 +329,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
         self.predict_path = predict_path
         self.frame_path = frame_path
         self.skip_unknown_labels = skip_unknown_labels
+        self.gold_ratio = gold_ratio
 
         if self.train_path is not None:
             self.train_dataset = MultiClassFrameImageRelationDataset(
@@ -314,6 +344,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 text_stance_path=text_stance_path,
                 keep_original=keep_original,
                 all_frames=self.all_frames,
+                gold_ratio=self.gold_ratio,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
