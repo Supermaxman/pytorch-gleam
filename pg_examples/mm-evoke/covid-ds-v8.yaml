@@ -55,8 +55,8 @@ data:
       No_Stance: 1
     tokenizer_name: bert-base-uncased
     num_workers: 8
-    skip_unknown_labels: false
     all_frames: true
+    skip_unknown_labels: false
     frame_path:
       - /shared/aifiles/disk1/media/twitter/v10/data/frames.json
     train_path:
