@@ -23,6 +23,7 @@ class MultiClassFrameImageDataset(Dataset):
         label_map: Dict[str, int],
         preprocess_config: TweetPreprocessConfig,
         skip_unknown_labels: bool = False,
+        all_frames: bool = False,
     ):
         super().__init__()
         self.frame_path = frame_path
@@ -30,6 +31,7 @@ class MultiClassFrameImageDataset(Dataset):
         self.label_map = label_map
         self.preprocess_config = preprocess_config
         self.skip_unknown_labels = skip_unknown_labels
+        self.all_frames = all_frames
 
         self.examples = []
         if isinstance(self.frame_path, str):
@@ -61,23 +63,43 @@ class MultiClassFrameImageDataset(Dataset):
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
             ex_text = preprocess_tweet(ex_text, self.preprocess_config)
             ex_images = ex["images"]
-            for f_id, f_label in ex[self.label_name].items():
-                frame = self.frames[f_id]
-                frame_text = frame["text"]
-                ex_label = 0
-                f_label = f_label.replace(" ", "_")
-                if f_label in self.label_map:
-                    ex_label = self.label_map[f_label]
-                elif self.skip_unknown_labels:
-                    continue
-                text = f"Frame: {frame_text} Tweet: {ex_text}"
-                example = {
-                    "ids": f"{ex_id}|{f_id}",
-                    "label": ex_label,
-                    "text": text,
-                    "image_path": os.path.join(data_folder, ex_images[0]),
-                }
-                self.examples.append(example)
+            if self.all_frames:
+                for f_id, frame in self.frames.items():
+                    frame_text = frame["text"]
+                    text = f"Frame: {frame_text} Tweet: {ex_text}"
+                    ex_label = 0
+                    if f_id in ex[self.label_name]:
+                        f_label = ex[self.label_name][f_id]
+                        f_label = f_label.replace(" ", "_")
+                        if f_label in self.label_map:
+                            ex_label = self.label_map[f_label]
+                        elif self.skip_unknown_labels:
+                            continue
+                    example = {
+                        "ids": f"{ex_id}|{f_id}",
+                        "label": ex_label,
+                        "text": text,
+                        "image_path": os.path.join(data_folder, ex_images[0]),
+                    }
+                    self.examples.append(example)
+            else:
+                for f_id, f_label in ex[self.label_name].items():
+                    frame = self.frames[f_id]
+                    frame_text = frame["text"]
+                    ex_label = 0
+                    f_label = f_label.replace(" ", "_")
+                    if f_label in self.label_map:
+                        ex_label = self.label_map[f_label]
+                    elif self.skip_unknown_labels:
+                        continue
+                    text = f"Frame: {frame_text} Tweet: {ex_text}"
+                    example = {
+                        "ids": f"{ex_id}|{f_id}",
+                        "label": ex_label,
+                        "text": text,
+                        "image_path": os.path.join(data_folder, ex_images[0]),
+                    }
+                    self.examples.append(example)
 
     def __len__(self):
         return len(self.examples)
@@ -173,6 +195,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
         predict_path: Union[str, List[str]] = None,
         preprocess_config: TweetPreprocessConfig = None,
         skip_unknown_labels: bool = False,
+        all_frames: bool = False,
         *args,
         **kwargs,
     ):
@@ -183,7 +206,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
         self.label_map = label_map
         self.processor_name = processor_name
         self.processor = AutoProcessor.from_pretrained(self.processor_name)
-
+        self.all_frames = all_frames
         self.label_name = label_name
         self.train_path = train_path
         self.val_path = val_path
@@ -200,6 +223,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
@@ -209,6 +233,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.test_path is not None:
             self.test_dataset = MultiClassFrameImageDataset(
@@ -218,6 +243,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.predict_path is not None:
             self.predict_dataset = MultiClassFrameImageDataset(
@@ -227,6 +253,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
 
     def create_collator(self):
@@ -254,6 +281,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
         sources: List[str] = None,
         text_stance_path: str = None,
         keep_original: bool = False,
+        all_frames: bool = False,
         *args,
         **kwargs,
     ):
@@ -264,7 +292,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
         self.label_map = label_map
         self.processor_name = processor_name
         self.processor = AutoProcessor.from_pretrained(self.processor_name)
-
+        self.all_frames = all_frames
         self.label_name = label_name
         self.train_path = train_path
         self.val_path = val_path
@@ -285,6 +313,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 sources=sources,
                 text_stance_path=text_stance_path,
                 keep_original=keep_original,
+                all_frames=self.all_frames,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
@@ -294,6 +323,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.test_path is not None:
             self.test_dataset = MultiClassFrameImageDataset(
@@ -303,6 +333,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.predict_path is not None:
             self.predict_dataset = MultiClassFrameImageDataset(
@@ -312,6 +343,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
 
     def create_collator(self):
