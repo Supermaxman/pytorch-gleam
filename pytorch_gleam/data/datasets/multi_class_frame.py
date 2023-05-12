@@ -21,6 +21,7 @@ class MultiClassFrameDataset(Dataset):
         label_map: Dict[str, int],
         preprocess_config: TweetPreprocessConfig,
         skip_unknown_labels: bool = False,
+        all_frames: bool = False,
     ):
         super().__init__()
         self.frame_path = frame_path
@@ -29,6 +30,7 @@ class MultiClassFrameDataset(Dataset):
         self.label_map = label_map
         self.preprocess_config = preprocess_config
         self.skip_unknown_labels = skip_unknown_labels
+        self.all_frames = all_frames
 
         self.examples = []
         if isinstance(self.frame_path, str):
@@ -59,26 +61,49 @@ class MultiClassFrameDataset(Dataset):
             ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
             ex_text = preprocess_tweet(ex_text, self.preprocess_config)
 
-            for f_id, f_label in ex[self.label_name].items():
-                frame = self.frames[f_id]
-                frame_text = frame["text"]
-                ex_label = 0
-                f_label = f_label.replace(" ", "_")
-                if f_label in self.label_map:
-                    ex_label = self.label_map[f_label]
-                elif self.skip_unknown_labels:
-                    continue
-                token_data = self.tokenizer(frame_text, ex_text)
-                example = {
-                    "ids": f"{ex_id}|{f_id}",
-                    "label": ex_label,
-                    "input_ids": token_data["input_ids"],
-                    "attention_mask": token_data["attention_mask"],
-                }
-                if "token_type_ids" in token_data:
-                    example["token_type_ids"] = token_data["token_type_ids"]
+            if self.all_frames:
+                for f_id, frame in self.frames.items():
+                    frame_text = frame["text"]
+                    ex_label = 0
+                    if f_id in ex[self.label_name]:
+                        f_label = ex[self.label_name][f_id]
+                        f_label = f_label.replace(" ", "_")
+                        if f_label in self.label_map:
+                            ex_label = self.label_map[f_label]
+                        elif self.skip_unknown_labels:
+                            continue
+                    token_data = self.tokenizer(frame_text, ex_text)
+                    example = {
+                        "ids": f"{ex_id}|{f_id}",
+                        "label": ex_label,
+                        "input_ids": token_data["input_ids"],
+                        "attention_mask": token_data["attention_mask"],
+                    }
+                    if "token_type_ids" in token_data:
+                        example["token_type_ids"] = token_data["token_type_ids"]
 
-                self.examples.append(example)
+                    self.examples.append(example)
+            else:
+                for f_id, f_label in ex[self.label_name].items():
+                    frame = self.frames[f_id]
+                    frame_text = frame["text"]
+                    ex_label = 0
+                    f_label = f_label.replace(" ", "_")
+                    if f_label in self.label_map:
+                        ex_label = self.label_map[f_label]
+                    elif self.skip_unknown_labels:
+                        continue
+                    token_data = self.tokenizer(frame_text, ex_text)
+                    example = {
+                        "ids": f"{ex_id}|{f_id}",
+                        "label": ex_label,
+                        "input_ids": token_data["input_ids"],
+                        "attention_mask": token_data["attention_mask"],
+                    }
+                    if "token_type_ids" in token_data:
+                        example["token_type_ids"] = token_data["token_type_ids"]
+
+                    self.examples.append(example)
 
     def __len__(self):
         return len(self.examples)
@@ -107,6 +132,7 @@ class MultiClassFrameDataModule(BaseDataModule):
         predict_path: Union[str, List[str]] = None,
         preprocess_config: TweetPreprocessConfig = None,
         skip_unknown_labels: bool = False,
+        all_frames: bool = False,
         *args,
         **kwargs,
     ):
@@ -115,6 +141,7 @@ class MultiClassFrameDataModule(BaseDataModule):
             preprocess_config = TweetPreprocessConfig()
         self.preprocess_config = preprocess_config
         self.label_map = label_map
+        self.all_frames = all_frames
 
         self.label_name = label_name
         self.train_path = train_path
@@ -133,6 +160,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameDataset(
@@ -143,6 +171,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.test_path is not None:
             self.test_dataset = MultiClassFrameDataset(
@@ -153,6 +182,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
         if self.predict_path is not None:
             self.predict_dataset = MultiClassFrameDataset(
@@ -163,6 +193,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 label_map=self.label_map,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
+                all_frames=self.all_frames,
             )
 
     def create_collator(self):

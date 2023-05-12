@@ -189,7 +189,6 @@ class MultiClassFrameImageDataModule(BaseDataModule):
         label_map: Dict[str, int],
         processor_name: str,
         frame_path: Union[str, List[str]],
-        *args,
         train_path: Union[str, List[str]] = None,
         val_path: Union[str, List[str]] = None,
         test_path: Union[str, List[str]] = None,
@@ -197,6 +196,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
         preprocess_config: TweetPreprocessConfig = None,
         skip_unknown_labels: bool = False,
         all_frames: bool = False,
+        *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
