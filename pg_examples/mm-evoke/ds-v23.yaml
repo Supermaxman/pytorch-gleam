@@ -1,0 +1,64 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.MultiClassFrameLanguageModel
+  init_args:
+    learning_rate: 3e-5
+    lr_warm_up: 0.0
+    pre_model_name: bert-base-uncased
+    label_map:
+      Not_Relevant: 0
+      Relevant: 1
+    threshold:
+      class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
+    metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: macro
+        num_classes: 2
+
+trainer:
+  max_epochs: 10
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 2
+  deterministic: true
+  num_sanity_val_steps: 1
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /shared/aifiles/disk1/covid19/models/mm-evoke/ds-v23
+  enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      name: ds-v23
+      project: mm-evoke
+      save_dir: /shared/aifiles/disk1/covid19/logs/mm-evoke
+      dir: /shared/aifiles/disk1/covid19/logs/mm-evoke
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_gleam.callbacks.WandbConfig
+data:
+  class_path: pytorch_gleam.data.datasets.MultiClassFrameDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    label_name: labels
+    label_map:
+      Not_Relevant: 0
+      Accept: 1
+      Reject: 1
+      No_Stance: 1
+    tokenizer_name: bert-base-uncased
+    num_workers: 8
+    skip_unknown_labels: false
+    all_frames: true
+    gold_ratio: 0.5
+    frame_path: /shared/aifiles/disk1/media/twitter/v10/data/frames.json
+    train_path: /shared/aifiles/disk1/media/twitter/v10/data/train.jsonl
+    val_path: /shared/aifiles/disk1/media/twitter/v10/data/dev.jsonl
+    test_path: /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl
