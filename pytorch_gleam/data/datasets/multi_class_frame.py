@@ -200,6 +200,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
+                gold_ratio=self.gold_ratio,
             )
         if self.test_path is not None:
             self.test_dataset = MultiClassFrameDataset(
@@ -211,6 +212,7 @@ class MultiClassFrameDataModule(BaseDataModule):
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
+                gold_ratio=self.gold_ratio,
             )
         if self.predict_path is not None:
             self.predict_dataset = MultiClassFrameDataset(
