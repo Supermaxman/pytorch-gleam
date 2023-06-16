@@ -366,6 +366,7 @@ class MultiClassFrameImageRelationDataModule(BaseDataModule):
                 keep_original=keep_original,
                 all_frames=self.all_frames,
                 gold_ratio=self.gold_ratio,
+                count=True,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
