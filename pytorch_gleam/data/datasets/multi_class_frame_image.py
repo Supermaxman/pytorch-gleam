@@ -26,6 +26,7 @@ class MultiClassFrameImageDataset(Dataset):
         skip_unknown_labels: bool = False,
         all_frames: bool = False,
         gold_ratio: float = None,
+        count: bool = False,
     ):
         super().__init__()
         self.frame_path = frame_path
@@ -35,6 +36,9 @@ class MultiClassFrameImageDataset(Dataset):
         self.skip_unknown_labels = skip_unknown_labels
         self.all_frames = all_frames
         self.gold_ratio = gold_ratio
+        self.count = count
+        self.counts = defaultdict(int)
+        self.total = 0
 
         self.examples = []
         if isinstance(self.frame_path, str):
@@ -185,7 +189,7 @@ class MultiClassFrameImageRelationDataset(MultiClassFrameImageDataset):
                 ex_joint_stance = self.inv_label_map[ex["label"]]
                 ex_text_joint = f"{ex_text_stance}|{ex_joint_stance}"
                 if ex_text_joint in self.sources:
-                    source_images[f_id][self.sources[ex_text_joint]].append(ex)
+                    source_images[f_id][self.sources[ex_text_joint]].append(((ex_text_stance, ex_joint_stance), ex))
 
             for ex in self.orig_examples:
                 ex_id = ex["ids"]
@@ -194,7 +198,7 @@ class MultiClassFrameImageRelationDataset(MultiClassFrameImageDataset):
                 ex_joint_stance = self.inv_label_map[ex["label"]]
                 ex_text_joint = f"{ex_text_stance}|{ex_joint_stance}"
                 for ex_img_stance in self.relations[ex_text_joint]:
-                    for source in source_images[f_id][ex_img_stance]:
+                    for (source_text_stance, source_joint_stance), source in source_images[f_id][ex_img_stance]:
                         self.examples.append(
                             {
                                 "ids": f"{ex_id}||{source['ids']}",
@@ -203,6 +207,20 @@ class MultiClassFrameImageRelationDataset(MultiClassFrameImageDataset):
                                 "image_path": source["image_path"],
                             }
                         )
+                        if self.count:
+                            # We have ex_text_stance, ex_joint_stance, ex_img_stance,
+                            # AND source_text_stance, source_joint_stance
+                            # where ex_image_stance applies for both ex and source
+                            self.total += 1
+                            # TODO count up
+                            self.counts[
+                                f"{ex_joint_stance}|{ex_text_stance}|{ex_img_stance}|"
+                                + f"{source_joint_stance}|{source_text_stance}"
+                            ] += 1
+            if self.count:
+                print(f"Total synthetic examples: {self.total}")
+                for k, v in self.counts.items():
+                    print(f"{k}|{v}")
             if self.keep_original:
                 self.examples.extend(self.orig_examples)
 
@@ -252,6 +270,7 @@ class MultiClassFrameImageDataModule(BaseDataModule):
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
                 gold_ratio=self.gold_ratio,
+                count=True,
             )
         if self.val_path is not None:
             self.val_dataset = MultiClassFrameImageDataset(
