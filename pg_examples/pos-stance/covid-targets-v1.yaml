@@ -42,6 +42,7 @@ trainer:
         leave: true
     - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
     - class_path: pytorch_gleam.callbacks.WandbConfig
+    - class_path: pytorch_gleam.callbacks.JsonlWriter
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameDataModule
   init_args:
@@ -59,3 +60,4 @@ data:
     train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-train-target.jsonl
     val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev-target.jsonl
     test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test-target.jsonl
+    predict_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test-target.jsonl

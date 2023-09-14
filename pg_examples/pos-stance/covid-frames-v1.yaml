@@ -59,3 +59,4 @@ data:
     train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-train.jsonl
     val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev.jsonl
     test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl
+    predict_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl
