@@ -1,0 +1,63 @@
+seed_everything: 0
+model:
+  class_path: pytorch_gleam.modeling.models.MultiClassFrameLanguageModel
+  init_args:
+    learning_rate: 1e-5
+    lr_warm_up: 0.0
+    pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+    label_map:
+      No_Stance: 0
+      Accept: 1
+      Reject: 2
+    threshold:
+      class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
+    metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: macro
+        num_classes: 3
+
+trainer:
+  max_epochs: 20
+  accumulate_grad_batches: 4
+  check_val_every_n_epoch: 2
+  deterministic: true
+  num_sanity_val_steps: 1
+  accelerator: gpu
+  devices: 1
+  default_root_dir: /shared/hltdir4/disk1/team/data/models/pos-stance/covid-claims-v3
+  enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      project: "pos-stance"
+      save_dir: /shared/hltdir4/disk1/team/data/models/clearml
+      dir: /shared/hltdir4/disk1/team/data/models/clearml
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: step
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+      init_args:
+        leave: true
+    - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+    - class_path: pytorch_gleam.callbacks.WandbConfig
+    - class_path: pytorch_gleam.callbacks.JsonlWriter
+data:
+  class_path: pytorch_gleam.data.datasets.MultiClassFrameDataModule
+  init_args:
+    batch_size: 8
+    max_seq_len: 128
+    label_name: claim_labels
+    label_map:
+      No_Stance: 0
+      Accept: 1
+      Reject: 2
+    tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
+    num_workers: 8
+    skip_unknown_labels: true
+    frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-problem-claims.json
+    train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-train-claims.jsonl
+    val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev-claims.jsonl
+    test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test-claims.jsonl
+    predict_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test-claims.jsonl
