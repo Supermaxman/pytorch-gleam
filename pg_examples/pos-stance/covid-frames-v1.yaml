@@ -30,7 +30,7 @@ trainer:
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
-      project: "mm-stance"
+      project: "pos-stance"
       save_dir: /shared/hltdir4/disk1/team/data/models/clearml
       dir: /shared/hltdir4/disk1/team/data/models/clearml
   callbacks:
