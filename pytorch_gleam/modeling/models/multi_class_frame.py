@@ -152,6 +152,7 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
         logits = self(batch)
         loss = self.loss(logits, batch["labels"])
         scores = self.score_func(logits)
+        preds = self.threshold(scores)
         results = {
             # [bsize]
             "ids": batch["ids"],
@@ -159,6 +160,7 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
             "logits": logits,
             "loss": loss,
             "scores": scores,
+            "preds": preds,
         }
         return results
 
