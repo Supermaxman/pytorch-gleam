@@ -47,7 +47,7 @@ data:
   init_args:
     batch_size: 8
     max_seq_len: 128
-    label_name: labels
+    label_name: claim_labels
     label_map:
       No_Stance: 0
       Accept: 1
