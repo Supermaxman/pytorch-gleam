@@ -5,6 +5,7 @@ model:
     learning_rate: 1e-5
     lr_warm_up: 0.0
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+    update_threshold: True
     label_map:
       No_Stance: 0
       Accept: 1
