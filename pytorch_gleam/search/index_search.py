@@ -44,10 +44,10 @@ def main():
         q_hits = searcher.batch_search(queries=batch_q_txt, qids=batch_q_ids, k=args.top_k, threads=args.threads)
         for q_id, hits in q_hits.items():
             for rank, hit in enumerate(hits[: args.top_k], start=1):
-                tweet_id = hit.docid
-                if tweet_id not in scores:
-                    scores[tweet_id] = []
-                scores[tweet_id].append(q_id)
+                post_id = hit.docid
+                if post_id not in scores:
+                    scores[post_id] = []
+                scores[post_id].append(q_id)
 
     with open(args.output_path, "w") as f:
         json.dump(scores, f)
