@@ -207,16 +207,16 @@ class RerankBert(pl.LightningModule):
                 + "\n"
             )
 
-    def _eval_epoch_end(self, outputs, name):
+    def _eval_epoch_end(self, name):
         if self.file is not None:
             self.file.close()
             self.file = None
 
-    def validation_epoch_end(self, outputs):
-        self._eval_epoch_end(outputs, "val")
+    def on_validation_epoch_end(self, trainer, pl_module):
+        self._eval_epoch_end("val")
 
-    def test_epoch_end(self, outputs):
-        self._eval_epoch_end(outputs, "test")
+    def on_test_epoch_start(self, trainer, pl_module):
+        self._eval_epoch_end("test")
 
 
 def main():
