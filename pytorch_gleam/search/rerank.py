@@ -212,10 +212,10 @@ class RerankBert(pl.LightningModule):
             self.file.close()
             self.file = None
 
-    def on_validation_epoch_end(self, trainer, pl_module):
+    def on_validation_epoch_end(self):
         self._eval_epoch_end("val")
 
-    def on_test_epoch_end(self, trainer, pl_module):
+    def on_test_epoch_end(self):
         self._eval_epoch_end("test")
 
 
