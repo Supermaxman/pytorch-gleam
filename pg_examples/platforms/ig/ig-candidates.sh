@@ -50,15 +50,13 @@ python pytorch_gleam/search/rerank.py \
  --max_seq_len 128 \
  --gpus 0
 
-python pytorch_gleam/search/rerank_format.py \
-  --input_path ${output_path}_rerank_scores \
-  --output_path ${output_path}_rerank_scores.json
-
-# minimum number of tweets for each frame
-# minimum relevance score for each frame
-
 python pytorch_gleam/search/select_candidates.py \
   --data_path ${data_root}/${data_version}/posts.jsonl \
   --scores_path ${output_path}_rerank_scores \
   --output_path ${output_path}_candidates.jsonl \
-  --min_score 2.0
+  --min_score 6.0 \
+  --count 516581
+
+wc -l ${output_path}_candidates.jsonl
+
+echo ${output_path}_candidates.jsonl

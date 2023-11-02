@@ -2,6 +2,7 @@ import argparse
 import os
 from collections import defaultdict
 
+import numpy as np
 import ujson as json
 from tqdm import tqdm
 
@@ -64,10 +65,21 @@ def main():
 
     print("Collecting candidates for each post...")
     post_candidates = defaultdict(dict)
+    qc = defaultdict(int)
     for q_id, q_rel in tqdm(question_scores.items()):
         for rank, (t_score, post_id) in enumerate(q_rel, start=1):
             p_candidates = post_candidates[post_id]
             p_candidates[q_id] = {"rank": rank, "score": t_score}
+            qc[q_id] += 1
+
+    print(f"Questions: {len(question_scores):,}")
+    print(f"Candidates: {len(post_candidates):,}")
+    print(f"Questions with candidates: {len(qc):,}")
+    q_counts = [v for v in qc.values()]
+    print(f"Avg candidates per question: {np.mean(q_counts):.2f}")
+    print(f"Median candidates per question: {np.median(q_counts):.2f}")
+    print(f"Max candidates per question: {np.max(q_counts):,}")
+    print(f"Min candidates per question: {np.min(q_counts):,}")
 
     print("Writing candidate posts...")
     write_jsonl(collect_posts(args.data_path, post_candidates, args.count), args.output_path)
