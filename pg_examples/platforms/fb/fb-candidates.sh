@@ -46,7 +46,7 @@ python pytorch_gleam/search/rerank.py \
  --scores_path ${output_path}_bm25_scores.json \
  --output_path ${output_path}_rerank_scores \
  --pre_model_name nboost/pt-biobert-base-msmarco \
- --batch_size 64 \
+ --batch_size 256 \
  --max_seq_len 128 \
  --gpus 0
 
@@ -54,7 +54,9 @@ python pytorch_gleam/search/select_candidates.py \
   --data_path ${data_root}/${data_version}/posts.jsonl \
   --scores_path ${output_path}_rerank_scores \
   --output_path ${output_path}_candidates.jsonl \
-  --min_score 2.0 \
+  --max_count 20 \
   --count 8735966
+
+wc -l ${output_path}_candidates.jsonl
 
 echo ${output_path}_candidates.jsonl
