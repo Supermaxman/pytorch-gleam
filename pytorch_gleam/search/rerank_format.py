@@ -6,11 +6,26 @@ from collections import defaultdict
 import torch
 
 
+def read_jsonl(path):
+    with open(path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    ex = json.loads(line)
+                    yield ex
+                except Exception as e:
+                    print(e)
+
+
 def load_predictions(input_path):
     pred_list = []
     for file_name in os.listdir(input_path):
         if file_name.endswith(".pt"):
             preds = torch.load(os.path.join(input_path, file_name))
+            pred_list.extend(preds)
+        if file_name.endswith(".jsonl"):
+            preds = read_jsonl(os.path.join(input_path, file_name))
             pred_list.extend(preds)
 
     question_scores = defaultdict(lambda: defaultdict(dict))

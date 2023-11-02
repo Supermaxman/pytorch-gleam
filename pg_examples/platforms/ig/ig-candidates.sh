@@ -44,7 +44,7 @@ python pytorch_gleam/search/rerank.py \
  --index_path ${index_data_path} \
  --questions_path ${frame_path} \
  --scores_path ${output_path}_bm25_scores.json \
- --output_path ${output_path}_rerank_scores.json \
+ --output_path ${output_path}_rerank_scores \
  --pre_model_name nboost/pt-biobert-base-msmarco \
  --batch_size 64 \
  --max_seq_len 128 \
