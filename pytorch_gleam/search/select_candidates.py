@@ -25,15 +25,8 @@ def write_jsonl(data, path):
             f.write(json_data + "\n")
 
 
-def get_posts(dir_path):
-    for file_name in os.listdir(dir_path):
-        file_path = os.path.join(dir_path, file_name)
-        for ex in read_jsonl(file_path):
-            yield ex
-
-
-def collect_posts(dir_path, post_candidates):
-    for post in tqdm(get_posts(dir_path), total=46_159_226):
+def collect_posts(file_path, post_candidates, total=None):
+    for post in tqdm(read_jsonl(file_path), total=total):
         post_id = post["id"]
         if post_id not in post_candidates:
             continue
@@ -47,6 +40,7 @@ def main():
     parser.add_argument("-sc", "--scores_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-mis", "--min_score", default=0.0, type=float)
+    parser.add_argument("-c", "--count", default=None, type=int)
     args = parser.parse_args()
 
     print("Loading scores...")
@@ -76,7 +70,7 @@ def main():
             p_candidates[q_id] = {"rank": rank, "score": t_score}
 
     print("Writing candidate posts...")
-    write_jsonl(collect_posts(args.data_path, post_candidates), args.output_path)
+    write_jsonl(collect_posts(args.data_path, post_candidates, args.count), args.output_path)
 
 
 if __name__ == "__main__":

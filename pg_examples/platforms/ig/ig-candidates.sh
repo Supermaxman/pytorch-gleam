@@ -58,8 +58,7 @@ python pytorch_gleam/search/rerank_format.py \
 # minimum relevance score for each frame
 
 python pytorch_gleam/search/select_candidates.py \
-  --index_path ${index_data_path} \
-  --scores_path ${output_path}_rerank_scores.json \
+  --data_path ${data_root}/${data_version}/posts.jsonl \
+  --scores_path ${output_path}_rerank_scores \
   --output_path ${output_path}_candidates.jsonl \
-  --min_rank 10 \
   --min_score 2.0
