@@ -54,7 +54,7 @@ python pytorch_gleam/search/select_candidates.py \
   --data_path ${data_root}/${data_version}/posts.jsonl \
   --scores_path ${output_path}_rerank_scores \
   --output_path ${output_path}_candidates.jsonl \
-  --min_score 6.0 \
+  --max_count 20 \
   --count 516581
 
 wc -l ${output_path}_candidates.jsonl

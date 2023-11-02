@@ -40,7 +40,7 @@ def main():
     parser.add_argument("-i", "--data_path", required=True)
     parser.add_argument("-sc", "--scores_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
-    parser.add_argument("-mis", "--min_score", default=0.0, type=float)
+    parser.add_argument("-mis", "--min_score", default=None, type=float)
     parser.add_argument("-mac", "--max_count", default=None, type=int)
     parser.add_argument("-c", "--count", default=None, type=int)
     args = parser.parse_args()
@@ -50,7 +50,7 @@ def main():
     for file in tqdm(sorted(os.listdir(args.scores_path), key=lambda x: int(x.split("-")[-1].split(".")[0]))):
         for ex in read_jsonl(os.path.join(args.scores_path, file)):
             score = ex["pos_score"] - ex["neg_score"]
-            if score > args.min_score:
+            if args.min_score is None or score > args.min_score:
                 q_id = ex["question_id"]
                 post_id = ex["id"]
                 question_scores[q_id].append((score, post_id))
