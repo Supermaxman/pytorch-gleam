@@ -277,7 +277,8 @@ def main():
     )
 
     trainer = pl.Trainer(
-        gpus=gpus,
+        accelerator="gpu",
+        devices=gpus,
         max_epochs=0,
         deterministic=deterministic,
     )
