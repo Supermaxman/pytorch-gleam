@@ -41,6 +41,7 @@ def main():
     parser.add_argument("-sc", "--scores_path", required=True)
     parser.add_argument("-o", "--output_path", required=True)
     parser.add_argument("-mis", "--min_score", default=0.0, type=float)
+    parser.add_argument("-mac", "--max_count", default=None, type=int)
     parser.add_argument("-c", "--count", default=None, type=int)
     args = parser.parse_args()
 
@@ -61,7 +62,7 @@ def main():
             # (score, post_id)
             key=lambda x: x[0],
             reverse=True,
-        )
+        )[0 : args.max_count]
 
     print("Collecting candidates for each post...")
     post_candidates = defaultdict(dict)
@@ -74,7 +75,6 @@ def main():
 
     print(f"Questions: {len(question_scores):,}")
     print(f"Candidates: {len(post_candidates):,}")
-    print(f"Questions with candidates: {len(qc):,}")
     q_counts = [v for v in qc.values()]
     print(f"Avg candidates per question: {np.mean(q_counts):.2f}")
     print(f"Median candidates per question: {np.median(q_counts):.2f}")
