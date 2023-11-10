@@ -167,7 +167,7 @@ def main():
         f"This experiment involves: {description}",
         "The initial configuration file for this experiment is:",
         f"```yaml\n{config_str}```",
-        f"The hyperparameters to optimize are: {hyperparameter_names.join(', ')}",
+        f"The hyperparameters to optimize are: {', '.join(hyperparameter_names)}",
         "Please begin to propose new hyperparameters to optimize the experiment.",
         "You can run the experiment with the given hyperparameters by using the `run` tool.",
         f"Please {direction} the {metric} metric.",
