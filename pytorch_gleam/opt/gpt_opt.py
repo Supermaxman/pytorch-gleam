@@ -289,26 +289,24 @@ def main():
     ]
     messages.append({"role": "user", "content": "\n".join(user_prompts)})
 
-    tools = [
-        {
-            "type": "function",
-            "function": {
-                "name": "run",
-                "description": "Run the experiment with the given hyperparameters.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        h: {
-                            "type": t,
-                            "description": f"The value for the {h} hyperparameter.",
-                        }
-                        for (h, t) in hyperparameter_names_types
-                    },
-                    "required": hyperparameter_names,
+    run_tool = {
+        "type": "function",
+        "function": {
+            "name": "run",
+            "description": "Run the experiment with the given hyperparameters.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    h: {
+                        "type": t,
+                        "description": f"The value for the {h} hyperparameter.",
+                    }
+                    for (h, t) in hyperparameter_names_types
                 },
+                "required": hyperparameter_names,
             },
         },
-    ]
+    }
 
     with open(output, "w") as fo:
         start_idx = get_ex_idx(config_path)
@@ -320,7 +318,7 @@ def main():
             # TODO add @retry
             # TODO could fail
             chat_completion = client.chat.completions.create(
-                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="run", tools=tools
+                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice=run_tool
             )
             choice = chat_completion.choices[0]
             # TODO could fail
@@ -371,7 +369,7 @@ def main():
             # TODO could fail
             # also have the model discuss the results and what was learned
             chat_completion = client.chat.completions.create(
-                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none", tools=tools
+                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none"
             )
             choice = chat_completion.choices[0]
             message = choice.message
