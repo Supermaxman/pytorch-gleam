@@ -82,7 +82,18 @@ def print_message(message):
         print(colored(f"user: {message['content']}\n", role_to_color[message["role"]]))
     elif message["role"] == "assistant" and message.get("tool_calls"):
         # TODO improve formatting
-        print(colored(f"assistant: {message['tool_calls']}\n", role_to_color[message["role"]]))
+        tool_calls = message["tool_calls"]
+        lines = ["assistant:"]
+        for tool_call in tool_calls:
+            lines.append(f"  tool ({tool_call.function.name}):")
+            try:
+                hyperparameters = json.loads(tool_call.function.arguments)
+                for k, v in hyperparameters.items():
+                    lines.append(f"    {k}: {v}")
+            except json.decoder.JSONDecodeError:
+                hyperparameters = tool_call.function.arguments
+                lines.append(f"    {hyperparameters}")
+        print(colored("\n".join(lines) + "\n", role_to_color[message["role"]]))
     elif message["role"] == "assistant":
         print(colored(f"assistant: {message['content']}\n", role_to_color[message["role"]]))
     elif message["role"] == "tool":
