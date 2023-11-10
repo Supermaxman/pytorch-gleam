@@ -38,6 +38,15 @@ def get_new_ex_path(config_path: str, i: int):
     return new_config_path
 
 
+def prune_config(config: Dict[str, str], skip_config_keys: set):
+    for k, v in list(config.items()):
+        if k in skip_config_keys:
+            del config[k]
+        elif isinstance(v, dict):
+            prune_config(v, skip_config_keys)
+    return config
+
+
 # recursively update the config with the hyperparameters if they match any keys in the config
 def update_config(config: Dict[str, str], hyperparameters: Dict[str, str], ex_name: str, logs_path=None, project=None):
     for k, v in config.items():
@@ -177,6 +186,32 @@ def main():
         ],
         help="List of hyperparameters to optimize.",
     )
+    parser.add_argument(
+        "--skip_config_keys",
+        nargs="+",
+        default=[
+            "class_path",
+            "seed_everything",
+            "threshold",
+            "check_val_every_n_epoch",
+            "deterministic",
+            "num_sanity_val_steps",
+            "accelerator",
+            "devices",
+            "default_root_dir",
+            "enable_checkpointing",
+            "logger",
+            "callbacks",
+            "label_name",
+            "num_workers",
+            "frame_path",
+            "train_path",
+            "val_path",
+            "test_path",
+            "predict_path",
+        ],
+        help="List of hyperparameters to optimize.",
+    )
     parser.add_argument("--config", type=str, required=True, help="Path to the experiment configuration file.")
     parser.add_argument("--seed", type=int, default=0, help="Random seed.")
     parser.add_argument("--org", type=str, default="hltri", help="Organization to use for wandb.")
@@ -194,6 +229,7 @@ def main():
     seed = args.seed
     hyperparameter_names_types = [h.split(":") for h in args.hyperparameters]
     hyperparameter_names = [h for (h, _) in hyperparameter_names_types]
+    skip_config_keys = set(args.skip_config_keys)
     org = args.org
     metric = args.metric
     direction = args.direction
@@ -202,7 +238,9 @@ def main():
 
     # TODO add skippable keys so model doesn't see unnecessary information
     with open(config_path, "r") as f:
-        config_str = f.read()
+        config = yaml.safe_load(f)
+    config = prune_config(config, skip_config_keys)
+    config_str = yaml.dump(config)
 
     client = OpenAI()
 
