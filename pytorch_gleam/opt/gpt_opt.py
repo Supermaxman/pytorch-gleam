@@ -45,9 +45,7 @@ def update_config(config: Dict[str, str], hyperparameters: Dict[str, str], ex_na
         elif isinstance(v, dict):
             config[k], logs_path, project = update_config(config[k], hyperparameters, ex_name, logs_path, project)
         elif k == "default_root_dir":
-            print(v)
             path, _ = os.path.split(v)
-            print(path)
             config[k] = os.path.join(path, ex_name)
         elif k == "logger":
             logs_path = config[k]["init_args"]["save_dir"]
@@ -104,9 +102,8 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
 
     except subprocess.CalledProcessError as e:
         # TODO possibly include stdout
-        outputs = e.stderr.decode()
         # TODO handle errors better
-        return outputs
+        outputs = e.stderr.decode()
     print(outputs)
 
     return outputs
@@ -211,12 +208,11 @@ def main():
         if choice.finish_reason == "tool_calls":
             message = choice.message
             messages.append(
-                # {
-                #     "role": "assistant",
-                #     "tool_calls": message.tool_calls,
-                #     "content": "",  # hack to get the tool calls to show up
-                # }
-                message
+                {
+                    "role": "assistant",
+                    "tool_calls": message.tool_calls,
+                    "content": "",  # hack to get the tool calls to show up
+                }
             )
             for tool_call in message.tool_calls:
                 if tool_call.function.name == "run":
