@@ -50,6 +50,7 @@ def prune_config(config: Dict[str, str], skip_config_keys: set):
                 elif isinstance(v2, dict):
                     prune_config(v2, skip_config_keys)
                 config[k2] = v2
+            del config[k]
         elif isinstance(v, dict):
             prune_config(v, skip_config_keys)
     return config
