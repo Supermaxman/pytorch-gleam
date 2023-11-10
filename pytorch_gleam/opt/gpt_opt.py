@@ -161,12 +161,12 @@ def main():
         "--hyperparameters",
         nargs="+",
         default=[
-            "learning_rate:float",
+            "learning_rate:number",
             "batch_size:integer",
             "accumulate_grad_batches:integer",
-            "lr_warm_up:float",
+            "lr_warm_up:number",
             "max_epochs:integer",
-            "weight_decay:float",
+            "weight_decay:number",
         ],
         help="List of hyperparameters to optimize.",
     )
