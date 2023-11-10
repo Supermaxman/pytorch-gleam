@@ -200,6 +200,7 @@ def main():
     delay = args.delay
     output = args.output
 
+    # TODO add skippable keys so model doesn't see unnecessary information
     with open(config_path, "r") as f:
         config_str = f.read()
 
