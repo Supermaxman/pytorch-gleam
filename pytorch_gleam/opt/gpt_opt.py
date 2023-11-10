@@ -68,7 +68,7 @@ def create_new_config(hyperparameters: Dict[str, str], config_path: str, i: int)
     return new_ex_path, logs_path, project
 
 
-def print_message(message):
+def print_message(message, fo):
     role_to_color = {
         "system": "red",
         "user": "green",
@@ -78,8 +78,10 @@ def print_message(message):
 
     if message["role"] == "system":
         print(colored(f"system: {message['content']}\n", role_to_color[message["role"]]))
+        fo.write(f"system: {message['content']}\n\n")
     elif message["role"] == "user":
         print(colored(f"user: {message['content']}\n", role_to_color[message["role"]]))
+        fo.write(f"user: {message['content']}\n\n")
     elif message["role"] == "assistant" and message.get("tool_calls"):
         # TODO improve formatting
         tool_calls = message["tool_calls"]
@@ -94,10 +96,15 @@ def print_message(message):
                 hyperparameters = tool_call.function.arguments
                 lines.append(f"    {hyperparameters}")
         print(colored("\n".join(lines) + "\n", role_to_color[message["role"]]))
+        fo.write("\n".join(lines) + "\n\n")
     elif message["role"] == "assistant":
         print(colored(f"assistant: {message['content']}\n", role_to_color[message["role"]]))
+        fo.write(f"assistant: {message['content']}\n\n")
     elif message["role"] == "tool":
-        print(colored(f"tool ({message['name']}): {message['content']}\n", role_to_color[message["role"]]))
+        print(colored(f"tool ({message['name']}): {message['content']}", role_to_color[message["role"]]))
+        print(colored(f"  {message['experiment']}\n", role_to_color[message["role"]]))
+        fo.write(f"tool ({message['name']}): {message['content']}\n")
+        fo.write(f"  {message['experiment']}\n\n")
 
 
 def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
@@ -141,7 +148,7 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
         # TODO possibly include stdout
         # TODO handle errors better
         outputs = e.stderr.decode()
-    return outputs
+    return outputs, ex_config_path
 
 
 def main():
@@ -176,6 +183,8 @@ def main():
     parser.add_argument("--metric", type=str, default="val_f1", help="Metric to optimize.")
     parser.add_argument("--direction", type=str, default="maximize", choices=["maximize", "minimize"])
     parser.add_argument("--delay", type=int, default=10, help="Minimum delay between experiments in seconds.")
+    parser.add_argument("--output", type=str, default="output.txt", help="Output file for conversation.")
+
     args = parser.parse_args()
 
     model = args.model
@@ -189,6 +198,7 @@ def main():
     metric = args.metric
     direction = args.direction
     delay = args.delay
+    output = args.output
 
     with open(config_path, "r") as f:
         config_str = f.read()
@@ -241,69 +251,79 @@ def main():
         },
     ]
 
-    start_idx = get_ex_idx(config_path)
-    for message in messages:
-        print_message(message)
+    with open(output, "w") as fo:
+        start_idx = get_ex_idx(config_path)
+        for message in messages:
+            print_message(message, fo)
 
-    for i in range(start_idx + 1, start_idx + experiments + 1):
-        start = time.time()
-        # TODO add @retry
-        # TODO coild fail
-        chat_completion = client.chat.completions.create(
-            messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="auto", tools=tools
-        )
-        choice = chat_completion.choices[0]
-        # TODO could fail
-        if choice.finish_reason == "tool_calls":
+        for i in range(start_idx + 1, start_idx + experiments + 1):
+            start = time.time()
+            # TODO add @retry
+            # TODO coild fail
+            chat_completion = client.chat.completions.create(
+                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="auto", tools=tools
+            )
+            choice = chat_completion.choices[0]
+            # TODO could fail
+            if choice.finish_reason == "tool_calls":
+                message = choice.message
+                tool_message = {
+                    "role": "assistant",
+                    "tool_calls": message.tool_calls,
+                    "content": "",  # hack to get the tool calls to show up
+                }
+                messages.append(tool_message)
+                print_message(tool_message, fo)
+                for tool_call in message.tool_calls:
+                    if tool_call.function.name == "run":
+                        tool_call_id = tool_call.id
+                        # TODO could fail
+                        hyperparameters = json.loads(tool_call.function.arguments)
+                        results, ex_config_path = run(hyperparameters, config_path, i, org)
+                        response_message = {
+                            "role": "tool",
+                            "tool_call_id": tool_call_id,
+                            "name": tool_call.function.name,
+                            "content": results,
+                        }
+                        messages.append(response_message)
+                        print_message(
+                            {
+                                "role": "tool",
+                                "tool_call_id": tool_call_id,
+                                "name": tool_call.function.name,
+                                "content": results,
+                                "experiment": ex_config_path,
+                            },
+                            fo,
+                        )
+
+            end = time.time()
+            seconds = end - start
+            if delay > seconds:
+                time.sleep(delay - seconds)
+
+            start = time.time()
+            chat_completion = client.chat.completions.create(
+                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none", tools=tools
+            )
+            choice = chat_completion.choices[0]
             message = choice.message
-            tool_message = {
+            summary_message = {
                 "role": "assistant",
-                "tool_calls": message.tool_calls,
-                "content": "",  # hack to get the tool calls to show up
+                "content": message.content,
             }
-            messages.append(tool_message)
-            print_message(tool_message)
-            for tool_call in message.tool_calls:
-                if tool_call.function.name == "run":
-                    tool_call_id = tool_call.id
-                    # TODO could fail
-                    hyperparameters = json.loads(tool_call.function.arguments)
-                    results = run(hyperparameters, config_path, i, org)
-                    response_message = {
-                        "role": "tool",
-                        "tool_call_id": tool_call_id,
-                        "name": tool_call.function.name,
-                        "content": results,
-                    }
-                    messages.append(response_message)
-                    print_message(response_message)
-
-        end = time.time()
-        seconds = end - start
-        if delay > seconds:
-            time.sleep(delay - seconds)
-
-        start = time.time()
-        chat_completion = client.chat.completions.create(
-            messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none", tools=tools
-        )
-        choice = chat_completion.choices[0]
-        message = choice.message
-        summary_message = {
-            "role": "assistant",
-            "content": message.content,
-        }
-        messages.append(summary_message)
-        print_message(summary_message)
-        # TODO also have the model discuss the results and what was learned
-        # https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models
-        continue_message = {"role": "user", "content": "Please propose new hyperparameters."}
-        messages.append(continue_message)
-        print_message(continue_message)
-        end = time.time()
-        seconds = end - start
-        if delay > seconds:
-            time.sleep(delay - seconds)
+            messages.append(summary_message)
+            print_message(summary_message, fo)
+            # TODO also have the model discuss the results and what was learned
+            # https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models
+            continue_message = {"role": "user", "content": "Please propose new hyperparameters."}
+            messages.append(continue_message)
+            print_message(continue_message, fo)
+            end = time.time()
+            seconds = end - start
+            if delay > seconds:
+                time.sleep(delay - seconds)
 
 
 if __name__ == "__main__":
