@@ -162,10 +162,10 @@ def main():
         nargs="+",
         default=[
             "learning_rate:float",
-            "batch_size:int",
-            "accumulate_grad_batches:int",
+            "batch_size:integer",
+            "accumulate_grad_batches:integer",
             "lr_warm_up:float",
-            "max_epochs:int",
+            "max_epochs:integer",
             "weight_decay:float",
         ],
         help="List of hyperparameters to optimize.",
