@@ -318,7 +318,13 @@ def main():
             # TODO add @retry
             # TODO could fail
             chat_completion = client.chat.completions.create(
-                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice=run_tool
+                messages=messages,
+                model=model,
+                max_tokens=512,
+                seed=seed,
+                top_p=0.7,
+                tool_choice=run_tool,
+                tools=[run_tool],
             )
             choice = chat_completion.choices[0]
             # TODO could fail
@@ -369,7 +375,7 @@ def main():
             # TODO could fail
             # also have the model discuss the results and what was learned
             chat_completion = client.chat.completions.create(
-                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none"
+                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7
             )
             choice = chat_completion.choices[0]
             message = choice.message
