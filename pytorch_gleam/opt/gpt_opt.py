@@ -102,11 +102,7 @@ def print_message(message):
 
 def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
     ex_config_path, logs_path, project = create_new_config(hyperparameters, config_path, i)
-    print(f"Running experiment: {ex_config_path}")
-    print("  Hyperparameters:")
-    for k, v in hyperparameters.items():
-        print(f"    {k}: {v}")
-    print()
+    print(f"Running experiment: {ex_config_path}\n")
     try:
         start = time.time()
         # TODO eventually use stdout out = ...
@@ -145,9 +141,6 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
         # TODO possibly include stdout
         # TODO handle errors better
         outputs = e.stderr.decode()
-    print(outputs)
-    print()
-
     return outputs
 
 
@@ -165,7 +158,17 @@ def main():
     )
     parser.add_argument("--experiments", type=int, default=10, help="Number of experiments to run.")
     parser.add_argument(
-        "--hyperparameters", nargs="+", default=["learning_rate"], help="List of hyperparameters to optimize."
+        "--hyperparameters",
+        nargs="+",
+        default=[
+            "learning_rate:float",
+            "batch_size:int",
+            "accumulate_grad_batches:int",
+            "lr_warm_up:float",
+            "max_epochs:int",
+            "weight_decay:float",
+        ],
+        help="List of hyperparameters to optimize.",
     )
     parser.add_argument("--config", type=str, required=True, help="Path to the experiment configuration file.")
     parser.add_argument("--seed", type=int, default=0, help="Random seed.")
@@ -180,7 +183,8 @@ def main():
     experiments = args.experiments
     config_path = args.config
     seed = args.seed
-    hyperparameter_names = args.hyperparameters
+    hyperparameter_names_types = [h.split(":") for h in args.hyperparameters]
+    hyperparameter_names = [h for (h, _) in hyperparameter_names_types]
     org = args.org
     metric = args.metric
     direction = args.direction
@@ -226,10 +230,10 @@ def main():
                     "type": "object",
                     "properties": {
                         h: {
-                            "type": "string",
-                            "description": f"the value for the {h} hyperparameter.",
+                            "type": t,
+                            "description": f"The value for the {h} hyperparameter.",
                         }
-                        for h in hyperparameter_names
+                        for (h, t) in hyperparameter_names_types
                     },
                     "required": hyperparameter_names,
                 },
@@ -274,6 +278,12 @@ def main():
                     messages.append(response_message)
                     print_message(response_message)
 
+        end = time.time()
+        seconds = end - start
+        if delay > seconds:
+            time.sleep(delay - seconds)
+
+        start = time.time()
         chat_completion = client.chat.completions.create(
             messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none", tools=tools
         )
