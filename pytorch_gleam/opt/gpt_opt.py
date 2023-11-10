@@ -221,7 +221,7 @@ def main():
                     # TODO could fail
                     hyperparameters = json.load(tool_call.function.arguments)
                     results = run(hyperparameters, config_path, i, org)
-                    message.append(
+                    messages.append(
                         {
                             "role": "tool",
                             "tool_call_id": tool_call_id,
@@ -229,7 +229,7 @@ def main():
                             "content": results,
                         }
                     )
-        message.append({"role": "user", "content": "Please propose new hyperparameters."})
+        messages.append({"role": "user", "content": "Please propose new hyperparameters."})
         end = time.time()
         seconds = end - start
         if delay > seconds:
