@@ -8,6 +8,7 @@ from typing import Dict
 import wandb
 import yaml
 from openai import OpenAI
+from termcolor import colored
 
 
 def get_ex_idx(config_path: str):
@@ -67,6 +68,27 @@ def create_new_config(hyperparameters: Dict[str, str], config_path: str, i: int)
     return new_ex_path, logs_path, project
 
 
+def print_message(message):
+    role_to_color = {
+        "system": "red",
+        "user": "green",
+        "assistant": "blue",
+        "tool": "magenta",
+    }
+
+    if message["role"] == "system":
+        print(colored(f"system: {message['content']}\n", role_to_color[message["role"]]))
+    elif message["role"] == "user":
+        print(colored(f"user: {message['content']}\n", role_to_color[message["role"]]))
+    elif message["role"] == "assistant" and message.get("tool_calls"):
+        # TODO improve formatting
+        print(colored(f"assistant: {message['tool_calls']}\n", role_to_color[message["role"]]))
+    elif message["role"] == "assistant":
+        print(colored(f"assistant: {message['content']}\n", role_to_color[message["role"]]))
+    elif message["role"] == "tool":
+        print(colored(f"tool ({message['name']}): {message['content']}\n", role_to_color[message["role"]]))
+
+
 def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
     ex_config_path, logs_path, project = create_new_config(hyperparameters, config_path, i)
     print(f"Running experiment: {ex_config_path}")
@@ -91,9 +113,14 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
                 # run-ID.wandb
                 ex_id = file.split(".")[0].split("-")[-1]
                 break
+        # TODO could fail
         api = wandb.Api()
+        # TODO could fail
         run = api.run(f"{org}/{project}/{ex_id}")
+        # TODO could fail
         summary: dict = run.summary
+        # TODO consider entire run history, not just the last values
+        # https://docs.wandb.ai/guides/track/public-api-guide#runhistory
         outputs = []
         for k, v in summary.items():
             if k.startswith("_") or isinstance(v, dict):
@@ -159,9 +186,9 @@ def main():
         "Results of each experiment will be provided to you.",
         "You will continue to propose new hyperparameters with the goal of improving the results.",
         "The goal is to find the best hyperparameters for the experiment in the shortest amount of time.",
+        "Furthermore, after each experiment, you will be asked to discuss the results and what was learned.",
     ]
     system_prompt = " ".join(system_prompts)
-    print(system_prompt)
 
     messages.append({"role": "system", "content": system_prompt})
 
@@ -198,9 +225,12 @@ def main():
     ]
 
     start_idx = get_ex_idx(config_path)
+    for message in messages:
+        print_message(message)
 
     for i in range(start_idx + 1, start_idx + experiments + 1):
         start = time.time()
+        # TODO add @retry
         # TODO coild fail
         chat_completion = client.chat.completions.create(
             messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="auto", tools=tools
@@ -209,28 +239,44 @@ def main():
         # TODO could fail
         if choice.finish_reason == "tool_calls":
             message = choice.message
-            messages.append(
-                {
-                    "role": "assistant",
-                    "tool_calls": message.tool_calls,
-                    "content": "",  # hack to get the tool calls to show up
-                }
-            )
+            tool_message = {
+                "role": "assistant",
+                "tool_calls": message.tool_calls,
+                "content": "",  # hack to get the tool calls to show up
+            }
+            messages.append(tool_message)
+            print_message(tool_message)
             for tool_call in message.tool_calls:
                 if tool_call.function.name == "run":
                     tool_call_id = tool_call.id
                     # TODO could fail
                     hyperparameters = json.loads(tool_call.function.arguments)
                     results = run(hyperparameters, config_path, i, org)
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call_id,
-                            "name": tool_call.function.name,
-                            "content": results,
-                        }
-                    )
-        messages.append({"role": "user", "content": "Please propose new hyperparameters."})
+                    response_message = {
+                        "role": "tool",
+                        "tool_call_id": tool_call_id,
+                        "name": tool_call.function.name,
+                        "content": results,
+                    }
+                    messages.append(response_message)
+                    print_message(response_message)
+
+        chat_completion = client.chat.completions.create(
+            messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none", tools=tools
+        )
+        choice = chat_completion.choices[0]
+        message = choice.message
+        summary_message = {
+            "role": "assistant",
+            "content": message.content,
+        }
+        messages.append(summary_message)
+        print_message(summary_message)
+        # TODO also have the model discuss the results and what was learned
+        # https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models
+        continue_message = {"role": "user", "content": "Please propose new hyperparameters."}
+        messages.append(continue_message)
+        print_message(continue_message)
         end = time.time()
         seconds = end - start
         if delay > seconds:
