@@ -45,7 +45,9 @@ def update_config(config: Dict[str, str], hyperparameters: Dict[str, str], ex_na
         elif isinstance(v, dict):
             config[k], logs_path, project = update_config(config[k], hyperparameters, logs_path, project)
         elif k == "default_root_dir":
+            print(v)
             path, _ = os.path.split(v)
+            print(path)
             config[k] = os.path.join(path, ex_name)
         elif k == "logger":
             logs_path = config[k]["init_args"]["save_dir"]
@@ -59,6 +61,7 @@ def create_new_config(hyperparameters: Dict[str, str], config_path: str, i: int)
 
     new_ex_path = get_new_ex_path(config_path, i)
     new_ex_name = os.path.split(new_ex_path)[-1].split(".")[0]
+    print(f"Creating new experiment: {new_ex_name}")
     new_config, logs_path, project = update_config(config, hyperparameters, new_ex_name)
 
     with open(new_ex_path, "w") as f:
