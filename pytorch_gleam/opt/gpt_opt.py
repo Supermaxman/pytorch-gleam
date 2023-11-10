@@ -70,12 +70,12 @@ def create_new_config(hyperparameters: Dict[str, str], config_path: str, i: int)
 
 def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
     ex_config_path, logs_path, project = create_new_config(hyperparameters, config_path, i)
-
+    print(f"Running experiment: {ex_config_path}")
     try:
         start = time.time()
         # TODO eventually use stdout out = ...
         subprocess.run(
-            ["python", "pytorch_gleam/ex/gleam.py", "fit", "--config", f'"{ex_config_path}"'],
+            ["python", "pytorch_gleam/ex/gleam.py", "fit", "--config", f"{ex_config_path}"],
             capture_output=True,
             check=True,
         )
