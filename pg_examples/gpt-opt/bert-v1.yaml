@@ -27,7 +27,7 @@ trainer:
   accelerator: gpu
   devices: 1
   default_root_dir: /shared/aifiles/disk1/covid19/models/gpt-opt/bert-v1
-  checkpoint_callback: false
+  enable_checkpointing: false
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
