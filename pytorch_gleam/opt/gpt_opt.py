@@ -43,7 +43,7 @@ def update_config(config: Dict[str, str], hyperparameters: Dict[str, str], ex_na
         if k in hyperparameters:
             config[k] = hyperparameters[k]
         elif isinstance(v, dict):
-            config[k], logs_path, project = update_config(config[k], hyperparameters, logs_path, project)
+            config[k], logs_path, project = update_config(config[k], hyperparameters, ex_name, logs_path, project)
         elif k == "default_root_dir":
             print(v)
             path, _ = os.path.split(v)
