@@ -219,7 +219,7 @@ def main():
                 if tool_call.function.name == "run":
                     tool_call_id = tool_call.id
                     # TODO could fail
-                    hyperparameters = json.load(tool_call.function.arguments)
+                    hyperparameters = json.loads(tool_call.function.arguments)
                     results = run(hyperparameters, config_path, i, org)
                     messages.append(
                         {
