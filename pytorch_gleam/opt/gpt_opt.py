@@ -327,10 +327,6 @@ def main():
                 tools=[run_tool],
             )
             choice = chat_completion.choices[0]
-            print(choice)
-            # TODO could fail
-            if choice.finish_reason != "tool_calls":
-                raise ValueError(f"Invalid finish reason: {choice.finish_reason}")
             message = choice.message
             tool_message = {
                 "role": "assistant",
@@ -339,32 +335,38 @@ def main():
             }
             messages.append(tool_message)
             print_message(tool_message, fo)
-            for tool_call in message.tool_calls:
-                if tool_call.function.name == "run":
-                    tool_call_id = tool_call.id
-                    # TODO could fail
-                    try:
-                        hyperparameters = json.loads(tool_call.function.arguments)
-                    except json.decoder.JSONDecodeError:
-                        raise ValueError(f"Invalid hyperparameter JSON: {tool_call.function.arguments}")
-                    results, ex_config_path = run(hyperparameters, config_path, i, org)
-                    response_message = {
-                        "role": "tool",
-                        "tool_call_id": tool_call_id,
-                        "name": tool_call.function.name,
-                        "content": results,
-                    }
-                    messages.append(response_message)
-                    print_message(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call_id,
-                            "name": tool_call.function.name,
-                            "content": results,
-                            "experiment": ex_config_path,
-                        },
-                        fo,
-                    )
+            
+            # TODO could fail
+            assert len(message.tool_calls) == 1
+            tool_call = message.tool_calls[0]
+            
+            # TODO could fail
+            assert tool_call.function.name == "run"
+            
+            tool_call_id = tool_call.id
+            # TODO could fail
+            try:
+                hyperparameters = json.loads(tool_call.function.arguments)
+            except json.decoder.JSONDecodeError:
+                raise ValueError(f"Invalid hyperparameter JSON: {tool_call.function.arguments}")
+            results, ex_config_path = run(hyperparameters, config_path, i, org)
+            response_message = {
+                "role": "tool",
+                "tool_call_id": tool_call_id,
+                "name": tool_call.function.name,
+                "content": results,
+            }
+            messages.append(response_message)
+            print_message(
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call_id,
+                    "name": tool_call.function.name,
+                    "content": results,
+                    "experiment": ex_config_path,
+                },
+                fo,
+            )
 
             end = time.time()
             seconds = end - start
