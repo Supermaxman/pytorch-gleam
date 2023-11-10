@@ -42,6 +42,14 @@ def prune_config(config: Dict[str, str], skip_config_keys: set):
     for k, v in list(config.items()):
         if k in skip_config_keys:
             del config[k]
+        elif k == "init_args":
+            for k2, v2 in list(v.items()):
+                if k2 in skip_config_keys:
+                    del v[k2]
+                    continue
+                elif isinstance(v2, dict):
+                    prune_config(v2, skip_config_keys)
+                config[k2] = v2
         elif isinstance(v, dict):
             prune_config(v, skip_config_keys)
     return config
