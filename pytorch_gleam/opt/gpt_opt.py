@@ -43,14 +43,14 @@ def update_config(config: Dict[str, str], hyperparameters: Dict[str, str], ex_na
     for k, v in config.items():
         if k in hyperparameters:
             config[k] = hyperparameters[k]
-        elif isinstance(v, dict):
-            config[k], logs_path, project = update_config(config[k], hyperparameters, ex_name, logs_path, project)
+        elif k == "logger":
+            logs_path = v["init_args"]["save_dir"]
+            project = v["init_args"]["project"]
         elif k == "default_root_dir":
             path, _ = os.path.split(v)
             config[k] = os.path.join(path, ex_name)
-        elif k == "logger":
-            logs_path = config[k]["init_args"]["save_dir"]
-            project = config[k]["init_args"]["project"]
+        elif isinstance(v, dict):
+            config[k], logs_path, project = update_config(config[k], hyperparameters, ex_name, logs_path, project)
     return config, logs_path, project
 
 
