@@ -101,7 +101,6 @@ def print_message(message, fo):
         print(colored(f"user: {message['content']}\n", role_to_color[message["role"]]))
         fo.write(f"user: {message['content']}\n\n")
     elif message["role"] == "assistant" and message.get("tool_calls"):
-        # TODO improve formatting
         tool_calls = message["tool_calls"]
         lines = ["assistant:"]
         for tool_call in tool_calls:
@@ -178,7 +177,7 @@ def main():
     parser.add_argument(
         "--description",
         type=str,
-        default="Fine-tuning a BERT-base model for stance detection.",
+        default="Fine-tuning a BERT-base model for stance detection between tweets and frames of communication.",
         help="Description of the experiment to optimize.",
     )
     parser.add_argument("--experiments", type=int, default=10, help="Number of experiments to run.")
@@ -228,6 +227,14 @@ def main():
     parser.add_argument("--direction", type=str, default="maximize", choices=["maximize", "minimize"])
     parser.add_argument("--delay", type=int, default=10, help="Minimum delay between experiments in seconds.")
     parser.add_argument("--output", type=str, default="output.txt", help="Output file for conversation.")
+    parser.add_argument("--train_size", type=int, default=10250, help="Size of the training set.")
+    parser.add_argument("--val_size", type=int, default=1115, help="Size of the validation set.")
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="NVIDIA TITAN V w/ 12GB VRAM",
+        help="Accelerator device to help inform hyperparameter selection.",
+    )
 
     args = parser.parse_args()
 
@@ -244,8 +251,10 @@ def main():
     direction = args.direction
     delay = args.delay
     output = args.output
+    device = args.device
+    train_size = args.train_size
+    val_size = args.val_size
 
-    # TODO add skippable keys so model doesn't see unnecessary information
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
     config = prune_config(config, skip_config_keys)
@@ -259,9 +268,9 @@ def main():
         "You will assist in optimizing the hyperparameters of ongoing experiments.",
         "You will be given a description of the experiment and a set of hyperparameters to optimize.",
         "Results of each experiment will be provided to you.",
-        "You will continue to propose new hyperparameters with the goal of improving the results.",
-        "The goal is to find the best hyperparameters for the experiment in the shortest amount of time.",
+        "You will continue to propose new hyperparameters and run experiments with the goal of improving the results.",
         "Furthermore, after each experiment, you will be asked to discuss the results and what was learned.",
+        "Only propose one set of hyperparameters for a single experiment.",
     ]
     system_prompt = " ".join(system_prompts)
 
@@ -269,10 +278,12 @@ def main():
 
     user_prompts = [
         f"This experiment involves: {description}",
+        f"The training set will contain {train_size:,} examples, while the validation set will contain {val_size:,} examples.",
+        f"Experiments will be performed on a {device}.",
         "The initial configuration file for this experiment is:",
         f"```yaml\n{config_str}```",
         f"The hyperparameters to optimize are: {', '.join(hyperparameter_names)}",
-        "Please begin to propose new hyperparameters to optimize the experiment.",
+        "Please begin to propose hyperparameters.",
         "You can run the experiment with the given hyperparameters by using the `run` tool.",
         f"Please {direction} the {metric} metric.",
     ]
@@ -307,44 +318,48 @@ def main():
         for i in range(start_idx + 1, start_idx + experiments + 1):
             start = time.time()
             # TODO add @retry
-            # TODO coild fail
+            # TODO could fail
             chat_completion = client.chat.completions.create(
-                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="auto", tools=tools
+                messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="run", tools=tools
             )
             choice = chat_completion.choices[0]
             # TODO could fail
-            if choice.finish_reason == "tool_calls":
-                message = choice.message
-                tool_message = {
-                    "role": "assistant",
-                    "tool_calls": message.tool_calls,
-                    "content": "",  # hack to get the tool calls to show up
-                }
-                messages.append(tool_message)
-                print_message(tool_message, fo)
-                for tool_call in message.tool_calls:
-                    if tool_call.function.name == "run":
-                        tool_call_id = tool_call.id
-                        # TODO could fail
+            if choice.finish_reason != "tool_calls":
+                raise ValueError(f"Invalid finish reason: {choice.finish_reason}")
+            message = choice.message
+            tool_message = {
+                "role": "assistant",
+                "tool_calls": message.tool_calls,
+                "content": "",  # hack to get the tool calls to show up
+            }
+            messages.append(tool_message)
+            print_message(tool_message, fo)
+            for tool_call in message.tool_calls:
+                if tool_call.function.name == "run":
+                    tool_call_id = tool_call.id
+                    # TODO could fail
+                    try:
                         hyperparameters = json.loads(tool_call.function.arguments)
-                        results, ex_config_path = run(hyperparameters, config_path, i, org)
-                        response_message = {
+                    except json.decoder.JSONDecodeError:
+                        raise ValueError(f"Invalid hyperparameter JSON: {tool_call.function.arguments}")
+                    results, ex_config_path = run(hyperparameters, config_path, i, org)
+                    response_message = {
+                        "role": "tool",
+                        "tool_call_id": tool_call_id,
+                        "name": tool_call.function.name,
+                        "content": results,
+                    }
+                    messages.append(response_message)
+                    print_message(
+                        {
                             "role": "tool",
                             "tool_call_id": tool_call_id,
                             "name": tool_call.function.name,
                             "content": results,
-                        }
-                        messages.append(response_message)
-                        print_message(
-                            {
-                                "role": "tool",
-                                "tool_call_id": tool_call_id,
-                                "name": tool_call.function.name,
-                                "content": results,
-                                "experiment": ex_config_path,
-                            },
-                            fo,
-                        )
+                            "experiment": ex_config_path,
+                        },
+                        fo,
+                    )
 
             end = time.time()
             seconds = end - start
@@ -352,6 +367,9 @@ def main():
                 time.sleep(delay - seconds)
 
             start = time.time()
+            # TODO add @retry
+            # TODO could fail
+            # also have the model discuss the results and what was learned
             chat_completion = client.chat.completions.create(
                 messages=messages, model=model, max_tokens=512, seed=seed, top_p=0.7, tool_choice="none", tools=tools
             )
@@ -363,11 +381,12 @@ def main():
             }
             messages.append(summary_message)
             print_message(summary_message, fo)
-            # TODO also have the model discuss the results and what was learned
+
             # https://cookbook.openai.com/examples/how_to_call_functions_with_chat_models
-            continue_message = {"role": "user", "content": "Please propose new hyperparameters."}
-            messages.append(continue_message)
-            print_message(continue_message, fo)
+            # may not be necessary
+            # continue_message = {"role": "user", "content": "Continue"}
+            # messages.append(continue_message)
+            # print_message(continue_message, fo)
             end = time.time()
             seconds = end - start
             if delay > seconds:
