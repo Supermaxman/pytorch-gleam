@@ -327,6 +327,7 @@ def main():
                 tools=[run_tool],
             )
             choice = chat_completion.choices[0]
+            print(choice)
             # TODO could fail
             if choice.finish_reason != "tool_calls":
                 raise ValueError(f"Invalid finish reason: {choice.finish_reason}")
