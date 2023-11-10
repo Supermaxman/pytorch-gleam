@@ -177,7 +177,7 @@ def main():
     parser.add_argument(
         "--description",
         type=str,
-        default="Fine-tuning a BERT-base model for stance detection between tweets and frames of communication.",
+        default="Fine-tuning a BERT-large model for stance detection between tweets and frames of communication.",
         help="Description of the experiment to optimize.",
     )
     parser.add_argument("--experiments", type=int, default=10, help="Number of experiments to run.")
@@ -186,11 +186,11 @@ def main():
         nargs="+",
         default=[
             "learning_rate:number",
-            "batch_size:integer",
-            "accumulate_grad_batches:integer",
-            "lr_warm_up:number",
-            "max_epochs:integer",
-            "weight_decay:number",
+            # "batch_size:integer",
+            # "accumulate_grad_batches:integer",
+            # "lr_warm_up:number",
+            # "max_epochs:integer",
+            # "weight_decay:number",
         ],
         help="List of hyperparameters to optimize.",
     )
@@ -335,14 +335,14 @@ def main():
             }
             messages.append(tool_message)
             print_message(tool_message, fo)
-            
+
             # TODO could fail
             assert len(message.tool_calls) == 1
             tool_call = message.tool_calls[0]
-            
+
             # TODO could fail
             assert tool_call.function.name == "run"
-            
+
             tool_call_id = tool_call.id
             # TODO could fail
             try:
