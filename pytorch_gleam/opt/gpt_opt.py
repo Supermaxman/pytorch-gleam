@@ -106,6 +106,7 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
     print("  Hyperparameters:")
     for k, v in hyperparameters.items():
         print(f"    {k}: {v}")
+    print()
     try:
         start = time.time()
         # TODO eventually use stdout out = ...
@@ -145,6 +146,7 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
         # TODO handle errors better
         outputs = e.stderr.decode()
     print(outputs)
+    print()
 
     return outputs
 

@@ -19,7 +19,7 @@ model:
         mode: macro
         num_classes: 3
 trainer:
-  max_epochs: 10
+  max_epochs: 1
   accumulate_grad_batches: 8
   check_val_every_n_epoch: 1
   deterministic: true
