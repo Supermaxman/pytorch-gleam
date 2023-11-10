@@ -59,7 +59,6 @@ def create_new_config(hyperparameters: Dict[str, str], config_path: str, i: int)
 
     new_ex_path = get_new_ex_path(config_path, i)
     new_ex_name = os.path.split(new_ex_path)[-1].split(".")[0]
-    print(f"Creating new experiment: {new_ex_name}")
     new_config, logs_path, project = update_config(config, hyperparameters, new_ex_name)
 
     with open(new_ex_path, "w") as f:
@@ -71,6 +70,9 @@ def create_new_config(hyperparameters: Dict[str, str], config_path: str, i: int)
 def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
     ex_config_path, logs_path, project = create_new_config(hyperparameters, config_path, i)
     print(f"Running experiment: {ex_config_path}")
+    print("  Hyperparameters:")
+    for k, v in hyperparameters.items():
+        print(f"    {k}: {v}")
     try:
         start = time.time()
         # TODO eventually use stdout out = ...
