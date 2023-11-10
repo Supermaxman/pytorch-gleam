@@ -1,6 +1,8 @@
+import math
 from typing import Dict, List, Optional
 
 import torch
+from torch.optim.lr_scheduler import LambdaLR
 
 from pytorch_gleam.modeling.layers.gcn import GraphAttention
 from pytorch_gleam.modeling.layers.hopfield import HopfieldPooling
@@ -84,11 +86,25 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
 
         self.criterion = torch.nn.CrossEntropyLoss(reduction="none")
         self.score_func = torch.nn.Softmax(dim=-1)
+        self.outputs = []
 
-    def setup(self, stage: Optional[str] = None):
-        super().setup(stage)
-        if stage == "fit":
-            self.update_threshold = True
+    def forward(self, batch):
+        input_ids = batch["input_ids"]
+        attention_mask = batch["attention_mask"]
+        if "token_type_ids" in batch:
+            token_type_ids = batch["token_type_ids"]
+        else:
+            token_type_ids = None
+        # [bsize, seq_len, hidden_size]
+        contextualized_embeddings = self.lm_step(
+            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
+        )
+        # [bsize, hidden_size]
+        lm_output = contextualized_embeddings[:, 0]
+        lm_output = self.f_dropout(lm_output)
+        # [bsize, num_classes]
+        logits = self.cls_layer(lm_output)
+        return logits
 
     def eval_epoch_end(self, outputs, stage):
         loss = torch.cat([x["loss"] for x in outputs], dim=0).mean().cpu()
@@ -164,24 +180,6 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
         }
         return results
 
-    def forward(self, batch):
-        input_ids = batch["input_ids"]
-        attention_mask = batch["attention_mask"]
-        if "token_type_ids" in batch:
-            token_type_ids = batch["token_type_ids"]
-        else:
-            token_type_ids = None
-        # [bsize, seq_len, hidden_size]
-        contextualized_embeddings = self.lm_step(
-            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
-        )
-        # [bsize, hidden_size]
-        lm_output = contextualized_embeddings[:, 0]
-        lm_output = self.f_dropout(lm_output)
-        # [bsize, num_classes]
-        logits = self.cls_layer(lm_output)
-        return logits
-
     def loss(self, logits, labels):
         loss = self.criterion(logits, labels)
         return loss
@@ -198,6 +196,72 @@ class MultiClassFrameLanguageModel(BaseLanguageModel):
     def predict_step(self, batch, batch_idx, dataloader_idx=None):
         results = self.eval_step(batch, batch_idx, dataloader_idx)
         return results
+
+    def configure_optimizers(self):
+        params = self._get_optimizer_params(self.weight_decay)
+        optimizer = torch.optim.AdamW(
+            params,
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+        )
+        scheduler = WarmupLR(
+            optimizer,
+            num_warmup_steps=int(math.ceil(self.lr_warm_up * self.trainer.estimated_stepping_batches)),
+            num_training_steps=self.trainer.estimated_stepping_batches,
+        )
+        optimizer_dict = {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                # REQUIRED: The scheduler instance
+                "scheduler": scheduler,
+                # The unit of the scheduler's step size, could also be 'step'.
+                # 'epoch' updates the scheduler on epoch end whereas 'step'
+                # updates it after a optimizer update.
+                "interval": "step",
+                # How many epochs/steps should pass between calls to
+                # `scheduler.step()`. 1 corresponds to updating the learning
+                # rate after every epoch/step.
+                "frequency": 1,
+            },
+        }
+
+        return optimizer_dict
+
+    def _get_optimizer_params(self, weight_decay):
+        param_optimizer = list(self.named_parameters())
+        no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
+        optimizer_params = [
+            {
+                "params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+                "weight_decay": weight_decay,
+            },
+            {
+                "params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0,
+            },
+        ]
+        return optimizer_params
+
+    def setup(self, stage: Optional[str] = None):
+        super().setup(stage)
+        if stage == "fit":
+            self.update_threshold = True
+
+    def validation_step(self, batch, batch_idx, dataloader_idx=None):
+        batch_outputs = self.eval_step(batch, batch_idx, dataloader_idx)
+        self.outputs.append(batch_outputs)
+
+    def test_step(self, batch, batch_idx, dataloader_idx=None):
+        batch_outputs = self.eval_step(batch, batch_idx, dataloader_idx)
+        self.outputs.append(batch_outputs)
+
+    def on_validation_epoch_end(self):
+        self.eval_epoch_end(self.outputs, "val")
+        self.outputs.clear()
+
+    def on_test_epoch_end(self):
+        self.eval_epoch_end(self.outputs, "test")
+        self.outputs.clear()
 
     @staticmethod
     def flatten(multi_list):
@@ -318,3 +382,19 @@ class MultiClassFrameGraphMoralityLanguageModel(MultiClassFrameGraphLanguageMode
         graph_outputs_pooled = f_pool.sum(dim=-2) / f_counts
 
         return graph_outputs_pooled
+
+
+class WarmupLR(LambdaLR):
+    def __init__(self, optimizer, num_warmup_steps: int, num_training_steps: int, last_epoch=-1):
+        self.num_warmup_steps = num_warmup_steps
+        self.num_training_steps = num_training_steps
+        super().__init__(optimizer=optimizer, lr_lambda=self.lr_lambda, last_epoch=last_epoch)
+
+    def lr_lambda(self, current_step: int):
+        if current_step < self.num_warmup_steps:
+            return float(current_step) / float(max(1, self.num_warmup_steps))
+        return max(
+            0.0,
+            float(self.num_training_steps - current_step)
+            / float(max(1, self.num_training_steps - self.num_warmup_steps)),
+        )
