@@ -2,13 +2,13 @@ import torch
 
 
 class MultiClassFrameValuesBatchCollator:
-    def __init__(self, tokenizer, values_map, max_seq_len: int = 512, use_tpus=False):
+    def __init__(self, tokenizer, value_list, max_seq_len: int = 512, use_tpus=False):
         super().__init__()
         self.tokenizer = tokenizer
-        self.values_map = values_map
+        self.value_list = value_list
         self.max_seq_len = max_seq_len
         self.use_tpus = use_tpus
-        self.num_values = len(values_map)
+        self.num_values = len(value_list)
 
     def __call__(self, examples: list) -> dict:
         batch_size = len(examples)

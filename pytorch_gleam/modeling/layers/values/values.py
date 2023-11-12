@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import List
 
 import torch.nn as nn
 
@@ -9,13 +9,13 @@ class ValuesModule(nn.module, ABC):
         self,
         input_dim: int,
         output_dim: int,
-        values_map: Dict[str, int],
+        value_list: List[str],
     ):
         super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.values_map = values_map
-        self.num_values = len(values_map)
+        self.value_list = value_list
+        self.num_values = len(value_list)
         self.value_embeddings = nn.Embedding(self.num_values, self.output_dim)
 
     @abstractmethod

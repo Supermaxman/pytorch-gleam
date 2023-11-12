@@ -19,7 +19,7 @@ class MultiClassFrameValuesDataset(Dataset):
         frame_path: Union[str, List[str]],
         label_name: str,
         label_map: Dict[str, int],
-        values_map: Dict[str, int],
+        value_list: List[str],
         preprocess_config: TweetPreprocessConfig,
         skip_unknown_labels: bool = False,
         all_frames: bool = False,
@@ -29,11 +29,12 @@ class MultiClassFrameValuesDataset(Dataset):
         self.frame_path = frame_path
         self.label_name = label_name
         self.label_map = label_map
-        self.values_map = values_map
+        self.value_list = value_list
         self.preprocess_config = preprocess_config
         self.skip_unknown_labels = skip_unknown_labels
         self.all_frames = all_frames
         self.gold_ratio = gold_ratio
+        self.values_map = {v: i for i, v in enumerate(self.value_list)}
 
         self.examples = []
         if isinstance(self.frame_path, str):
@@ -151,7 +152,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
         label_name: str,
         label_map: Dict[str, int],
         frame_path: Union[str, List[str]],
-        values_map: Dict[str, int],
+        value_list: List[str],
         train_path: Union[str, List[str]] = None,
         val_path: Union[str, List[str]] = None,
         test_path: Union[str, List[str]] = None,
@@ -178,7 +179,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
         self.frame_path = frame_path
         self.skip_unknown_labels = skip_unknown_labels
         self.gold_ratio = gold_ratio
-        self.values_map = values_map
+        self.value_list = value_list
 
         if self.train_path is not None:
             self.train_dataset = MultiClassFrameValuesDataset(
@@ -186,7 +187,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
-                values_map=self.values_map,
+                value_list=self.value_list,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
@@ -198,7 +199,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
-                values_map=self.values_map,
+                value_list=self.value_list,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
@@ -210,7 +211,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
-                values_map=self.values_map,
+                value_list=self.value_list,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
@@ -222,7 +223,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
                 frame_path=self.frame_path,
                 label_name=self.label_name,
                 label_map=self.label_map,
-                values_map=self.values_map,
+                value_list=self.value_list,
                 preprocess_config=preprocess_config,
                 skip_unknown_labels=self.skip_unknown_labels,
                 all_frames=self.all_frames,
@@ -231,7 +232,7 @@ class MultiClassFrameValuesDataModule(BaseDataModule):
     def create_collator(self):
         return MultiClassFrameValuesBatchCollator(
             self.tokenizer,
-            self.values_map,
+            self.value_list,
             max_seq_len=self.max_seq_len,
             use_tpus=self.use_tpus,
         )
