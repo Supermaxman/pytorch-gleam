@@ -1,11 +1,11 @@
 import math
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import torch
 from torch.optim.lr_scheduler import LambdaLR
 
-from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.layers.values import ValuesModule
+from pytorch_gleam.modeling.metrics import Metric
 from pytorch_gleam.modeling.models.base_models import BaseLanguageModel
 from pytorch_gleam.modeling.thresholds import ThresholdModule
 
@@ -53,10 +53,18 @@ class MultiClassFrameValueLanguageModel(BaseLanguageModel):
             input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
         )
         # use self.values
-        output_features = self.values(contextualized_embeddings, attention_mask, batch["value_mask"])
+        values_outputs = self.values(
+            contextualized_embeddings,
+            embeddings_mask=attention_mask,
+            value_mask=batch["value_mask"],
+            post_mask=(token_type_ids == 1).long() if token_type_ids is not None else None,
+            frame_mask=(token_type_ids == 0).long() if token_type_ids is not None else None,
+        )
+        output_features = values_outputs["output_features"]
         # [bsize, hidden_size]
         # lm_output = contextualized_embeddings[:, 0]
-        output_features = self.f_dropout(output_features)
+        # TODO add dropout
+        # output_features = self.f_dropout(output_features)
         # [bsize, num_classes]
         logits = self.cls_layer(output_features)
         return logits
