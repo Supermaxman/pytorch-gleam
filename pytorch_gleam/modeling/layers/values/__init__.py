@@ -1,1 +1,1 @@
-from pytorch_gleam.modeling.layers.values.values import ValuesModule, ValueAttentionPooling
+from pytorch_gleam.modeling.layers.values.values import ValuesAttentionPooling, ValuesModule

@@ -23,7 +23,7 @@ class ValuesModule(nn.module, ABC):
         pass
 
 
-class ValueAttentionPooling(ValuesModule):
+class ValuesAttentionPooling(ValuesModule):
     def __init__(
         self,
         *args,

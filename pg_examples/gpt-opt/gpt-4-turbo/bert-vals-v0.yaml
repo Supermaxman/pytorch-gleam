@@ -1,5 +1,5 @@
 data:
-  class_path: pytorch_gleam.data.datasets.MultiClassFrameValueDataModule
+  class_path: pytorch_gleam.data.datasets.MultiClassFrameValuesDataModule
   init_args:
     batch_size: 20
     frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-values.json
@@ -35,7 +35,7 @@ data:
       "Universalism: tolerance": 18
       "Universalism: objectivity": 19
 model:
-  class_path: pytorch_gleam.modeling.models.MultiClassFrameValueLanguageModel
+  class_path: pytorch_gleam.modeling.models.MultiClassFrameValuesLanguageModel
   init_args:
     label_map:
       Accept: 1
@@ -53,7 +53,7 @@ model:
       class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
     weight_decay: 0.008
     values:
-      class_path: pytorch_gleam.modeling.layers.values.ValueAttentionPooling
+      class_path: pytorch_gleam.modeling.layers.values.ValuesAttentionPooling
       init_args:
         input_dim: 768
         output_dim: 128

@@ -11,7 +11,7 @@ from pytorch_gleam.modeling.thresholds import ThresholdModule
 
 
 # noinspection PyAbstractClass
-class MultiClassFrameValueLanguageModel(BaseLanguageModel):
+class MultiClassFrameValuesLanguageModel(BaseLanguageModel):
     def __init__(
         self,
         label_map: Dict[str, int],
