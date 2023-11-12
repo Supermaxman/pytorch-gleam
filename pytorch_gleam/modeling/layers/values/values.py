@@ -4,7 +4,7 @@ from typing import List
 import torch.nn as nn
 
 
-class ValuesModule(nn.module, ABC):
+class ValuesModule(nn.Module, ABC):
     def __init__(
         self,
         input_dim: int,
