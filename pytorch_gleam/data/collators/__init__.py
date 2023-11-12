@@ -21,3 +21,5 @@ from pytorch_gleam.data.collators.multi_sequence import MultiSequenceBatchCollat
 from pytorch_gleam.data.collators.nli_text import NliTextBatchCollator
 from pytorch_gleam.data.collators.noisy_channel import NoisyChannelBatchCollator
 from pytorch_gleam.data.collators.sequence_to_sequence import SequenceToSequenceBatchCollator
+
+from pytorch_gleam.data.collators.frame_values import MultiClassFrameValuesBatchCollator
