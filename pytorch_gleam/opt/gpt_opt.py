@@ -186,11 +186,12 @@ def main():
         nargs="+",
         default=[
             "learning_rate:number",
-            # "batch_size:integer",
-            # "accumulate_grad_batches:integer",
-            # "lr_warm_up:number",
-            # "max_epochs:integer",
-            # "weight_decay:number",
+            "batch_size:integer",
+            "accumulate_grad_batches:integer",
+            "lr_warm_up:number",
+            "max_epochs:integer",
+            "weight_decay:number",
+            "output_dim:integer",
         ],
         help="List of hyperparameters to optimize.",
     )
@@ -217,6 +218,7 @@ def main():
             "val_path",
             "test_path",
             "predict_path",
+            "value_list",
         ],
         help="List of hyperparameters to optimize.",
     )
@@ -278,7 +280,8 @@ def main():
 
     user_prompts = [
         f"This experiment involves: {description}",
-        f"The training set will contain {train_size:,} examples, while the validation set will contain {val_size:,} examples.",
+        f"The training set will contain {train_size:,} examples, "
+        f"while the validation set will contain {val_size:,} examples."
         f"Experiments will be performed on a {device}.",
         "The initial configuration file for this experiment is:",
         f"```yaml\n{config_str}```",
