@@ -55,7 +55,7 @@ model:
     values:
       class_path: pytorch_gleam.modeling.layers.values.ValuesAttentionPooling
       init_args:
-        input_dim: 768
+        input_dim: 1024
         output_dim: 128
         value_list:
           - "Self-direction: thought"
