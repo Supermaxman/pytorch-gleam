@@ -1,5 +1,6 @@
 import argparse
 import os
+import yaml
 
 from pytorch_gleam.opt.gpt_opt import add_arguments, optimize
 
@@ -15,9 +16,19 @@ if __name__ == "__main__":
 
     assert len(configs) > 0, "Must provide at least one configuration file."
 
+    print(f"Checking {len(configs):,} config files...")
     for config in configs:
         assert os.path.exists(config), f"Config file {config} does not exist."
+        with open(config, "r") as f:
+            config = yaml.safe_load(f)
+        assert "model" in config, f"Config file {config} does not specify a model."
+        assert "data" in config, f"Config file {config} does not specify data."
+        assert "trainer" in config, f"Config file {config} does not specify a trainer."
+        print(f"  {config} OK.")
 
+    print()
+    print("All config files OK, proceeding to optimization.")
+    print()
     for config in configs:
         print(f"Optimizing {config}...")
         print()
