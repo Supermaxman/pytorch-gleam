@@ -464,7 +464,7 @@ def optimize(
     user_prompts = [
         f"This experiment involves: {description}",
         f"The training set will contain {train_size:,} examples, "
-        + f"while the validation set will contain {val_size:,} examples."
+        + f"while the validation set will contain {val_size:,} examples.",
         f"Experiments will be performed on a {device}.",
         "The initial configuration file for this experiment is:",
         f"```yaml\n{config_str}```",
@@ -472,6 +472,7 @@ def optimize(
         "Please begin to propose hyperparameters.",
         "You can run the experiment with the given hyperparameters by using the `run` tool.",
         "You can also end the session by using the `end` tool.",
+        "Only use the `end` tool when you are done and do not believe you can improve the results any further.",
         f"Please {direction} the {metric} metric.",
     ]
 
