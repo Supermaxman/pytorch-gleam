@@ -122,9 +122,7 @@ def print_message(message, fo):
         fo.write(f"assistant: {message['content']}\n\n")
     elif message["role"] == "tool":
         print(colored(f"tool ({message['name']}): {message['content']}", role_to_color[message["role"]]))
-        print(colored(f"  {message['experiment']}\n", role_to_color[message["role"]]))
         fo.write(f"tool ({message['name']}): {message['content']}\n")
-        fo.write(f"  {message['experiment']}\n\n")
 
 
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
