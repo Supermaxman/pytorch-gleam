@@ -284,7 +284,7 @@ def run_step(
         mg.add_message(
             {
                 "role": "assistant",
-                "tool_calls": tool_calls,
+                "tool_calls": chat_completion.choices[0].message.model_dump()["tool_calls"],
                 "content": "",  # hack to get the tool calls to show up
             }
         )
