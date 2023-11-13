@@ -281,7 +281,7 @@ def run_step(
             tool_choice="auto",
             tools=tools,
         )
-        tool_calls = chat_completion.choices[0].message.model_dump(mode="json")["tool_calls"]
+        tool_calls = chat_completion.choices[0].message.model_dump()["tool_calls"]
         mg.add_message(
             {
                 "role": "assistant",
