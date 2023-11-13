@@ -196,7 +196,7 @@ class MinimumDelay:
     def __enter__(self):
         self.start = time.time()
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         end = time.time()
         seconds = end - self.start
         if self.delay > seconds:
@@ -224,7 +224,7 @@ class MessageContext:
             self.text_file = open(self.text_file_path, "a")
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         if self.file_path is not None:
             self.file.close()
         if self.text_file_path is not None:
