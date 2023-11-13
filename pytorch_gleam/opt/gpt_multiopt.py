@@ -17,9 +17,9 @@ if __name__ == "__main__":
     assert len(configs) > 0, "Must provide at least one configuration file."
 
     print(f"Checking {len(configs):,} config files...")
-    for config in configs:
-        assert os.path.exists(config), f"Config file {config} does not exist."
-        with open(config, "r") as f:
+    for config_path in configs:
+        assert os.path.exists(config_path), f"Config file {config_path} does not exist."
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f)
         assert "model" in config, f"Config file {config} does not specify a model."
         assert "data" in config, f"Config file {config} does not specify data."
@@ -29,16 +29,16 @@ if __name__ == "__main__":
     print()
     print("All config files OK, proceeding to optimization.")
     print()
-    for config in configs:
-        print(f"Optimizing {config}...")
+    for config_path in configs:
+        print(f"Optimizing {config_path}...")
         print()
-        text_output = config + ".txt"
-        message_output = config + ".jsonl"
+        text_output = config_path + ".txt"
+        message_output = config_path + ".jsonl"
         optimize(
             model=args.model,
             description=args.description,
             experiments=args.experiments,
-            config_path=config,
+            config_path=config_path,
             seed=args.seed,
             hyperparameter_names_types=[h.split(":") for h in args.hyperparameters],
             skip_config_keys=set(args.skip_config_keys),
