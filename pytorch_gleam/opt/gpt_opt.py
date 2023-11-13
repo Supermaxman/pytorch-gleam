@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 import time
-from typing import Dict
+from typing import Dict, List
 
 import wandb
 import yaml
@@ -64,6 +64,7 @@ def update_config(config: Dict[str, str], hyperparameters: Dict[str, str], ex_na
         elif k == "logger":
             logs_path = v["init_args"]["save_dir"]
             project = v["init_args"]["project"]
+            v["init_args"]["name"] = ex_name
         elif k == "default_root_dir":
             path, _ = os.path.split(v)
             config[k] = os.path.join(path, ex_name)
@@ -124,7 +125,7 @@ def print_message(message, fo):
         fo.write(f"  {message['experiment']}\n\n")
 
 
-def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
+def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str, metrics: List[str]):
     ex_config_path, logs_path, project = create_new_config(hyperparameters, config_path, i)
     print(f"Running experiment: {ex_config_path}\n")
     try:
@@ -154,11 +155,13 @@ def run(hyperparameters: Dict[str, str], config_path: str, i: int, org: str):
         # TODO consider entire run history, not just the last values
         # https://docs.wandb.ai/guides/track/public-api-guide#runhistory
         outputs = []
-        for k, v in summary.items():
+        for k, v in sorted(summary.items(), key=lambda x: x[0]):
             if k.startswith("_") or isinstance(v, dict):
                 continue
-            outputs.append(f"{k}: {v}")
-        outputs.append(f"seconds: {seconds}")
+            if k not in metrics:
+                continue
+            outputs.append(f"{k}: {v:.4f}")
+        outputs.append(f"seconds: {seconds:.0f}")
         outputs = "\n".join(outputs)
 
     except subprocess.CalledProcessError as e:
@@ -226,6 +229,18 @@ def main():
     parser.add_argument("--config", type=str, required=True, help="Path to the experiment configuration file.")
     parser.add_argument("--seed", type=int, default=0, help="Random seed.")
     parser.add_argument("--org", type=str, default="hltri", help="Organization to use for wandb.")
+    parser.add_argument(
+        "--metrics",
+        nargs="+",
+        default=[
+            "val_f1",
+            "val_p",
+            "val_r",
+            "val_loss",
+            "train_loss",
+        ],
+        help="Metrics to show.",
+    )
     parser.add_argument("--metric", type=str, default="val_f1", help="Metric to optimize.")
     parser.add_argument("--direction", type=str, default="maximize", choices=["maximize", "minimize"])
     parser.add_argument("--delay", type=int, default=10, help="Minimum delay between experiments in seconds.")
@@ -251,6 +266,7 @@ def main():
     skip_config_keys = set(args.skip_config_keys)
     org = args.org
     metric = args.metric
+    metrics = args.metrics
     direction = args.direction
     delay = args.delay
     output = args.output
@@ -353,7 +369,7 @@ def main():
                 hyperparameters = json.loads(tool_call.function.arguments)
             except json.decoder.JSONDecodeError:
                 raise ValueError(f"Invalid hyperparameter JSON: {tool_call.function.arguments}")
-            results, ex_config_path = run(hyperparameters, config_path, i, org)
+            results, ex_config_path = run(hyperparameters, config_path, i, org, metrics)
             response_message = {
                 "role": "tool",
                 "tool_call_id": tool_call_id,
