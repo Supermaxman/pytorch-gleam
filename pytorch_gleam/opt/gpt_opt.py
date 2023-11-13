@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple
 import wandb
 import yaml
 from openai import OpenAI
+from openai.types.chat import ChatCompletion
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from termcolor import colored
 
@@ -266,7 +267,7 @@ def run_step(
     client: OpenAI,
 ):
     @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-    def chat(**kwargs):
+    def chat(**kwargs) -> ChatCompletion:
         return client.chat.completions.create(**kwargs)
 
     with MinimumDelay(delay):
@@ -280,11 +281,11 @@ def run_step(
             tool_choice="auto",
             tools=tools,
         )
-        tool_calls = chat_completion.choices[0].message.tool_calls
+        tool_calls = chat_completion.choices[0].message.model_dump(mode="json")["tool_calls"]
         mg.add_message(
             {
                 "role": "assistant",
-                "tool_calls": chat_completion.choices[0].message.model_dump()["tool_calls"],
+                "tool_calls": tool_calls,
                 "content": "",  # hack to get the tool calls to show up
             }
         )
@@ -294,28 +295,28 @@ def run_step(
         assert len(tool_calls) == 1
         tool_call = tool_calls[0]
 
-        if tool_call.function.name == "end":
+        if tool_call["function"]["name"] == "end":
             return None, None
 
         # TODO could fail to use the run tool
-        assert tool_call.function.name == "run"
+        assert tool_call["function"]["name"] == "run"
 
-        tool_call_id = tool_call.id
+        tool_call_id = tool_call["id"]
         try:
-            hyperparameters = json.loads(tool_call.function.arguments)
+            hyperparameters = json.loads(tool_call["function"]["arguments"])
             results, ex_config_path, ex_metric = run_experiment(hyperparameters, config_path, i, org, metric, metrics)
             response_message = {
                 "role": "tool",
                 "tool_call_id": tool_call_id,
-                "name": tool_call.function.name,
+                "name": tool_call["function"]["name"],
                 "content": results,
             }
         except json.decoder.JSONDecodeError:
             response_message = {
                 "role": "tool",
                 "tool_call_id": tool_call_id,
-                "name": tool_call.function.name,
-                "content": f"Invalid function arguments JSON: {tool_call.function.arguments}",
+                "name": tool_call["function"]["name"],
+                "content": f"Invalid function arguments JSON: {tool_call['function']['arguments']}",
             }
 
         mg.add_message(response_message)
