@@ -204,24 +204,30 @@ class MinimumDelay:
 
 
 class MessageContext:
-    def __init__(self, file_path: str = None, text_file_path: str = None):
+    def __init__(self, file_path: str = None, text_file_path: str = None, load: bool = False):
         self.messages = []
         self.file_path = file_path
         self.file = None
         self.text_file_path = text_file_path
         self.text_file = None
+        self.load = load
 
     def __enter__(self):
         if self.file_path is not None:
-            if os.path.exists(self.file_path):
+            if os.path.exists(self.file_path) and self.load:
                 # first read the existing messages
                 with open(self.file_path, "r") as f:
                     for line in f:
                         message = json.loads(line)
                         self.messages.append(message)
-            self.file = open(self.file_path, "a")
+                self.file = open(self.file_path, "a")
+            else:
+                self.file = open(self.file_path, "w")
         if self.text_file_path is not None:
-            self.text_file = open(self.text_file_path, "a")
+            if os.path.exists(self.text_file_path) and self.load:
+                self.text_file = open(self.text_file_path, "a")
+            else:
+                self.text_file = open(self.text_file_path, "w")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -428,10 +434,7 @@ def optimize(
 
     results = []
 
-    with MessageContext(
-        file_path=message_output,
-        text_file_path=text_output,
-    ) as mg:
+    with MessageContext(file_path=message_output, text_file_path=text_output) as mg:
         start_idx = get_ex_idx(config_path)
         mg.add_message({"role": "system", "content": system_prompt})
         mg.add_message({"role": "user", "content": "\n".join(user_prompts)})
