@@ -107,13 +107,13 @@ def print_message(message, fo):
         tool_calls = message["tool_calls"]
         lines = ["assistant:"]
         for tool_call in tool_calls:
-            lines.append(f"  tool ({tool_call.function.name}):")
+            lines.append(f"  tool ({tool_call['function']['name']}):")
             try:
-                hyperparameters = json.loads(tool_call.function.arguments)
+                hyperparameters = json.loads(tool_call["function"]["arguments"])
                 for k, v in hyperparameters.items():
                     lines.append(f"    {k}: {v}")
             except json.decoder.JSONDecodeError:
-                hyperparameters = tool_call.function.arguments
+                hyperparameters = tool_call["function"]["arguments"]
                 lines.append(f"    {hyperparameters}")
         print(colored("\n".join(lines) + "\n", role_to_color[message["role"]]))
         fo.write("\n".join(lines) + "\n\n")
