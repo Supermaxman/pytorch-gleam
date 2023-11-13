@@ -13,6 +13,7 @@ data:
     tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
     train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-train.jsonl
     val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev.jsonl
+    test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl
     value_list:
       - "Self-direction: thought"
       - "Self-direction: action"
@@ -53,7 +54,7 @@ model:
       class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
     weight_decay: 0.008
     values:
-      class_path: pytorch_gleam.modeling.layers.values.ValuesDifferenceAttentionPooling
+      class_path: pytorch_gleam.modeling.layers.values.ValuesCentroidAttentionPooling
       init_args:
         input_dim: 1024
         output_dim: 128
@@ -92,15 +93,15 @@ trainer:
   - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
   - class_path: pytorch_gleam.callbacks.WandbConfig
   check_val_every_n_epoch: 1
-  default_root_dir: /shared/aifiles/disk1/covid19/models/gpt-opt/bert-vals-diff-v0
+  default_root_dir: /shared/aifiles/disk1/covid19/models/values/centroid-v0
   deterministic: true
   devices: 1
   enable_checkpointing: false
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
-      dir: /shared/aifiles/disk1/covid19/logs/gpt-opt
-      project: gpt-opt
-      save_dir: /shared/aifiles/disk1/covid19/logs/gpt-opt
+      dir: /shared/aifiles/disk1/covid19/logs/values
+      project: values
+      save_dir: /shared/aifiles/disk1/covid19/logs/values
   max_epochs: 4
   num_sanity_val_steps: 1

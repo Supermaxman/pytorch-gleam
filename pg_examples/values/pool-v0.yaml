@@ -1,7 +1,7 @@
 data:
   class_path: pytorch_gleam.data.datasets.MultiClassFrameValuesDataModule
   init_args:
-    batch_size: 18
+    batch_size: 20
     frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-values.json
     label_map:
       Accept: 1
@@ -15,26 +15,26 @@ data:
     val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev.jsonl
     test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl
     value_list:
-    - 'Self-direction: thought'
-    - 'Self-direction: action'
-    - Stimulation
-    - Hedonism
-    - Achievement
-    - 'Power: dominance'
-    - 'Power: resources'
-    - Face
-    - 'Security: personal'
-    - 'Security: societal'
-    - Tradition
-    - 'Conformity: rules'
-    - 'Conformity: interpersonal'
-    - Humility
-    - 'Benevolence: caring'
-    - 'Benevolence: dependability'
-    - 'Universalism: concern'
-    - 'Universalism: nature'
-    - 'Universalism: tolerance'
-    - 'Universalism: objectivity'
+      - "Self-direction: thought"
+      - "Self-direction: action"
+      - "Stimulation"
+      - "Hedonism"
+      - "Achievement"
+      - "Power: dominance"
+      - "Power: resources"
+      - "Face"
+      - "Security: personal"
+      - "Security: societal"
+      - "Tradition"
+      - "Conformity: rules"
+      - "Conformity: interpersonal"
+      - "Humility"
+      - "Benevolence: caring"
+      - "Benevolence: dependability"
+      - "Universalism: concern"
+      - "Universalism: nature"
+      - "Universalism: tolerance"
+      - "Universalism: objectivity"
 model:
   class_path: pytorch_gleam.modeling.models.MultiClassFrameValuesLanguageModel
   init_args:
@@ -42,8 +42,8 @@ model:
       Accept: 1
       Not Relevant: 0
       Reject: 2
-    learning_rate: 1.7e-05
-    lr_warm_up: 0.11
+    learning_rate: 1.9e-05
+    lr_warm_up: 0.15
     metric:
       class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
       init_args:
@@ -52,33 +52,33 @@ model:
     pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
     threshold:
       class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
+    weight_decay: 0.008
     values:
       class_path: pytorch_gleam.modeling.layers.values.ValuesAttentionPooling
       init_args:
         input_dim: 1024
-        output_dim: 180
+        output_dim: 128
         value_list:
-        - 'Self-direction: thought'
-        - 'Self-direction: action'
-        - Stimulation
-        - Hedonism
-        - Achievement
-        - 'Power: dominance'
-        - 'Power: resources'
-        - Face
-        - 'Security: personal'
-        - 'Security: societal'
-        - Tradition
-        - 'Conformity: rules'
-        - 'Conformity: interpersonal'
-        - Humility
-        - 'Benevolence: caring'
-        - 'Benevolence: dependability'
-        - 'Universalism: concern'
-        - 'Universalism: nature'
-        - 'Universalism: tolerance'
-        - 'Universalism: objectivity'
-    weight_decay: 0.018
+          - "Self-direction: thought"
+          - "Self-direction: action"
+          - "Stimulation"
+          - "Hedonism"
+          - "Achievement"
+          - "Power: dominance"
+          - "Power: resources"
+          - "Face"
+          - "Security: personal"
+          - "Security: societal"
+          - "Tradition"
+          - "Conformity: rules"
+          - "Conformity: interpersonal"
+          - "Humility"
+          - "Benevolence: caring"
+          - "Benevolence: dependability"
+          - "Universalism: concern"
+          - "Universalism: nature"
+          - "Universalism: tolerance"
+          - "Universalism: objectivity"
 seed_everything: 0
 trainer:
   accelerator: gpu
@@ -93,15 +93,15 @@ trainer:
   - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
   - class_path: pytorch_gleam.callbacks.WandbConfig
   check_val_every_n_epoch: 1
-  default_root_dir: /shared/aifiles/disk1/covid19/models/gpt-opt/bert-vals-v4
+  default_root_dir: /shared/aifiles/disk1/covid19/models/values/pool-v0
   deterministic: true
   devices: 1
   enable_checkpointing: false
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
-      dir: /shared/aifiles/disk1/covid19/logs/gpt-opt
-      project: gpt-opt
-      save_dir: /shared/aifiles/disk1/covid19/logs/gpt-opt
+      dir: /shared/aifiles/disk1/covid19/logs/values
+      project: values
+      save_dir: /shared/aifiles/disk1/covid19/logs/values
   max_epochs: 4
   num_sanity_val_steps: 1

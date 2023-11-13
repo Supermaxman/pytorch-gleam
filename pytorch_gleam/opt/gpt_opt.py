@@ -13,6 +13,90 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 from termcolor import colored
 
 
+def add_arguments(parser: argparse.ArgumentParser):
+    parser.add_argument(
+        "--model", type=str, default="gpt-4-1106-preview", choices=["gpt-4-1106-preview", "gpt-3.5-turbo-1106"]
+    )
+    parser.add_argument(
+        "--description",
+        type=str,
+        default="Fine-tuning a BERT-large model for stance detection between tweets and frames of communication, "
+        "utilizing attention pooling with human value embeddings.",
+        help="Description of the experiment to optimize.",
+    )
+    parser.add_argument("--experiments", type=int, default=10, help="Number of experiments to run.")
+    parser.add_argument(
+        "--hyperparameters",
+        nargs="+",
+        default=[
+            "learning_rate:number",
+            "batch_size:integer",
+            "accumulate_grad_batches:integer",
+            "lr_warm_up:number",
+            "max_epochs:integer",
+            "weight_decay:number",
+            "output_dim:integer",
+        ],
+        help="List of hyperparameters to optimize.",
+    )
+    parser.add_argument(
+        "--skip_config_keys",
+        nargs="+",
+        default=[
+            "class_path",
+            "seed_everything",
+            "threshold",
+            "check_val_every_n_epoch",
+            "deterministic",
+            "num_sanity_val_steps",
+            "accelerator",
+            "devices",
+            "default_root_dir",
+            "enable_checkpointing",
+            "logger",
+            "callbacks",
+            "label_name",
+            "num_workers",
+            "frame_path",
+            "train_path",
+            "val_path",
+            "test_path",
+            "predict_path",
+            "value_list",
+            "label_map",
+            "tokenizer_name",
+        ],
+        help="List of hyperparameters to optimize.",
+    )
+    parser.add_argument("--seed", type=int, default=0, help="Random seed.")
+    parser.add_argument("--org", type=str, default="hltri", help="Organization to use for wandb.")
+    parser.add_argument(
+        "--metrics",
+        nargs="+",
+        default=[
+            "val_f1",
+            "val_p",
+            "val_r",
+            "val_loss",
+            "train_loss",
+        ],
+        help="Metrics to show.",
+    )
+    parser.add_argument("--metric", type=str, default="val_f1", help="Metric to optimize.")
+    parser.add_argument("--direction", type=str, default="maximize", choices=["maximize", "minimize"])
+    parser.add_argument("--delay", type=int, default=10, help="Minimum delay between experiments in seconds.")
+    parser.add_argument("--text", type=str, default="text.txt", help="Output file for printed text.")
+    parser.add_argument("--messages", type=str, default="messages.jsonl", help="Output file for messages as jsonl.")
+    parser.add_argument("--train_size", type=int, default=10250, help="Size of the training set.")
+    parser.add_argument("--val_size", type=int, default=1115, help="Size of the validation set.")
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="NVIDIA TITAN V w/ 12GB VRAM",
+        help="Accelerator device to help inform hyperparameter selection.",
+    )
+
+
 def get_ex_idx(config_path: str):
     _, file_name = os.path.split(config_path)
     ex_name = file_name.split(".")[0]
@@ -476,89 +560,8 @@ def optimize(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # gpt-4-1106-preview or gpt-3.5-turbo-1106
-    parser.add_argument(
-        "--model", type=str, default="gpt-4-1106-preview", choices=["gpt-4-1106-preview", "gpt-3.5-turbo-1106"]
-    )
-    parser.add_argument(
-        "--description",
-        type=str,
-        default="Fine-tuning a BERT-large model for stance detection between tweets and frames of communication, "
-        "utilizing attention pooling with human value embeddings.",
-        help="Description of the experiment to optimize.",
-    )
-    parser.add_argument("--experiments", type=int, default=10, help="Number of experiments to run.")
-    parser.add_argument(
-        "--hyperparameters",
-        nargs="+",
-        default=[
-            "learning_rate:number",
-            "batch_size:integer",
-            "accumulate_grad_batches:integer",
-            "lr_warm_up:number",
-            "max_epochs:integer",
-            "weight_decay:number",
-            "output_dim:integer",
-        ],
-        help="List of hyperparameters to optimize.",
-    )
-    parser.add_argument(
-        "--skip_config_keys",
-        nargs="+",
-        default=[
-            "class_path",
-            "seed_everything",
-            "threshold",
-            "check_val_every_n_epoch",
-            "deterministic",
-            "num_sanity_val_steps",
-            "accelerator",
-            "devices",
-            "default_root_dir",
-            "enable_checkpointing",
-            "logger",
-            "callbacks",
-            "label_name",
-            "num_workers",
-            "frame_path",
-            "train_path",
-            "val_path",
-            "test_path",
-            "predict_path",
-            "value_list",
-            "label_map",
-            "tokenizer_name",
-        ],
-        help="List of hyperparameters to optimize.",
-    )
+    add_arguments(parser)
     parser.add_argument("--config", type=str, required=True, help="Path to the experiment configuration file.")
-    parser.add_argument("--seed", type=int, default=0, help="Random seed.")
-    parser.add_argument("--org", type=str, default="hltri", help="Organization to use for wandb.")
-    parser.add_argument(
-        "--metrics",
-        nargs="+",
-        default=[
-            "val_f1",
-            "val_p",
-            "val_r",
-            "val_loss",
-            "train_loss",
-        ],
-        help="Metrics to show.",
-    )
-    parser.add_argument("--metric", type=str, default="val_f1", help="Metric to optimize.")
-    parser.add_argument("--direction", type=str, default="maximize", choices=["maximize", "minimize"])
-    parser.add_argument("--delay", type=int, default=10, help="Minimum delay between experiments in seconds.")
-    parser.add_argument("--text", type=str, default="text.txt", help="Output file for printed text.")
-    parser.add_argument("--messages", type=str, default="messages.jsonl", help="Output file for messages as jsonl.")
-    parser.add_argument("--train_size", type=int, default=10250, help="Size of the training set.")
-    parser.add_argument("--val_size", type=int, default=1115, help="Size of the validation set.")
-    parser.add_argument(
-        "--device",
-        type=str,
-        default="NVIDIA TITAN V w/ 12GB VRAM",
-        help="Accelerator device to help inform hyperparameter selection.",
-    )
 
     args = parser.parse_args()
 

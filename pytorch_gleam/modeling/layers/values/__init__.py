@@ -4,4 +4,5 @@ from pytorch_gleam.modeling.layers.values.values import (
     ValuesCentroidAttentionPooling,
     ValuesDifferenceAttentionPooling,
     ValuesModule,
+    ValuesWeightedAttentionPooling,
 )
