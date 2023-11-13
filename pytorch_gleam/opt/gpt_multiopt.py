@@ -21,10 +21,10 @@ if __name__ == "__main__":
         assert os.path.exists(config_path), f"Config file {config_path} does not exist."
         with open(config_path, "r") as f:
             config = yaml.safe_load(f)
-        assert "model" in config, f"Config file {config} does not specify a model."
-        assert "data" in config, f"Config file {config} does not specify data."
-        assert "trainer" in config, f"Config file {config} does not specify a trainer."
-        print(f"  {config} OK.")
+        assert "model" in config, f"Config file {config_path} does not specify a model."
+        assert "data" in config, f"Config file {config_path} does not specify data."
+        assert "trainer" in config, f"Config file {config_path} does not specify a trainer."
+        print(f"  {config_path} OK.")
 
     print()
     print("All config files OK, proceeding to optimization.")
