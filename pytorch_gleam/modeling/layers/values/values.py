@@ -52,7 +52,7 @@ class ValuesAttentionPooling(ValuesModule):
         # [bsize, seq_len, num_values]
         value_scores = value_scores.sum(dim=-1)
         # [bsize, seq_len, num_values] + [bsize, seq_len, 1]
-        value_scores = value_scores * (1.0 - embeddings_mask.unsqueeze(dim=-1).float())
+        value_scores = value_scores * embeddings_mask.unsqueeze(dim=-1).float()
         # [bsize, num_values]
         value_scores = value_scores.sum(dim=1)
         # [bsize, num_values]
