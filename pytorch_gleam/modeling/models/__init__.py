@@ -16,6 +16,7 @@ from pytorch_gleam.modeling.models.contrastive_frame import (
 from pytorch_gleam.modeling.models.contrastive_frame_stance import ContrastiveFrameStanceLanguageModel
 from pytorch_gleam.modeling.models.direct_acs import DirectACSLanguageModel
 from pytorch_gleam.modeling.models.direct_stance import DirectStanceLanguageModel
+from pytorch_gleam.modeling.models.frame_mvalues import MultiClassFrameMultiValuesLanguageModel
 from pytorch_gleam.modeling.models.frame_values import MultiClassFrameValuesLanguageModel
 from pytorch_gleam.modeling.models.kbi import KbiLanguageModel
 from pytorch_gleam.modeling.models.multi_class import MultiClassLanguageModel

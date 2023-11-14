@@ -8,6 +8,7 @@ from pytorch_gleam.data.datasets.contrastive_frame import ContrastiveEmbFrameDat
 from pytorch_gleam.data.datasets.contrastive_frame_stance import ContrastiveFrameStanceDataModule
 from pytorch_gleam.data.datasets.direct_acs_misinfo_stance import DirectACSMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.direct_misinfo_stance import DirectMisinfoStanceDataModule
+from pytorch_gleam.data.datasets.frame_mvalues import MultiClassFrameMultiValuesDataModule
 from pytorch_gleam.data.datasets.frame_values import MultiClassFrameValuesDataModule
 from pytorch_gleam.data.datasets.kbi_misinfo_stance import KbiMisinfoStanceDataModule
 from pytorch_gleam.data.datasets.multi_class_frame import MultiClassFrameDataModule
