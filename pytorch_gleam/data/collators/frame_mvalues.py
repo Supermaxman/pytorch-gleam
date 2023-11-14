@@ -16,8 +16,8 @@ class MultiClassFrameMultiValuesBatchCollator:
         batch_size = len(examples)
         # [ex_count, num_classes]
         labels = torch.zeros([batch_size], dtype=torch.long)
-        cultural_value_mask = torch.zeros([batch_size, self.num_cultural_values], dtype=torch.long)
-        moral_value_mask = torch.zeros([batch_size, self.num_moral_values], dtype=torch.long)
+        cultural_mask = torch.zeros([batch_size, self.num_cultural_values], dtype=torch.long)
+        moral_mask = torch.zeros([batch_size, self.num_moral_values], dtype=torch.long)
         ids = []
         texts = []
         for ex_idx, ex in enumerate(examples):
@@ -25,8 +25,8 @@ class MultiClassFrameMultiValuesBatchCollator:
             if "label" in ex:
                 labels[ex_idx] = ex["label"]
             texts.append(ex["text"])
-            cultural_value_mask[ex_idx, ex["cultural_value_ids"]] = 1
-            moral_value_mask[ex_idx, ex["moral_value_ids"]] = 1
+            cultural_mask[ex_idx, ex["cultural_value_ids"]] = 1
+            moral_mask[ex_idx, ex["moral_value_ids"]] = 1
         data = self.tokenizer(
             text=texts,
             return_tensors="pt",
@@ -38,8 +38,8 @@ class MultiClassFrameMultiValuesBatchCollator:
             "ids": ids,
             "input_ids": data["input_ids"],
             "attention_mask": data["attention_mask"],
-            "cultural_value_mask": cultural_value_mask,
-            "moral_value_mask": moral_value_mask,
+            "cultural_mask": cultural_mask,
+            "moral_mask": moral_mask,
             "labels": labels,
         }
         if "token_type_ids" in data:
