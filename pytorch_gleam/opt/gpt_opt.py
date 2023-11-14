@@ -498,7 +498,7 @@ def optimize(
     end_tool = {
         "type": "function",
         "function": {
-            "name": "run",
+            "name": "end",
             "description": "End this session of running the experiment. Only use this tool when "
             + "you are done and do not believe you can improve the results any further.",
             "parameters": {
