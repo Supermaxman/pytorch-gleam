@@ -180,3 +180,55 @@ class MultiValuesWeightedAttentionPooling(MultiValuesModule):
             "pooled_embedding": pooled_embedding,
             "output_features": pooled_embedding,
         }
+
+
+class MultiValuesExtraWeightedAttentionPooling(MultiValuesWeightedAttentionPooling):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.moral_linear = nn.Linear(self.input_dim, self.output_dim)
+
+    def preprocess(self, embeddings, layer):
+        # [bsize, seq_len, hidden_size] -> [bsize, seq_len, out_dim]
+        if self.linear is not None:
+            # TODO add dropout
+            embeddings = self.linear(embeddings)
+        return embeddings
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        cultural_embeddings = self.linear(embeddings)
+        moral_embeddings = self.moral_linear(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # value attention - which value info matters for frame
+        frame_cultural, frame_cultural_probs = self.value_attention(
+            cultural_embeddings, frame_mask, cultural_mask, self.cultural_embeddings
+        )
+        frame_moral, frame_moral_probs = self.value_attention(
+            moral_embeddings, frame_mask, moral_mask, self.moral_embeddings
+        )
+
+        # attention pooling - which post info matters for values
+        post_cultural, post_cultural_probs = self.attention_pooling(cultural_embeddings, post_mask, frame_cultural)
+        post_moral, post_moral_probs = self.attention_pooling(moral_embeddings, post_mask, frame_moral)
+
+        pooled_embedding = post_cultural + post_moral
+
+        return {
+            "frame_cultural": frame_cultural,
+            "frame_moral": frame_moral,
+            "frame_cultural_probs": frame_cultural_probs,
+            "frame_moral_probs": frame_moral_probs,
+            "post_cultural": post_cultural,
+            "post_moral": post_moral,
+            "post_cultural_probs": post_cultural_probs,
+            "post_moral_probs": post_moral_probs,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }
