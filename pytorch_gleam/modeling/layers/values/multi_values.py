@@ -317,3 +317,187 @@ class MultiValuesQueryValueAttentionPooling(MultiValuesWeightedAttentionPooling)
             "pooled_embedding": pooled_embedding,
             "output_features": pooled_embedding,
         }
+
+
+class MultiValuesQueryValueDiffAttentionPooling(MultiValuesQueryValueAttentionPooling):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        cultural_queries = self.linear(embeddings)
+        moral_queries = self.moral_query(embeddings)
+        cultural_values = self.cultural_value(embeddings)
+        moral_values = self.moral_value(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # value attention - which value info matters for frame
+        frame_cultural, frame_cultural_probs = self.value_attention(
+            cultural_queries, frame_mask, cultural_mask, self.cultural_embeddings
+        )
+        frame_moral, frame_moral_probs = self.value_attention(
+            moral_queries, frame_mask, moral_mask, self.moral_embeddings
+        )
+
+        # attention pooling - which post info matters for values
+        post_cultural, post_cultural_probs = self.attention_pooling(cultural_values, post_mask, frame_cultural)
+        post_moral, post_moral_probs = self.attention_pooling(moral_values, post_mask, frame_moral)
+
+        pooled_embedding = post_cultural - post_moral
+
+        return {
+            "frame_cultural": frame_cultural,
+            "frame_moral": frame_moral,
+            "frame_cultural_probs": frame_cultural_probs,
+            "frame_moral_probs": frame_moral_probs,
+            "post_cultural": post_cultural,
+            "post_moral": post_moral,
+            "post_cultural_probs": post_cultural_probs,
+            "post_moral_probs": post_moral_probs,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }
+
+
+class MultiValuesQueryValueCentroidAttentionPooling(MultiValuesQueryValueAttentionPooling):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        cultural_queries = self.linear(embeddings)
+        moral_queries = self.moral_query(embeddings)
+        cultural_values = self.cultural_value(embeddings)
+        moral_values = self.moral_value(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # value attention - which value info matters for frame
+        frame_cultural, frame_cultural_probs = self.value_attention(
+            cultural_queries, frame_mask, cultural_mask, self.cultural_embeddings
+        )
+        frame_moral, frame_moral_probs = self.value_attention(
+            moral_queries, frame_mask, moral_mask, self.moral_embeddings
+        )
+
+        # attention pooling - which post info matters for values
+        post_cultural, post_cultural_probs = self.attention_pooling(cultural_values, post_mask, frame_cultural)
+        post_moral, post_moral_probs = self.attention_pooling(moral_values, post_mask, frame_moral)
+
+        pooled_embedding = (post_cultural + post_moral) / 2.0
+
+        return {
+            "frame_cultural": frame_cultural,
+            "frame_moral": frame_moral,
+            "frame_cultural_probs": frame_cultural_probs,
+            "frame_moral_probs": frame_moral_probs,
+            "post_cultural": post_cultural,
+            "post_moral": post_moral,
+            "post_cultural_probs": post_cultural_probs,
+            "post_moral_probs": post_moral_probs,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }
+
+
+class MultiValuesQueryValueDotAttentionPooling(MultiValuesQueryValueAttentionPooling):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        cultural_queries = self.linear(embeddings)
+        moral_queries = self.moral_query(embeddings)
+        cultural_values = self.cultural_value(embeddings)
+        moral_values = self.moral_value(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # value attention - which value info matters for frame
+        frame_cultural, frame_cultural_probs = self.value_attention(
+            cultural_queries, frame_mask, cultural_mask, self.cultural_embeddings
+        )
+        frame_moral, frame_moral_probs = self.value_attention(
+            moral_queries, frame_mask, moral_mask, self.moral_embeddings
+        )
+
+        # attention pooling - which post info matters for values
+        post_cultural, post_cultural_probs = self.attention_pooling(cultural_values, post_mask, frame_cultural)
+        post_moral, post_moral_probs = self.attention_pooling(moral_values, post_mask, frame_moral)
+
+        pooled_embedding = post_cultural * post_moral
+
+        return {
+            "frame_cultural": frame_cultural,
+            "frame_moral": frame_moral,
+            "frame_cultural_probs": frame_cultural_probs,
+            "frame_moral_probs": frame_moral_probs,
+            "post_cultural": post_cultural,
+            "post_moral": post_moral,
+            "post_cultural_probs": post_cultural_probs,
+            "post_moral_probs": post_moral_probs,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }
+
+
+class MultiValuesQueryValueDistAttentionPooling(MultiValuesQueryValueAttentionPooling):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        cultural_queries = self.linear(embeddings)
+        moral_queries = self.moral_query(embeddings)
+        cultural_values = self.cultural_value(embeddings)
+        moral_values = self.moral_value(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # value attention - which value info matters for frame
+        frame_cultural, frame_cultural_probs = self.value_attention(
+            cultural_queries, frame_mask, cultural_mask, self.cultural_embeddings
+        )
+        frame_moral, frame_moral_probs = self.value_attention(
+            moral_queries, frame_mask, moral_mask, self.moral_embeddings
+        )
+
+        # attention pooling - which post info matters for values
+        post_cultural, post_cultural_probs = self.attention_pooling(cultural_values, post_mask, frame_cultural)
+        post_moral, post_moral_probs = self.attention_pooling(moral_values, post_mask, frame_moral)
+
+        pooled_embedding = (post_cultural - post_moral) ** 2
+
+        return {
+            "frame_cultural": frame_cultural,
+            "frame_moral": frame_moral,
+            "frame_cultural_probs": frame_cultural_probs,
+            "frame_moral_probs": frame_moral_probs,
+            "post_cultural": post_cultural,
+            "post_moral": post_moral,
+            "post_cultural_probs": post_cultural_probs,
+            "post_moral_probs": post_moral_probs,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }

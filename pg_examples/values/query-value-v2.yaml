@@ -1,0 +1,130 @@
+data:
+  class_path: pytorch_gleam.data.datasets.MultiClassFrameMultiValuesDataModule
+  init_args:
+    batch_size: 24
+    cultural_list:
+    - 'Self-direction: thought'
+    - 'Self-direction: action'
+    - Stimulation
+    - Hedonism
+    - Achievement
+    - 'Power: dominance'
+    - 'Power: resources'
+    - Face
+    - 'Security: personal'
+    - 'Security: societal'
+    - Tradition
+    - 'Conformity: rules'
+    - 'Conformity: interpersonal'
+    - Humility
+    - 'Benevolence: caring'
+    - 'Benevolence: dependability'
+    - 'Universalism: concern'
+    - 'Universalism: nature'
+    - 'Universalism: tolerance'
+    - 'Universalism: objectivity'
+    frame_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames-values.json
+    label_map:
+      Accept: 1
+      Not Relevant: 0
+      Reject: 2
+    label_name: labels
+    max_seq_len: 96
+    moral_list:
+    - care
+    - harm
+    - fairness
+    - cheating
+    - loyalty
+    - betrayal
+    - authority
+    - subversion
+    - purity
+    - degradation
+    num_workers: 8
+    test_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl
+    tokenizer_name: digitalepidemiologylab/covid-twitter-bert-v2
+    train_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-train.jsonl
+    val_path: /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-dev.jsonl
+model:
+  class_path: pytorch_gleam.modeling.models.MultiClassFrameMultiValuesLanguageModel
+  init_args:
+    label_map:
+      Accept: 1
+      Not Relevant: 0
+      Reject: 2
+    learning_rate: 1.5e-05
+    lr_warm_up: 0.2
+    metric:
+      class_path: pytorch_gleam.modeling.metrics.F1PRMultiClassMetric
+      init_args:
+        mode: macro
+        num_classes: 3
+    pre_model_name: digitalepidemiologylab/covid-twitter-bert-v2
+    threshold:
+      class_path: pytorch_gleam.modeling.thresholds.MultiClassThresholdModule
+    values:
+      class_path: pytorch_gleam.modeling.layers.values.MultiValuesQueryValueAttentionPooling
+      init_args:
+        cultural_list:
+        - 'Self-direction: thought'
+        - 'Self-direction: action'
+        - Stimulation
+        - Hedonism
+        - Achievement
+        - 'Power: dominance'
+        - 'Power: resources'
+        - Face
+        - 'Security: personal'
+        - 'Security: societal'
+        - Tradition
+        - 'Conformity: rules'
+        - 'Conformity: interpersonal'
+        - Humility
+        - 'Benevolence: caring'
+        - 'Benevolence: dependability'
+        - 'Universalism: concern'
+        - 'Universalism: nature'
+        - 'Universalism: tolerance'
+        - 'Universalism: objectivity'
+        input_dim: 1024
+        moral_list:
+        - care
+        - harm
+        - fairness
+        - cheating
+        - loyalty
+        - betrayal
+        - authority
+        - subversion
+        - purity
+        - degradation
+        output_dim: 512
+    weight_decay: 0.005
+seed_everything: 0
+trainer:
+  accelerator: gpu
+  accumulate_grad_batches: 1
+  callbacks:
+  - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+    init_args:
+      logging_interval: step
+  - class_path: pytorch_lightning.callbacks.RichProgressBar
+    init_args:
+      leave: true
+  - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
+  - class_path: pytorch_gleam.callbacks.WandbConfig
+  check_val_every_n_epoch: 1
+  default_root_dir: /shared/aifiles/disk1/covid19/models/values/query-value-v2
+  deterministic: true
+  devices: 1
+  enable_checkpointing: false
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      dir: /shared/aifiles/disk1/covid19/logs/values
+      name: query-value-v2
+      project: values
+      save_dir: /shared/aifiles/disk1/covid19/logs/values
+  max_epochs: 5
+  num_sanity_val_steps: 1
