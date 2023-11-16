@@ -67,6 +67,7 @@ def add_arguments(parser: argparse.ArgumentParser):
             "moral_list",
             "label_map",
             "tokenizer_name",
+            "update_threshold",
         ],
         help="List of hyperparameters to optimize.",
     )
