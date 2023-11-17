@@ -556,10 +556,10 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
         frame_cultural_embeddings, frame_cultural_weights = self.cultural_attention(
             # [bsize, seq_len, out_dim]
             query=embeddings,
-            # [1, num_values, out_dim]
-            key=self.cultural_embeddings.weight.unsqueeze(dim=0),
-            # [1, num_values, out_dim]
-            value=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            # [bsize, num_values, out_dim]
+            key=self.cultural_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
+            # [bsize, num_values, out_dim]
+            value=self.cultural_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
             need_weights=True,
             average_attn_weights=True,
             # [bsize, num_values]
@@ -578,10 +578,10 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
         post_cultural_embeddings, post_cultural_weights = self.cultural_attention(
             # [bsize, seq_len, out_dim]
             query=frame_cultural_embeddings,
-            # [1, num_values, out_dim]
-            key=self.cultural_embeddings.weight.unsqueeze(dim=0),
-            # [1, num_values, out_dim]
-            value=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            # [bsize, num_values, out_dim]
+            key=self.cultural_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
+            # [bsize, num_values, out_dim]
+            value=self.cultural_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
             need_weights=True,
             average_attn_weights=True,
             # [bsize, num_values]
@@ -603,10 +603,10 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
         frame_moral_embeddings, frame_moral_weights = self.moral_attention(
             # [bsize, seq_len, out_dim]
             query=embeddings,
-            # [1, num_values, out_dim]
-            key=self.moral_embeddings.weight.unsqueeze(dim=0),
-            # [1, num_values, out_dim]
-            value=self.moral_embeddings.weight.unsqueeze(dim=0),
+            # [bsize, num_values, out_dim]
+            key=self.moral_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
+            # [bsize, num_values, out_dim]
+            value=self.moral_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
             need_weights=True,
             average_attn_weights=True,
             # [bsize, num_values]
@@ -625,10 +625,10 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
         post_moral_embeddings, post_moral_weights = self.moral_attention(
             # [bsize, seq_len, out_dim]
             query=frame_moral_embeddings,
-            # [1, num_values, out_dim]
-            key=self.moral_embeddings.weight.unsqueeze(dim=0),
-            # [1, num_values, out_dim]
-            value=self.moral_embeddings.weight.unsqueeze(dim=0),
+            # [bsize, num_values, out_dim]
+            key=self.moral_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
+            # [bsize, num_values, out_dim]
+            value=self.moral_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
             need_weights=True,
             average_attn_weights=True,
             # [bsize, num_values]
@@ -706,10 +706,10 @@ class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule)
         frame_cultural_embeddings, frame_cultural_weights = self.cultural_attention(
             # [bsize, seq_len, out_dim]
             query=embeddings,
-            # [1, num_values, out_dim]
-            key=self.cultural_embeddings.weight.unsqueeze(dim=0),
-            # [1, num_values, out_dim]
-            value=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            # [bsize, num_values, out_dim]
+            key=self.cultural_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
+            # [bsize, num_values, out_dim]
+            value=self.cultural_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
             need_weights=True,
             average_attn_weights=True,
             # [bsize, num_values]
@@ -753,10 +753,10 @@ class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule)
         frame_moral_embeddings, frame_moral_weights = self.moral_attention(
             # [bsize, seq_len, out_dim]
             query=embeddings,
-            # [1, num_values, out_dim]
-            key=self.moral_embeddings.weight.unsqueeze(dim=0),
-            # [1, num_values, out_dim]
-            value=self.moral_embeddings.weight.unsqueeze(dim=0),
+            # [bsize, num_values, out_dim]
+            key=self.moral_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
+            # [bsize, num_values, out_dim]
+            value=self.moral_embeddings.weight.unsqueeze(dim=0).repeat(embeddings.shape[0], 1, 1),
             need_weights=True,
             average_attn_weights=True,
             # [bsize, num_values]
