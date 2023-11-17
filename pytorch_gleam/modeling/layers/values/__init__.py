@@ -7,6 +7,8 @@ from pytorch_gleam.modeling.layers.values.multi_values import (
     MultiValuesQueryValueDistAttentionPooling,
     MultiValuesQueryValueDotAttentionPooling,
     MultiValuesWeightedAttentionPooling,
+    MultiValuesQueryValueMultiHeadDiffAttentionPooling,
+    MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling,
 )
 from pytorch_gleam.modeling.layers.values.values import (
     ValuesAddedAttentionPooling,

@@ -501,3 +501,303 @@ class MultiValuesQueryValueDistAttentionPooling(MultiValuesQueryValueAttentionPo
             "pooled_embedding": pooled_embedding,
             "output_features": pooled_embedding,
         }
+
+
+class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
+    def __init__(
+        self,
+        num_heads: int,
+        dropout: float,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.num_heads = num_heads
+        self.moral_attention = nn.MultiheadAttention(
+            embed_dim=self.output_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True,
+        )
+        self.cultural_attention = nn.MultiheadAttention(
+            embed_dim=self.output_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True,
+        )
+        if self.input_dim != self.output_dim:
+            self.linear = nn.Linear(self.input_dim, self.output_dim)
+        else:
+            self.linear = None
+
+    def combine_masks(self, mask_a, mask_b):
+        # 0 x 0 = 0
+        # 0 x 1 = 0
+        # 1 x 0 = 0
+        # 1 x 1 = 1
+        return mask_a * mask_b
+
+    def preprocess(self, embeddings):
+        # [bsize, seq_len, hidden_size] -> [bsize, seq_len, out_dim]
+        if self.linear is not None:
+            # TODO add dropout
+            embeddings = self.linear(embeddings)
+        return embeddings
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        embeddings = self.preprocess(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # cultural
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, num_values]
+        frame_cultural_embeddings, frame_cultural_weights = self.cultural_attention(
+            # [bsize, seq_len, out_dim]
+            query=embeddings,
+            # [1, num_values, out_dim]
+            key=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            # [1, num_values, out_dim]
+            value=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, num_values]
+            key_padding_mask=cultural_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=frame_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # option 1: contextualize the post now
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, num_values]
+        post_cultural_embeddings, post_cultural_weights = self.cultural_attention(
+            # [bsize, seq_len, out_dim]
+            query=frame_cultural_embeddings,
+            # [1, num_values, out_dim]
+            key=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            # [1, num_values, out_dim]
+            value=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, num_values]
+            key_padding_mask=cultural_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=post_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # [bsize, out_dim]
+        post_cultural = post_cultural_embeddings.sum(dim=1) / post_mask.sum(dim=1, keepdim=True).float()
+
+        # moral
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, num_values]
+        frame_moral_embeddings, frame_moral_weights = self.moral_attention(
+            # [bsize, seq_len, out_dim]
+            query=embeddings,
+            # [1, num_values, out_dim]
+            key=self.moral_embeddings.weight.unsqueeze(dim=0),
+            # [1, num_values, out_dim]
+            value=self.moral_embeddings.weight.unsqueeze(dim=0),
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, num_values]
+            key_padding_mask=moral_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=frame_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # option 1: contextualize the post now
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, num_values]
+        post_moral_embeddings, post_moral_weights = self.moral_attention(
+            # [bsize, seq_len, out_dim]
+            query=frame_moral_embeddings,
+            # [1, num_values, out_dim]
+            key=self.moral_embeddings.weight.unsqueeze(dim=0),
+            # [1, num_values, out_dim]
+            value=self.moral_embeddings.weight.unsqueeze(dim=0),
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, num_values]
+            key_padding_mask=moral_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=post_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # [bsize, out_dim]
+        post_moral = post_moral_embeddings.sum(dim=1) / post_mask.sum(dim=1, keepdim=True).float()
+
+        pooled_embedding = post_cultural - post_moral
+
+        return {
+            "post_cultural": post_cultural,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }
+
+
+class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule):
+    def __init__(
+        self,
+        num_heads: int,
+        dropout: float,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.num_heads = num_heads
+        self.moral_attention = nn.MultiheadAttention(
+            embed_dim=self.output_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True,
+        )
+        self.cultural_attention = nn.MultiheadAttention(
+            embed_dim=self.output_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True,
+        )
+        if self.input_dim != self.output_dim:
+            self.linear = nn.Linear(self.input_dim, self.output_dim)
+        else:
+            self.linear = None
+
+    def combine_masks(self, mask_a, mask_b):
+        # 0 x 0 = 0
+        # 0 x 1 = 0
+        # 1 x 0 = 0
+        # 1 x 1 = 1
+        return mask_a * mask_b
+
+    def preprocess(self, embeddings):
+        # [bsize, seq_len, hidden_size] -> [bsize, seq_len, out_dim]
+        if self.linear is not None:
+            # TODO add dropout
+            embeddings = self.linear(embeddings)
+        return embeddings
+
+    def forward(self, embeddings, embeddings_mask, cultural_mask, moral_mask, post_mask, frame_mask):
+        embeddings = self.preprocess(embeddings)
+
+        post_mask = self.combine_masks(embeddings_mask, post_mask)
+        frame_mask = self.combine_masks(embeddings_mask, frame_mask)
+
+        # cultural
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, num_values]
+        frame_cultural_embeddings, frame_cultural_weights = self.cultural_attention(
+            # [bsize, seq_len, out_dim]
+            query=embeddings,
+            # [1, num_values, out_dim]
+            key=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            # [1, num_values, out_dim]
+            value=self.cultural_embeddings.weight.unsqueeze(dim=0),
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, num_values]
+            key_padding_mask=cultural_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=frame_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # option 2: contextualize the post with the frame
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, seq_len]
+        post_cultural_embeddings, post_cultural_weights = self.cultural_attention(
+            # [bsize, seq_len, out_dim]
+            query=frame_cultural_embeddings,
+            # [bsize, seq_len, out_dim]
+            key=embeddings,
+            # [bsize, seq_len, out_dim]
+            value=embeddings,
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, seq_len]
+            key_padding_mask=post_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=frame_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # [bsize, out_dim]
+        post_cultural = post_cultural_embeddings.sum(dim=1) / post_mask.sum(dim=1, keepdim=True).float()
+
+        # moral
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, num_values]
+        frame_moral_embeddings, frame_moral_weights = self.moral_attention(
+            # [bsize, seq_len, out_dim]
+            query=embeddings,
+            # [1, num_values, out_dim]
+            key=self.moral_embeddings.weight.unsqueeze(dim=0),
+            # [1, num_values, out_dim]
+            value=self.moral_embeddings.weight.unsqueeze(dim=0),
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, num_values]
+            key_padding_mask=moral_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=frame_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # option 2: contextualize the post with the frame
+        # [bsize, seq_len, out_dim]
+        # [bize, seq_len, seq_len]
+        post_moral_embeddings, post_moral_weights = self.moral_attention(
+            # [bsize, seq_len, out_dim]
+            query=frame_moral_embeddings,
+            # [bsize, seq_len, out_dim]
+            key=embeddings,
+            # [bsize, seq_len, out_dim]
+            value=embeddings,
+            need_weights=True,
+            average_attn_weights=True,
+            # [bsize, seq_len]
+            key_padding_mask=post_mask.float(),
+            # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
+            attn_mask=frame_mask.unsqueeze(dim=1)
+            .unsqueeze(dim=-1)
+            .repeat(1, self.num_heads, 1, 1)
+            .view(-1, embeddings.shape[1], 1)
+            .float(),
+        )
+
+        # [bsize, out_dim]
+        post_moral = post_moral_embeddings.sum(dim=1) / post_mask.sum(dim=1, keepdim=True).float()
+
+        pooled_embedding = post_cultural - post_moral
+
+        return {
+            "post_cultural": post_cultural,
+            "pooled_embedding": pooled_embedding,
+            "output_features": pooled_embedding,
+        }
