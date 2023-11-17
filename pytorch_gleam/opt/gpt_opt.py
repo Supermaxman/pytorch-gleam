@@ -37,7 +37,7 @@ def add_arguments(parser: argparse.ArgumentParser):
             "weight_decay:number",
             "output_dim:integer",
             "num_heads:integer",
-            "dropout:float",
+            "dropout:number",
         ],
         help="List of hyperparameters to optimize.",
     )
