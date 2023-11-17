@@ -567,7 +567,7 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=frame_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_cultural_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -589,7 +589,7 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=post_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_cultural_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -614,7 +614,7 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=frame_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_moral_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -636,7 +636,7 @@ class MultiValuesQueryValueMultiHeadDiffAttentionPooling(MultiValuesModule):
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=post_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_moral_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -717,7 +717,7 @@ class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule)
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=frame_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_cultural_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -739,7 +739,7 @@ class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule)
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=frame_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_cultural_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -764,7 +764,7 @@ class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule)
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=frame_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_moral_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
@@ -786,7 +786,7 @@ class MultiValuesQueryValueMultiHeadDiffCrossAttentionPooling(MultiValuesModule)
             # [bsize, seq_len] -> [bsize, num_heads, seq_len, 1] -> [bsize * num_heads, seq_len, 1]
             attn_mask=frame_mask.unsqueeze(dim=1)
             .unsqueeze(dim=-1)
-            .repeat(1, self.num_heads, 1, 1)
+            .repeat(1, self.num_heads, 1, self.num_moral_values)
             .view(-1, embeddings.shape[1], 1)
             .float(),
         )
