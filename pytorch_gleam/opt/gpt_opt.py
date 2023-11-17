@@ -21,7 +21,7 @@ def add_arguments(parser: argparse.ArgumentParser):
         "--description",
         type=str,
         default="Fine-tuning a BERT-large model for stance detection between tweets and frames of communication, "
-        "utilizing attention pooling with human value embeddings.",
+        "utilizing multi-headed attention with moral and human value embeddings. Be sure to keep `output_dim` divisible  by `num_heads`.",
         help="Description of the experiment to optimize.",
     )
     parser.add_argument("--experiments", type=int, default=10, help="Number of experiments to run.")
