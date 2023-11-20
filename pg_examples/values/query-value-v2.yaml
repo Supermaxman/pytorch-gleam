@@ -115,6 +115,7 @@ trainer:
       leave: true
   - class_path: pytorch_gleam.callbacks.FitCheckpointCallback
   - class_path: pytorch_gleam.callbacks.WandbConfig
+  - class_path: pytorch_gleam.callbacks.JsonlWriter
   check_val_every_n_epoch: 1
   default_root_dir: /shared/aifiles/disk1/covid19/models/values/query-value-v2
   deterministic: true
