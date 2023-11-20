@@ -41,7 +41,7 @@ class MultiClassFrameMultiValuesLanguageModel(BaseLanguageModel):
         self.score_func = torch.nn.Softmax(dim=-1)
         self.outputs = []
 
-    def forward(self, batch):
+    def forward(self, batch, return_probs=False):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         if "token_type_ids" in batch:
@@ -68,6 +68,9 @@ class MultiClassFrameMultiValuesLanguageModel(BaseLanguageModel):
         # output_features = self.f_dropout(output_features)
         # [bsize, num_classes]
         logits = self.cls_layer(output_features)
+        if return_probs:
+            probs = {k: v for k, v in output_features.items() if "probs" in k}
+            return logits, probs
         return logits
 
     def eval_epoch_end(self, outputs, stage):
@@ -129,8 +132,8 @@ class MultiClassFrameMultiValuesLanguageModel(BaseLanguageModel):
         return results, labels, preds, t_ids
 
     def eval_step(self, batch, batch_idx, dataloader_idx=None):
-        logits = self(batch)
-        loss = self.loss(logits, batch["labels"])
+        logits, probs = self(batch, return_probs=True)
+
         scores = self.score_func(logits)
         preds = self.threshold(scores)
         results = {
@@ -138,10 +141,14 @@ class MultiClassFrameMultiValuesLanguageModel(BaseLanguageModel):
             "ids": batch["ids"],
             "labels": batch["labels"],
             "logits": logits,
-            "loss": loss,
             "scores": scores,
             "preds": preds,
         }
+        if "labels" in batch:
+            loss = self.loss(logits, batch["labels"])
+            results["loss"] = loss
+        for k, v in probs.items():
+            results[k] = v
         return results
 
     def loss(self, logits, labels):
