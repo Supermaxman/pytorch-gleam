@@ -69,7 +69,7 @@ class MultiClassFrameMultiValuesLanguageModel(BaseLanguageModel):
         # [bsize, num_classes]
         logits = self.cls_layer(output_features)
         if return_probs:
-            probs = {k: v for k, v in output_features.items() if "probs" in k}
+            probs = {k: v for k, v in values_outputs.items() if "probs" in k}
             return logits, probs
         return logits
 
