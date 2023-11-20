@@ -70,6 +70,7 @@ class MultiClassFrameMultiValuesLanguageModel(BaseLanguageModel):
         logits = self.cls_layer(output_features)
         if return_probs:
             probs = {k: v for k, v in values_outputs.items() if "probs" in k}
+            probs["input_ids"] = batch["input_ids"]
             return logits, probs
         return logits
 
