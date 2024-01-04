@@ -25,7 +25,7 @@ def main():
     photos = 0
     with tqdm(total=args.total) as pbar:
         for path in input_paths:
-            for ex in read_jsonl(path):
+            for i, ex in enumerate(read_jsonl(path)):
                 total += 1
                 if "media" in ex:
                     media = ex["media"]
@@ -34,10 +34,12 @@ def main():
                     for m in media:
                         if m["type"] == "photo":
                             photos += 1
-                pbar.update(1)
-                photos_ratio = photos / total
-                pbar.set_postfix({"photos": f"{photos}/{total} ({100* photos_ratio:.0f}%)"})
+                if i % 1000 == 0:
+                    pbar.update(1000)
+                    photos_ratio = photos / total
+                    pbar.set_postfix({"photos": f"{photos}/{total} ({100* photos_ratio:.0f}%)"})
 
+    photos_ratio = photos / total
     print(f"photos: {photos}/{total} ({100* photos_ratio:.0f}%)")
 
 
