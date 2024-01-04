@@ -23,7 +23,7 @@ def main():
 
     total = 0
     photos = 0
-    update_freq = args.total // 100
+    update_freq = args.total // 1000
     with tqdm(total=args.total) as pbar:
         for path in input_paths:
             for i, ex in enumerate(read_jsonl(path)):
